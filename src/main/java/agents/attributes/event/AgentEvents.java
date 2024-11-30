@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class AgentEvents {
     private final Map<String, AgentEvent> eventsMap = new HashMap<String, AgentEvent>();
@@ -40,6 +41,12 @@ public class AgentEvents {
         for (AgentEvent event : eventsList) {
             if (event.isTriggered())
                 event.run();
+        }
+    }
+
+    public void forEach(Consumer<AgentEvent> action) {
+        for (AgentEvent event : eventsList) {
+            action.accept(event);
         }
     }
 }

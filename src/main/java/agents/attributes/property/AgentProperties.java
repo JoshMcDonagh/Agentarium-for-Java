@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class AgentProperties {
     private final Map<String, AgentProperty<?>> propertiesMap = new HashMap<String, AgentProperty<?>>();
@@ -35,6 +36,12 @@ public class AgentProperties {
     public void run() {
         for (AgentProperty<?> property : propertiesList) {
             property.run();
+        }
+    }
+
+    public void forEach(Consumer<AgentProperty<?>> action) {
+        for (AgentProperty<?> property : propertiesList) {
+            action.accept(property);
         }
     }
 }

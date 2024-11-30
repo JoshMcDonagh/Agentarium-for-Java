@@ -1,46 +1,78 @@
 package utilities;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class DatabaseHandler {
-    private static final String dbPath = "jdbc:sqlite:data.db";
+    private static final String DATABASE_URL = "jdbc:sqlite:agent_results.db"; // Path to SQLite database
+    private static Connection connection = null;
 
     static {
-        try (Connection conn = DriverManager.getConnection(dbPath)) {
-            Statement stmt = conn.createStatement();
-            stmt.execute("CREATE TABLE IF NOT EXISTS properties (name TEXT PRIMARY KEY, values TEXT)");
-            stmt.execute("CREATE TABLE IF NOT EXISTS events (name TEXT PRIMARY KEY, values TEXT)");
+        try {
+            connection = DriverManager.getConnection(DATABASE_URL);
+            System.out.println("SQLite connection established.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Failed to establish SQLite connection: " + e.getMessage());
         }
     }
 
-    public static void insertOrUpdate(String table, String key, String value) {
-        try (Connection conn = DriverManager.getConnection(dbPath)) {
-            String query = "INSERT INTO " + table + " (name, values) VALUES (?, ?) "
-                    + "ON CONFLICT(name) DO UPDATE SET values = ?";
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setString(1, key);
-            pstmt.setString(2, value);
-            pstmt.setString(3, value); // The value to update
-            pstmt.executeUpdate();
+    public static void createTable(String tableName, String tableSchema) {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + tableSchema + ");";
+        try (PreparedStatement stmt = connection.prepareStatement(createTableSQL)) {
+            stmt.execute();
+            System.out.println("Table '" + tableName + "' created or already exists.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error creating table '" + tableName + "': " + e.getMessage());
         }
     }
 
-    public static String get(String table, String key) {
-        try (Connection conn = DriverManager.getConnection(dbPath)) {
-            String query = "SELECT values FROM " + table + " WHERE name = ?";
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setString(1, key);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString("values");
+    public static void insertData(String tableName, String columns, String values, Object... params) {
+        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + values + ");";
+        try (PreparedStatement stmt = connection.prepareStatement(insertSQL)) {
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error inserting data into table '" + tableName + "': " + e.getMessage());
+        }
+    }
+
+    public static ResultSet queryData(String query, Object... params) {
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            return stmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error querying data: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static void updateData(String updateSQL, Object... params) {
+        try (PreparedStatement stmt = connection.prepareStatement(updateSQL)) {
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating data: " + e.getMessage());
+        }
+    }
+
+    public static void closeConnection() {
+        try {
+            if (connection != null) {
+                connection.close();
+                System.out.println("SQLite connection closed.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error closing SQLite connection: " + e.getMessage());
         }
-        return null;
     }
 }

@@ -18,8 +18,7 @@ public class AgentAttributes {
     }
 
     public AgentAttributes() {
-        this.name = "Agent Attribute " + agentAttributeCount;
-        agentAttributeCount++;
+        this("Agent Attribute " + agentAttributeCount);
     }
 
     public String name() {

@@ -8,8 +8,8 @@ import java.util.Map;
 public class Agent {
     private final String name;
     private AgentClock clock;
-    private AgentAttributes[] attributesArray;
-    private Map<String, AgentAttributes> attributesMap = new HashMap<String, AgentAttributes>();
+    private final AgentAttributes[] attributesArray;
+    private final Map<String, AgentAttributes> attributesMap = new HashMap<String, AgentAttributes>();
 
     public Agent(String name, AgentAttributes[] attributesArray) {
         this.name = name;

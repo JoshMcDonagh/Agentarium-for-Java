@@ -13,21 +13,15 @@ public abstract class AgentProperty<T> {
     }
 
     public AgentProperty(boolean isRecorded) {
-        this.name = "Agent Property " + agentPropertyCount;
-        this.isRecorded = isRecorded;
-        agentPropertyCount++;
+        this("Agent Property " + agentPropertyCount, isRecorded);
     }
 
     public AgentProperty(String name) {
-        this.name = name;
-        this.isRecorded = true;
-        agentPropertyCount++;
+        this(name, true);
     }
 
     public AgentProperty() {
-        this.name = "Agent Property " + agentPropertyCount;
-        this.isRecorded = true;
-        agentPropertyCount++;
+        this("Agent Property " + agentPropertyCount, true);
     }
 
     public String name() {

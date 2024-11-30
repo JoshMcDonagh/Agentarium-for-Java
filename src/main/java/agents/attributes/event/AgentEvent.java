@@ -13,21 +13,15 @@ public abstract class AgentEvent {
     }
 
     public AgentEvent(boolean isRecorded) {
-        this.name = "Agent Event " + agentEventCount;
-        this.isRecorded = isRecorded;
-        agentEventCount++;
+        this("Agent Event " + agentEventCount, isRecorded);
     }
 
     public AgentEvent(String name) {
-        this.name = name;
-        this.isRecorded = true;
-        agentEventCount++;
+        this(name, true);
     }
 
     public AgentEvent() {
-        this.name = "Agent Event " + agentEventCount;
-        this.isRecorded = true;
-        agentEventCount++;
+        this("Agent Event " + agentEventCount, true);
     }
 
     public String name() {

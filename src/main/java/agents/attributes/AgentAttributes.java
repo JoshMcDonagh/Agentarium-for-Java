@@ -4,9 +4,27 @@ import agents.attributes.event.AgentEvents;
 import agents.attributes.property.AgentProperties;
 
 public class AgentAttributes {
+    private static int agentAttributeCount = 0;
+
     private final AgentProperties properties = new AgentProperties();
     private final AgentEvents preEvents = new AgentEvents();
     private final AgentEvents postEvents = new AgentEvents();
+
+    private final String name;
+
+    public AgentAttributes(String name) {
+        this.name = name;
+        agentAttributeCount++;
+    }
+
+    public AgentAttributes() {
+        this.name = "Agent Attribute " + agentAttributeCount;
+        agentAttributeCount++;
+    }
+
+    public String name() {
+        return name;
+    }
 
     public AgentProperties getProperties() {
         return properties;

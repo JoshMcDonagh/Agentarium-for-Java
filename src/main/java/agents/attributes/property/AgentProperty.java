@@ -1,10 +1,10 @@
 package agents.attributes.property;
 
 public abstract class AgentProperty<T> {
-    static int agentPropertyCount = 0;
+    private static int agentPropertyCount = 0;
 
-    String name;
-    boolean isRecorded;
+    private final String name;
+    private final boolean isRecorded;
 
     public AgentProperty(String name, boolean isRecorded) {
         this.name = name;

@@ -1,10 +1,10 @@
 package agents.attributes.event;
 
 public abstract class AgentEvent {
-    static int agentEventCount = 0;
+    private static int agentEventCount = 0;
 
-    String name;
-    boolean isRecorded;
+    private final String name;
+    private final boolean isRecorded;
 
     public AgentEvent(String name, boolean isRecorded) {
         this.name = name;

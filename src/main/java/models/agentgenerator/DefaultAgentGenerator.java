@@ -1,7 +1,7 @@
 package models.agentgenerator;
 
 import agents.Agent;
-import agents.attributes.AgentAttributes;
+import agents.attributes.AgentAttributeSet;
 import agents.attributes.event.AgentEvent;
 import agents.attributes.property.AgentProperty;
 
@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 public class DefaultAgentGenerator extends AgentGenerator {
-    private final Map<String, Class<? extends AgentAttributes>> attributesMap;
+    private final Map<String, Class<? extends AgentAttributeSet>> attributesMap;
     private final Map<String, List<Class<? extends AgentProperty<?>>>> propertiesMap;
     private final Map<String, List<Class<? extends AgentEvent>>> preEventsMap;
     private final Map<String, List<Class<? extends AgentEvent>>> postEventsMap;
     private int agentCounter = 0;
 
     public DefaultAgentGenerator(
-            Map<String, Class<? extends AgentAttributes>> attributesMap,
+            Map<String, Class<? extends AgentAttributeSet>> attributesMap,
             Map<String, List<Class<? extends AgentProperty<?>>>> propertiesMap,
             Map<String, List<Class<? extends AgentEvent>>> preEventsMap,
             Map<String, List<Class<? extends AgentEvent>>> postEventsMap) {
@@ -57,15 +57,15 @@ public class DefaultAgentGenerator extends AgentGenerator {
 
     @Override
     public Agent generateAgent() {
-        List<AgentAttributes> attributesList = new ArrayList<>();
+        List<AgentAttributeSet> attributesList = new ArrayList<>();
 
-        for (Map.Entry<String, Class<? extends AgentAttributes>> entry : attributesMap.entrySet()) {
+        for (Map.Entry<String, Class<? extends AgentAttributeSet>> entry : attributesMap.entrySet()) {
             String attributeName = entry.getKey();
-            Class<? extends AgentAttributes> attributeClass = entry.getValue();
+            Class<? extends AgentAttributeSet> attributeClass = entry.getValue();
 
             try {
                 // Instantiate the attribute
-                AgentAttributes attribute = attributeClass.getDeclaredConstructor(String.class).newInstance(attributeName);
+                AgentAttributeSet attribute = attributeClass.getDeclaredConstructor(String.class).newInstance(attributeName);
 
                 // Add properties to the attribute
                 List<Class<? extends AgentProperty<?>>> propertyClasses = propertiesMap.getOrDefault(attributeName, List.of());

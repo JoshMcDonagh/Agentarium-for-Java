@@ -1,6 +1,6 @@
 package agents;
 
-import agents.attributes.AgentAttributes;
+import agents.attributes.AgentAttributeSet;
 import utilities.DatabaseHandler;
 
 import java.sql.ResultSet;
@@ -10,16 +10,16 @@ import java.util.List;
 
 public class AgentResults {
     private String agentName;
-    private List<AgentAttributes> attributes;
+    private List<AgentAttributeSet> attributes;
 
-    public void setup(String agentName, List<AgentAttributes> attributes) {
+    public void setup(String agentName, List<AgentAttributeSet> attributes) {
         this.agentName = agentName;
         this.attributes = attributes;
         initialiseTables();
     }
 
     private void initialiseTables() {
-        for (AgentAttributes attribute : attributes) {
+        for (AgentAttributeSet attribute : attributes) {
             String propertiesTable = getPropertiesTableName(attribute.name());
             String preEventsTable = getPreEventsTableName(attribute.name());
             String postEventsTable = getPostEventsTableName(attribute.name());
@@ -42,22 +42,22 @@ public class AgentResults {
         return agentName + "_" + attributeName + "_post_events";
     }
 
-    public void recordProperty(AgentAttributes attribute, String propertyName, double value) {
+    public void recordProperty(AgentAttributeSet attribute, String propertyName, double value) {
         String tableName = getPropertiesTableName(attribute.name());
         DatabaseHandler.insertData(tableName, "property_name, value", "?, ?", propertyName, value);
     }
 
-    public void recordPreEvent(AgentAttributes attribute, String eventName, boolean triggered) {
+    public void recordPreEvent(AgentAttributeSet attribute, String eventName, boolean triggered) {
         String tableName = getPreEventsTableName(attribute.name());
         DatabaseHandler.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
-    public void recordPostEvent(AgentAttributes attribute, String eventName, boolean triggered) {
+    public void recordPostEvent(AgentAttributeSet attribute, String eventName, boolean triggered) {
         String tableName = getPostEventsTableName(attribute.name());
         DatabaseHandler.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
-    public List<Double> getPropertyValues(AgentAttributes attribute, String propertyName) {
+    public List<Double> getPropertyValues(AgentAttributeSet attribute, String propertyName) {
         List<Double> values = new ArrayList<>();
         String tableName = getPropertiesTableName(attribute.name());
         try {
@@ -73,7 +73,7 @@ public class AgentResults {
         return values;
     }
 
-    public List<Boolean> getPreEventTriggers(AgentAttributes attribute, String eventName) {
+    public List<Boolean> getPreEventTriggers(AgentAttributeSet attribute, String eventName) {
         List<Boolean> triggers = new ArrayList<>();
         String tableName = getPreEventsTableName(attribute.name());
         try {
@@ -89,7 +89,7 @@ public class AgentResults {
         return triggers;
     }
 
-    public List<Boolean> getPostEventTriggers(AgentAttributes attribute, String eventName) {
+    public List<Boolean> getPostEventTriggers(AgentAttributeSet attribute, String eventName) {
         List<Boolean> triggers = new ArrayList<>();
         String tableName = getPostEventsTableName(attribute.name());
         try {

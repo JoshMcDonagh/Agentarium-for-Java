@@ -1,6 +1,6 @@
 package agents;
 
-import agents.attributes.AgentAttributes;
+import agents.attributes.AgentAttributeSet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,25 +9,25 @@ import java.util.Map;
 public class Agent {
     private final String name;
     private AgentClock clock;
-    private final List<AgentAttributes> attributesList;
-    private final Map<String, AgentAttributes> attributesMap = new HashMap<String, AgentAttributes>();
+    private final List<AgentAttributeSet> attributeSetList;
+    private final Map<String, AgentAttributeSet> attributeSetMap = new HashMap<String, AgentAttributeSet>();
     private final AgentResults results;
 
-    public Agent(String name, List<AgentAttributes> attributesList, AgentResults results) {
+    public Agent(String name, List<AgentAttributeSet> attributeSetList, AgentResults results) {
         this.name = name;
-        this.attributesList = attributesList;
-        for (AgentAttributes attribute : attributesList)
-            attributesMap.put(attribute.name(), attribute);
+        this.attributeSetList = attributeSetList;
+        for (AgentAttributeSet attribute : attributeSetList)
+            attributeSetMap.put(attribute.name(), attribute);
 
         if (results == null) {
             this.results = new AgentResults();
-            this.results.setup(name, attributesList);
+            this.results.setup(name, attributeSetList);
         } else {
             this.results = results;
         }
     }
 
-    public Agent(String name, List<AgentAttributes> attributes) {
+    public Agent(String name, List<AgentAttributeSet> attributes) {
         this(name, attributes, null);
     }
 
@@ -43,12 +43,12 @@ public class Agent {
         return clock;
     }
 
-    public AgentAttributes getAttributes(String name) {
-        return attributesMap.get(name);
+    public AgentAttributeSet getAttributeSet(String name) {
+        return attributeSetMap.get(name);
     }
 
-    public AgentAttributes getAttributesByIndex(int index) {
-        return attributesList.get(index);
+    public AgentAttributeSet getAttributeSetByIndex(int index) {
+        return attributeSetList.get(index);
     }
 
     public AgentResults getResults() {
@@ -57,19 +57,19 @@ public class Agent {
 
     public void run() {
         // Record pre-events
-        for (AgentAttributes attribute : attributesList) {
+        for (AgentAttributeSet attribute : attributeSetList) {
             attribute.getPreEvents().forEach(event ->
                     results.recordPreEvent(attribute, event.name(), event.isTriggered())
             );
         }
 
         // Run attributes
-        for (AgentAttributes attribute : attributesList) {
+        for (AgentAttributeSet attribute : attributeSetList) {
             attribute.run();
         }
 
         // Record properties
-        for (AgentAttributes attribute : attributesList) {
+        for (AgentAttributeSet attribute : attributeSetList) {
             attribute.getProperties().forEach(property -> {
                 if (property.isRecorded()) {
                     // Safely handle non-numeric property values
@@ -84,7 +84,7 @@ public class Agent {
         }
 
         // Record post-events
-        for (AgentAttributes attribute : attributesList) {
+        for (AgentAttributeSet attribute : attributeSetList) {
             attribute.getPostEvents().forEach(event ->
                     results.recordPostEvent(attribute, event.name(), event.isTriggered())
             );

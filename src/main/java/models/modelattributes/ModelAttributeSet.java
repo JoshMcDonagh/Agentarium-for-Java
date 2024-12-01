@@ -3,7 +3,7 @@ package models.modelattributes;
 import models.modelattributes.event.ModelEvents;
 import models.modelattributes.property.ModelProperties;
 
-public class ModelAttributes {
+public class ModelAttributeSet {
     private static int modelAttributeCount = 0;
 
     private final ModelProperties properties = new ModelProperties();
@@ -12,13 +12,13 @@ public class ModelAttributes {
 
     private final String name;
 
-    public ModelAttributes(final String name) {
+    public ModelAttributeSet(final String name) {
         this.name = name;
         modelAttributeCount++;
     }
 
-    public ModelAttributes() {
-        this("Model Attribute " + modelAttributeCount);
+    public ModelAttributeSet() {
+        this("Model Attribute Set " + modelAttributeCount);
     }
 
     public String name() {

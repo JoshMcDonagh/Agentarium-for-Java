@@ -3,7 +3,7 @@ package agents.attributes;
 import agents.attributes.event.AgentEvents;
 import agents.attributes.property.AgentProperties;
 
-public class AgentAttributes {
+public class AgentAttributeSet {
     private static int agentAttributeCount = 0;
 
     private final AgentProperties properties = new AgentProperties();
@@ -12,13 +12,13 @@ public class AgentAttributes {
 
     private final String name;
 
-    public AgentAttributes(String name) {
+    public AgentAttributeSet(String name) {
         this.name = name;
         agentAttributeCount++;
     }
 
-    public AgentAttributes() {
-        this("Agent Attribute " + agentAttributeCount);
+    public AgentAttributeSet() {
+        this("Agent Attribute Set " + agentAttributeCount);
     }
 
     public String name() {

@@ -3,6 +3,7 @@ package models.agentgenerator;
 import agents.Agent;
 import models.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AgentGenerator {
@@ -16,6 +17,13 @@ public abstract class AgentGenerator {
         return model;
     }
 
+    public List<Agent> generateAgents(int numOfAgents) {
+        List<Agent> agents = new ArrayList<Agent>();
+        for (int i = 0; i < numOfAgents; i++)
+            agents.add(generateAgent());
+        return agents;
+    }
+
     public abstract List<List<Agent>> getAgentsForEachCore(List<Agent> agentsList);
-    public abstract Agent generateAgent();
+    protected abstract Agent generateAgent();
 }

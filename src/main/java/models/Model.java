@@ -68,5 +68,6 @@ public class Model {
 
     public void run() {
         List<Agent> agents = agentGenerator.generateAgents(numOfAgents);
+        List<List<Agent>> agentsForEachCore = agentGenerator.getAgentsForEachCore(agents);
     }
 }

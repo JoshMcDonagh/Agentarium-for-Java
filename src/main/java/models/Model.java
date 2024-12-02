@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 public class Model {
     private int numOfAgents;
@@ -69,5 +70,58 @@ public class Model {
     public void run() {
         List<Agent> agents = agentGenerator.generateAgents(numOfAgents);
         List<List<Agent>> agentsForEachCore = agentGenerator.getAgentsForEachCore(agents);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
+        List<Future<ModelResults>> futures = new ArrayList<Future<ModelResults>>();
+
+        BlockingQueue<Request> requestQueue = new LinkedBlockingQueue<Request>();
+        BlockingQueue<Response> responseQueue = new LinkedBlockingQueue<Response>();
+        Thread coordinatorThread = null;
+
+        if (areProcessesSynced) {
+            CoordinatorTask coordinatorTask = new CoordinatorTask(numOfCores, modelAttributeSetList, requestQueue, responseQueue);
+            coordinatorThread = new Thread(coordinatorTask);
+            coordinatorThread.start();
+        }
+
+        for (int coreIndex = 0; coreIndex < numOfCores; coreIndex++) {
+            List<Agent> coreAgents = agentsForEachCore.get(coreIndex);
+            ModelResults coreResults = results.duplicate();
+
+            Callable<ModelResults> workerTask = new WorkerTask(
+                    coreIndex,
+                    coreAgents,
+                    clock,
+                    areProcessesSynced,
+                    modelAttributeSetList,
+                    doProcessStoresHoldAgentCopies,
+                    isAgentCacheUsed,
+                    coreResults
+            );
+
+            futures.add(executorService.submit(workerTask));
+        }
+
+        // Wait for all worker tasks to complete and merge results
+        try {
+            for (Future<ModelResults> future : futures) {
+                ModelResults coreResult = future.get();
+                results.mergeWith(coreResult);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            executorService.shutdown();
+        }
+
+        // Stop the coordinator thread if used
+        if (areProcessesSynced && coordinatorThread != null) {
+            coordinatorThread.interrupt();
+            try {
+                coordinatorThread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }

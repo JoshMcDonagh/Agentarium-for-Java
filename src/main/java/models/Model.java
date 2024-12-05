@@ -82,7 +82,7 @@ public class Model {
         Thread coordinatorThread = null;
 
         if (areProcessesSynced) {
-            Coordinator coordinatorTask = new Coordinator(numOfCores, modelAttributeSetList, requestQueue, responseQueue);
+            Coordinator coordinatorTask = new Coordinator(String.valueOf(numOfCores), modelAttributeSetList, requestQueue, responseQueue);
             coordinatorThread = new Thread(coordinatorTask);
             coordinatorThread.start();
         }

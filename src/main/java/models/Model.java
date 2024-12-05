@@ -3,6 +3,8 @@ package models;
 import agents.Agent;
 import models.agentgenerator.AgentGenerator;
 import models.modelattributes.ModelAttributeSet;
+import models.multithreading.requestresponse.Request;
+import models.multithreading.requestresponse.Response;
 
 import java.util.ArrayList;
 import java.util.HashMap;

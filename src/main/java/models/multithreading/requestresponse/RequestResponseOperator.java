@@ -12,11 +12,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 
 public class RequestResponseOperator {
-    private String threadName;
-    private ModelClock clock;
-    private boolean areProcessesSynced;
-    private BlockingQueue<Request> requestQueue;
-    private BlockingQueue<Response> responseQueue;
+    private final String threadName;
+    private final ModelClock clock;
+    private final boolean areProcessesSynced;
+    private final BlockingQueue<Request> requestQueue;
+    private final BlockingQueue<Response> responseQueue;
 
     public RequestResponseOperator(String threadName, ModelClock clock, boolean areProcessesSynced, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
         this.threadName = threadName;

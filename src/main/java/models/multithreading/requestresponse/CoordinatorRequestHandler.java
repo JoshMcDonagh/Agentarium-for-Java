@@ -5,12 +5,35 @@ import models.modelattributes.ModelAttributeSet;
 import models.multithreading.threadutilities.AgentStore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 
 public abstract class CoordinatorRequestHandler {
+    private static Map<String, CoordinatorRequestHandler> requestHandlersMap;
+
+    public static void initialise(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        requestHandlersMap = new HashMap<String, CoordinatorRequestHandler>();
+        requestHandlersMap.put(RequestCodes.ALL_WORKERS_FINISH_TICK,
+                new AllWorkersFinishTick(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+        requestHandlersMap.put(RequestCodes.ALL_WORKERS_UPDATE_COORDINATOR,
+                new AllWorkersUpdateCoordinator(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+        requestHandlersMap.put(RequestCodes.AGENT_ACCESS,
+                new AgentAccess(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+        requestHandlersMap.put(RequestCodes.UPDATE_COORDINATOR_AGENTS,
+                new UpdateCoordinatorAgents(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+        requestHandlersMap.put(RequestCodes.FILTERED_AGENTS_ACCESS,
+                new FilteredAgentsAccess(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+        requestHandlersMap.put(RequestCodes.MODEL_ATTRIBUTES_ACCESS,
+                new ModelAttributesAccess(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
+    }
+
+    public static void handleCoordinatorRequest(Request request) throws InterruptedException {
+        requestHandlersMap.get(request.getRequestCode()).handleRequest(request);
+    }
+
     private final String threadName;
     private final int numOfCores;
     private final Map<String, ModelAttributeSet> modelAttributeSetMap;

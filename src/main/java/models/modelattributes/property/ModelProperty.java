@@ -1,10 +1,18 @@
 package models.modelattributes.property;
 
+import models.modelattributes.ModelAttributeSet;
+import models.multithreading.threadutilities.AgentStore;
+
+import java.util.Map;
+
 public abstract class ModelProperty<T> {
     private static int modelPropertyCount = 0;
 
     private final String name;
     private final boolean isRecorded;
+
+    private Map<String, ModelAttributeSet> modelAttributeSetMap;
+    private AgentStore agentStore;
 
     public ModelProperty(String name, boolean isRecorded) {
         this.name = name;
@@ -30,6 +38,22 @@ public abstract class ModelProperty<T> {
 
     public boolean isRecorded() {
         return isRecorded;
+    }
+
+    void setModelAttributeSets(Map<String, ModelAttributeSet> modelAttributeSetList) {
+        this.modelAttributeSetMap = modelAttributeSetList;
+    }
+
+    void setAgentStore(AgentStore agentStore) {
+        this.agentStore = agentStore;
+    }
+
+    protected ModelAttributeSet getModelAttributeSet(String attributeName) {
+        return modelAttributeSetMap.get(attributeName);
+    }
+
+    protected AgentStore getAgentStore() {
+        return agentStore;
     }
 
     public abstract void set(T value);

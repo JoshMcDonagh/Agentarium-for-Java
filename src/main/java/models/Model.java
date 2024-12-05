@@ -3,6 +3,7 @@ package models;
 import agents.Agent;
 import models.agentgenerator.AgentGenerator;
 import models.modelattributes.ModelAttributeSet;
+import models.multithreading.Coordinator;
 import models.multithreading.requestresponse.Request;
 import models.multithreading.requestresponse.Response;
 
@@ -81,7 +82,7 @@ public class Model {
         Thread coordinatorThread = null;
 
         if (areProcessesSynced) {
-            CoordinatorTask coordinatorTask = new CoordinatorTask(numOfCores, modelAttributeSetList, requestQueue, responseQueue);
+            Coordinator coordinatorTask = new Coordinator(numOfCores, modelAttributeSetList, requestQueue, responseQueue);
             coordinatorThread = new Thread(coordinatorTask);
             coordinatorThread.start();
         }

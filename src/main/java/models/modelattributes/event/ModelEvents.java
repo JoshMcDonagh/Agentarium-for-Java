@@ -1,5 +1,8 @@
 package models.modelattributes.event;
 
+import models.modelattributes.ModelAttributeSet;
+import models.multithreading.threadutilities.AgentStore;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +12,25 @@ public class ModelEvents {
     private final Map<String, ModelEvent> eventsMap = new HashMap<String, ModelEvent>();
     private final List<ModelEvent> eventsList = new ArrayList<ModelEvent>();
 
+    private Map<String, ModelAttributeSet> modelAttributeSetMap;
+    private AgentStore agentStore;
+
+    public void setModelAttributeSets(Map<String, ModelAttributeSet> modelAttributeSetList) {
+        this.modelAttributeSetMap = modelAttributeSetList;
+    }
+
+    public void setAgentStore(AgentStore agentStore) {
+        this.agentStore = agentStore;
+    }
+
     public void addEvent(ModelEvent newEvent) {
+        newEvent.setModelAttributeSets(modelAttributeSetMap);
+        newEvent.setAgentStore(agentStore);
         eventsMap.put(newEvent.name(), newEvent);
         eventsList.add(newEvent);
     }
 
-    public void addEvents(ModelEvent[] newEvents) {
+    public void addEvents(List<ModelEvent> newEvents) {
         for (ModelEvent newEvent : newEvents)
             addEvent(newEvent);
     }

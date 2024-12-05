@@ -1,6 +1,8 @@
 package agents;
 
 import agents.attributes.AgentAttributeSet;
+import com.google.gson.reflect.TypeToken;
+import utilities.DeepCopier;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +13,7 @@ public class Agent {
     private AgentClock clock;
     private final List<AgentAttributeSet> attributeSetList;
     private final Map<String, AgentAttributeSet> attributeSetMap = new HashMap<String, AgentAttributeSet>();
-    private final AgentResults results;
+    private AgentResults results;
 
     public Agent(String name, List<AgentAttributeSet> attributeSetList, AgentResults results) {
         this.name = name;
@@ -92,5 +94,12 @@ public class Agent {
 
         // Tick the clock
         clock.tick();
+    }
+
+    public Agent duplicateWithoutRecords() {
+        Agent newAgent = new Agent(name, DeepCopier.deepCopy(attributeSetList, new TypeToken<List<AgentAttributeSet>>() {}.getType()));
+        newAgent.clock = DeepCopier.deepCopy(clock, AgentClock.class);
+        newAgent.results = null;
+        return newAgent;
     }
 }

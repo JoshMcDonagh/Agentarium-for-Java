@@ -55,11 +55,11 @@ public class AgentStore {
         return agentsMap.containsKey(agentName);
     }
 
-    public List<Agent> getFilteredAgents(Predicate<Agent> filterFunction) {
+    public List<Agent> getFilteredAgents(Predicate<Agent> agentFilter) {
         List<Agent> filteredAgents = new ArrayList<Agent>();
 
         for (Agent agent : agentsMap.values())
-            if (filterFunction.test(agent))
+            if (agentFilter.test(agent))
                 filteredAgents.add(agent);
 
         return filteredAgents;

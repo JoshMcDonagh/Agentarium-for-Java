@@ -4,13 +4,15 @@ import agents.Agent;
 import models.modelattributes.ModelAttributeSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class WorkerCache {
     private final List<Predicate<Agent>> agentFiltersCacheList = new ArrayList<Predicate<Agent>>();
+    private final Map<String, ModelAttributeSet> modelAttributeSetsCache = new HashMap<String, ModelAttributeSet>();
     private final AgentStore agentStoreCache;
-    private ModelAttributeSet modelAttributeSetCache;
 
     public WorkerCache(boolean isAgentCopiesHeld) {
         agentStoreCache = new AgentStore(isAgentCopiesHeld);
@@ -18,8 +20,8 @@ public class WorkerCache {
 
     public void clear() {
         agentFiltersCacheList.clear();
+        modelAttributeSetsCache.clear();
         agentStoreCache.clear();
-        modelAttributeSetCache = null;
     }
 
     public boolean doesAgentFilterExist(Predicate<Agent> agentFilter) {
@@ -50,11 +52,11 @@ public class WorkerCache {
         agentStoreCache.addAgents(agents);
     }
 
-    public boolean doesAModelAttributeSetExist() {
-        return modelAttributeSetCache != null;
+    public boolean doModelAttributeSetsExist() {
+        return !modelAttributeSetsCache.isEmpty();
     }
 
-    public ModelAttributeSet getModelAttributeSet() {
-        return modelAttributeSetCache;
+    public ModelAttributeSet getModelAttributeSet(String attributeSetName) {
+        return modelAttributeSetsCache.get(attributeSetName);
     }
 }

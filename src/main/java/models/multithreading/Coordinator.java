@@ -12,7 +12,7 @@ public class Coordinator implements Runnable {
     private String threadName;
     private List<ModelAttributeSet> modelAttributeSetList;
     private BlockingQueue<Request> requestQueue;
-    BlockingQueue<Response> responseQueue;
+    private BlockingQueue<Response> responseQueue;
 
     public Coordinator(String threadName, List<ModelAttributeSet> modelAttributeSetList, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
         this.threadName = threadName;

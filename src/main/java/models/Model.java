@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class Model {
-    private int numOfAgents;
-    private ModelClock clock;
-    private AgentGenerator agentGenerator;
-    private ModelResults results;
+    private final int numOfAgents;
+    private final ModelClock clock;
+    private final AgentGenerator agentGenerator;
+    private final ModelResults results;
 
     private int numOfCores = 1;
     private List<ModelResults> resultsPerProcess = new ArrayList<ModelResults>();
@@ -82,7 +82,7 @@ public class Model {
         Thread coordinatorThread = null;
 
         if (areProcessesSynced) {
-            Coordinator coordinatorTask = new Coordinator(String.valueOf(numOfCores), modelAttributeSetList, requestQueue, responseQueue);
+            Coordinator coordinatorTask = new Coordinator(String.valueOf(numOfCores), numOfCores, modelAttributeSetList, modelAttributeSetMap, requestQueue, responseQueue);
             coordinatorThread = new Thread(coordinatorTask);
             coordinatorThread.start();
         }

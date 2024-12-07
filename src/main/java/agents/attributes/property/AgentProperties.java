@@ -44,4 +44,15 @@ public class AgentProperties {
             action.accept(property);
         }
     }
+
+    public List<String> getPropertyNames() {
+        return new ArrayList<>(propertiesMap.keySet());
+    }
+
+    public Object getPropertyValue(String propertyName) {
+        AgentProperty<?> property = propertiesMap.get(propertyName);
+        if (property == null)
+            return null;
+        return property.get();
+    }
 }

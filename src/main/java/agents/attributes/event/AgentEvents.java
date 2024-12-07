@@ -49,4 +49,16 @@ public class AgentEvents {
             action.accept(event);
         }
     }
+
+    public List<String> getEventNames() {
+        return new ArrayList<>(eventsMap.keySet());
+    }
+
+
+    public Boolean isEventTriggered(String eventName) {
+        AgentEvent event = eventsMap.get(eventName);
+        if (event == null)
+            return null;
+        return event.isTriggered();
+    }
 }

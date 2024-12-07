@@ -1,7 +1,7 @@
 package agents;
 
 import agents.attributes.AgentAttributeSet;
-import utilities.DatabaseHandler;
+import utilities.Database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,23 +11,28 @@ import java.util.List;
 public class AgentResults {
     private String agentName;
     private List<AgentAttributeSet> attributes;
+    private Database database;
 
     public void setup(String agentName, List<AgentAttributeSet> attributes) {
         this.agentName = agentName;
         this.attributes = attributes;
-        initialiseTables();
+        database = createDatabase();
     }
 
-    private void initialiseTables() {
+    private Database createDatabase() {
+        Database database = new Database(agentName + "_agent_results.db");
+
         for (AgentAttributeSet attribute : attributes) {
             String propertiesTable = getPropertiesTableName(attribute.name());
             String preEventsTable = getPreEventsTableName(attribute.name());
             String postEventsTable = getPostEventsTableName(attribute.name());
 
-            DatabaseHandler.createTable(propertiesTable, "id INTEGER PRIMARY KEY, property_name TEXT, value REAL");
-            DatabaseHandler.createTable(preEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
-            DatabaseHandler.createTable(postEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
+            database.createTable(propertiesTable, "id INTEGER PRIMARY KEY, property_name TEXT, value TEXT, type TEXT");
+            database.createTable(preEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
+            database.createTable(postEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
         }
+
+        return database;
     }
 
     private String getPropertiesTableName(String attributeName) {
@@ -42,26 +47,32 @@ public class AgentResults {
         return agentName + "_" + attributeName + "_post_events";
     }
 
-    public void recordProperty(AgentAttributeSet attribute, String propertyName, double value) {
+    public void disconnectDatabase() {
+        database.disconnect();
+    }
+
+    public void recordProperty(AgentAttributeSet attribute, String propertyName, Object value) {
         String tableName = getPropertiesTableName(attribute.name());
-        DatabaseHandler.insertData(tableName, "property_name, value", "?, ?", propertyName, value);
+        String type = value.getClass().getName();
+        String serialisedValue =  Database.serialiseValue(value);
+        database.insertData(tableName, "property_name, value", "?, ?, ?", propertyName, serialisedValue, type);
     }
 
     public void recordPreEvent(AgentAttributeSet attribute, String eventName, boolean triggered) {
         String tableName = getPreEventsTableName(attribute.name());
-        DatabaseHandler.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
+        database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
     public void recordPostEvent(AgentAttributeSet attribute, String eventName, boolean triggered) {
         String tableName = getPostEventsTableName(attribute.name());
-        DatabaseHandler.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
+        database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
     public List<Double> getPropertyValues(AgentAttributeSet attribute, String propertyName) {
         List<Double> values = new ArrayList<>();
         String tableName = getPropertiesTableName(attribute.name());
         try {
-            ResultSet results = DatabaseHandler.queryData(
+            ResultSet results = database.queryData(
                     "SELECT value FROM " + tableName + " WHERE property_name = ?", propertyName
             );
             while (results.next()) {
@@ -77,7 +88,7 @@ public class AgentResults {
         List<Boolean> triggers = new ArrayList<>();
         String tableName = getPreEventsTableName(attribute.name());
         try {
-            ResultSet results = DatabaseHandler.queryData(
+            ResultSet results = database.queryData(
                     "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
             );
             while (results.next()) {
@@ -93,7 +104,7 @@ public class AgentResults {
         List<Boolean> triggers = new ArrayList<>();
         String tableName = getPostEventsTableName(attribute.name());
         try {
-            ResultSet results = DatabaseHandler.queryData(
+            ResultSet results = database.queryData(
                     "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
             );
             while (results.next()) {
@@ -107,5 +118,9 @@ public class AgentResults {
 
     public String getAgentName() {
         return agentName;
+    }
+
+    public List<AgentAttributeSet> getAttributes() {
+        return attributes;
     }
 }

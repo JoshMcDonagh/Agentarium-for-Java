@@ -9,8 +9,11 @@ import java.util.List;
 public abstract class ModelResults {
     private final Database database;
 
-    public ModelResults(String name, List<AgentAttributeSet> attributes) {
+    public ModelResults(String name) {
         database = new Database(name + "_model_results.db");
+    }
+
+    protected void setAttributes(List<AgentAttributeSet> attributes) {
         for (AgentAttributeSet attribute : attributes) {
             String propertiesTable = getPropertiesTableName(attribute.name());
             String preEventsTable = getPreEventsTableName(attribute.name());

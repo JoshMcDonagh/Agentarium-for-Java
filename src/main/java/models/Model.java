@@ -4,8 +4,10 @@ import agents.Agent;
 import models.agentgenerator.AgentGenerator;
 import models.modelattributes.ModelAttributeSet;
 import models.multithreading.Coordinator;
+import models.multithreading.Worker;
 import models.multithreading.requestresponse.Request;
 import models.multithreading.requestresponse.Response;
+import models.multithreading.threadutilities.AgentStore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ public class Model {
     private Map<String, ModelAttributeSet> modelAttributeSetMap = new HashMap<String, ModelAttributeSet>();
     private List<ModelAttributeSet> modelAttributeSetList = new ArrayList<ModelAttributeSet>();
     private boolean areProcessesSynced = false;
-    private boolean doProcessStoresHoldAgentCopies = true;
+    private boolean doAgentStoresHoldAgentCopies = true;
     private boolean isAgentCacheUsed = false;
 
     public Model(int numOfAgents, ModelClock clock, AgentGenerator agentGenerator, ModelResults results) {
@@ -54,8 +56,8 @@ public class Model {
         this.areProcessesSynced = areProcessesSynced;
     }
 
-    public void setDoProcessStoresHoldAgentCopies() {
-        doProcessStoresHoldAgentCopies = true;
+    public void setDoAgentStoresHoldAgentCopies() {
+        doAgentStoresHoldAgentCopies = true;
     }
 
     public void setIsAgentCacheUsed(boolean isAgentCacheUsed) {
@@ -82,27 +84,29 @@ public class Model {
         Thread coordinatorThread = null;
 
         if (areProcessesSynced) {
-            Coordinator coordinatorTask = new Coordinator(String.valueOf(numOfCores), numOfCores, modelAttributeSetList, modelAttributeSetMap, requestQueue, responseQueue);
-            coordinatorThread = new Thread(coordinatorTask);
+            Coordinator coordinator = new Coordinator(String.valueOf(numOfCores), numOfCores, modelAttributeSetList, modelAttributeSetMap, requestQueue, responseQueue);
+            coordinatorThread = new Thread(coordinator);
             coordinatorThread.start();
         }
 
         for (int coreIndex = 0; coreIndex < numOfCores; coreIndex++) {
-            List<Agent> coreAgents = agentsForEachCore.get(coreIndex);
+            AgentStore coreAgentStore = new AgentStore(doAgentStoresHoldAgentCopies);
+            coreAgentStore.addAgents(agentsForEachCore.get(coreIndex));
             ModelResults coreResults = results.duplicate();
 
-            Callable<ModelResults> workerTask = new WorkerTask(
-                    coreIndex,
-                    coreAgents,
-                    clock,
-                    areProcessesSynced,
+            Callable<ModelResults> worker = new Worker(
+                    String.valueOf(coreIndex),
+                    coreAgentStore,
                     modelAttributeSetList,
-                    doProcessStoresHoldAgentCopies,
+                    modelAttributeSetMap,
+                    areProcessesSynced,
+                    doAgentStoresHoldAgentCopies,
                     isAgentCacheUsed,
-                    coreResults
+                    requestQueue,
+                    responseQueue
             );
 
-            futures.add(executorService.submit(workerTask));
+            futures.add(executorService.submit(worker));
         }
 
         // Wait for all worker tasks to complete and merge results

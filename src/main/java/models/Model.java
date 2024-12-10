@@ -96,6 +96,7 @@ public class Model {
 
             Callable<ModelResults> worker = new Worker(
                     String.valueOf(coreIndex),
+                    clock,
                     coreAgentStore,
                     modelAttributeSetList,
                     modelAttributeSetMap,

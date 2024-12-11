@@ -22,9 +22,8 @@ public class Model {
     private final ModelResults results;
 
     private int numOfCores = 1;
-    private List<ModelResults> resultsPerProcess = new ArrayList<ModelResults>();
-    private Map<String, ModelAttributeSet> modelAttributeSetMap = new HashMap<String, ModelAttributeSet>();
-    private List<ModelAttributeSet> modelAttributeSetList = new ArrayList<ModelAttributeSet>();
+    private final Map<String, ModelAttributeSet> modelAttributeSetMap = new HashMap<String, ModelAttributeSet>();
+    private final List<ModelAttributeSet> modelAttributeSetList = new ArrayList<ModelAttributeSet>();
     private boolean areProcessesSynced = false;
     private boolean doAgentStoresHoldAgentCopies = true;
     private boolean isAgentCacheUsed = false;

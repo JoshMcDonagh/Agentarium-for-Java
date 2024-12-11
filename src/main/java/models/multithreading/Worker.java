@@ -70,7 +70,7 @@ public class Worker implements Callable<ModelResults> {
             requestResponseOperator.updateCoordinatorAgents(agentStore);
 
         for (int tick = 0; tick < clock.getTotalNumOfTicksToRun(); tick++) {
-            //for (Agent agent : agentStore.getAgentsList())
+            for (Agent agent : agentStore.getAgentsList())
         }
 
         return null;

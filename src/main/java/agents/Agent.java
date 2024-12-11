@@ -13,6 +13,7 @@ public class Agent {
     private AgentClock clock;
     private final List<AgentAttributeSet> attributeSetList;
     private final Map<String, AgentAttributeSet> attributeSetMap = new HashMap<String, AgentAttributeSet>();
+    private AgentAccessor agentAccessor;
     private AgentResults results;
 
     public Agent(String name, List<AgentAttributeSet> attributeSetList, AgentResults results) {
@@ -43,6 +44,14 @@ public class Agent {
 
     public AgentClock clock() {
         return clock;
+    }
+
+    public void setAgentAccessor(AgentAccessor agentAccessor) {
+        this.agentAccessor = agentAccessor;
+    }
+
+    public AgentAccessor agentAccessor() {
+        return agentAccessor;
     }
 
     public AgentAttributeSet getAttributeSet(String name) {

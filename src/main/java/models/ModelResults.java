@@ -1,5 +1,6 @@
 package models;
 
+import agents.Agent;
 import agents.AgentResults;
 import agents.attributes.AgentAttributeSet;
 import utilities.Database;
@@ -68,6 +69,10 @@ public abstract class ModelResults {
 
     public void disconnectDatabase() {
         database.disconnect();
+    }
+
+    public void run(List<Agent> agents) {
+
     }
 
     public abstract void mergeWith(ModelResults otherResults);

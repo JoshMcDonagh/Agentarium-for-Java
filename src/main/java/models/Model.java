@@ -94,12 +94,13 @@ public class Model {
             coreAgentStore.addAgents(agentsForEachCore.get(coreIndex));
             ModelResults coreResults = results.duplicate();
 
-            Callable<ModelResults> worker = new Worker(
+            Callable<ModelResults> worker = new Worker<>(
                     String.valueOf(coreIndex),
                     clock,
                     coreAgentStore,
                     modelAttributeSetList,
                     modelAttributeSetMap,
+                    results.getClass(),
                     areProcessesSynced,
                     doAgentStoresHoldAgentCopies,
                     isAgentCacheUsed,

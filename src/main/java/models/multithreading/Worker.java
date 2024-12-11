@@ -1,6 +1,7 @@
 package models.multithreading;
 
 import agents.Agent;
+import agents.AgentAccessor;
 import models.ModelClock;
 import models.ModelResults;
 import models.modelattributes.ModelAttributeSet;
@@ -15,12 +16,14 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
-public class Worker implements Callable<ModelResults> {
+public class Worker<T extends ModelResults> implements Callable<ModelResults> {
     private final String threadName;
     private final ModelClock clock;
     private final AgentStore agentStore;
+    private final List<Agent> updatedAgents;
     private final List<ModelAttributeSet> modelAttributeSetList;
     private final Map<String, ModelAttributeSet> modelAttributeSetMap;
+    private final Class<T> modelResultsClass;
     private final boolean areProcessesSynced;
     private final boolean doAgentStoresHoldAgentCopies;
     private final boolean isCacheUsed;
@@ -32,6 +35,7 @@ public class Worker implements Callable<ModelResults> {
                   AgentStore agentStore,
                   List<ModelAttributeSet> modelAttributeSetList,
                   Map<String, ModelAttributeSet> modelAttributeSetMap,
+                  Class<T> modelResultsClass,
                   boolean areProcessesSynced,
                   boolean doAgentStoresHoldAgentCopies,
                   boolean isCacheUsed,
@@ -40,8 +44,10 @@ public class Worker implements Callable<ModelResults> {
         this.threadName = threadName;
         this.clock = clock;
         this.agentStore = agentStore;
+        updatedAgents = agentStore.getAgentsList();
         this.modelAttributeSetList = modelAttributeSetList;
         this.modelAttributeSetMap = modelAttributeSetMap;
+        this.modelResultsClass = modelResultsClass;
         this.areProcessesSynced = areProcessesSynced;
         this.doAgentStoresHoldAgentCopies = doAgentStoresHoldAgentCopies;
         this.isCacheUsed = isCacheUsed;
@@ -54,6 +60,8 @@ public class Worker implements Callable<ModelResults> {
         WorkerCache cache;
         if (isCacheUsed)
             cache = new WorkerCache(doAgentStoresHoldAgentCopies);
+        else
+            cache = null;
 
         if (!areProcessesSynced) {
             for (ModelAttributeSet modelAttributeSet : modelAttributeSetList)
@@ -69,10 +77,35 @@ public class Worker implements Callable<ModelResults> {
         if (areProcessesSynced)
             requestResponseOperator.updateCoordinatorAgents(agentStore);
 
+        ModelResults results = modelResultsClass.getDeclaredConstructor(String.class).newInstance(threadName);
+
         for (int tick = 0; tick < clock.getTotalNumOfTicksToRun(); tick++) {
-            for (Agent agent : agentStore.getAgentsList())
+            for (Agent agent : updatedAgents) {
+                agent.setAgentAccessor(new AgentAccessor(
+                        agent,
+                        modelAttributeSetList,
+                        modelAttributeSetMap,
+                        requestResponseOperator,
+                        agentStore,
+                        areProcessesSynced,
+                        isCacheUsed,
+                        cache
+                ));
+                agent.run();
+            }
+
+            if (areProcessesSynced) {
+                requestResponseOperator.waitUntilAllWorkersFinishTick();
+                agentStore.addAgents(updatedAgents);
+                requestResponseOperator.updateCoordinatorAgents(agentStore);
+                requestResponseOperator.waitUntilAllWorkersUpdateCoordinator();
+            }
+
+            if (isCacheUsed)
+                cache.clear();
         }
 
-        return null;
+        results.run(updatedAgents);
+        return results;
     }
 }

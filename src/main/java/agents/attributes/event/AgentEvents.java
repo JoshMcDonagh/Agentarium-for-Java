@@ -33,6 +33,10 @@ public class AgentEvents {
         return eventsList.get(index);
     }
 
+    public List<AgentEvent> getEventsList() {
+        return eventsList;
+    }
+
     public int getEventCount() {
         return eventsList.size();
     }

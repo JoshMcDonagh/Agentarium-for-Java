@@ -62,6 +62,10 @@ public class Agent {
         return attributeSetList.get(index);
     }
 
+    public List<AgentAttributeSet> getAttributeSetList() {
+        return attributeSetList;
+    }
+
     public AgentResults getResults() {
         return results;
     }

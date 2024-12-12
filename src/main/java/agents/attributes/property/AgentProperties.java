@@ -29,6 +29,10 @@ public class AgentProperties {
         return propertiesList.get(index);
     }
 
+    public List<AgentProperty<?>> getPropertiesList() {
+        return propertiesList;
+    }
+
     public int getPropertyCount() {
         return propertiesList.size();
     }

@@ -68,48 +68,45 @@ public class AgentResults {
         database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
-    public List<Double> getPropertyValues(AgentAttributeSet attribute, String propertyName) {
+    public List<Double> getPropertyValues(String attributeName, String propertyName) {
         List<Double> values = new ArrayList<>();
-        String tableName = getPropertiesTableName(attribute.name());
+        String tableName = getPropertiesTableName(attributeName);
         try {
-            ResultSet results = database.queryData(
+            ResultSet databaseResults = database.queryData(
                     "SELECT value FROM " + tableName + " WHERE property_name = ?", propertyName
             );
-            while (results.next()) {
-                values.add(results.getDouble("value"));
-            }
+            while (databaseResults.next())
+                values.add(databaseResults.getDouble("value"));
         } catch (SQLException e) {
             System.err.println("Error retrieving property values for " + propertyName + ": " + e.getMessage());
         }
         return values;
     }
 
-    public List<Boolean> getPreEventTriggers(AgentAttributeSet attribute, String eventName) {
+    public List<Boolean> getPreEventTriggers(String attributeName, String eventName) {
         List<Boolean> triggers = new ArrayList<>();
-        String tableName = getPreEventsTableName(attribute.name());
+        String tableName = getPreEventsTableName(attributeName);
         try {
-            ResultSet results = database.queryData(
+            ResultSet databaseResults = database.queryData(
                     "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
             );
-            while (results.next()) {
-                triggers.add(results.getBoolean("triggered"));
-            }
+            while (databaseResults.next())
+                triggers.add(databaseResults.getBoolean("triggered"));
         } catch (SQLException e) {
             System.err.println("Error retrieving pre-event triggers for " + eventName + ": " + e.getMessage());
         }
         return triggers;
     }
 
-    public List<Boolean> getPostEventTriggers(AgentAttributeSet attribute, String eventName) {
+    public List<Boolean> getPostEventTriggers(String attributeName, String eventName) {
         List<Boolean> triggers = new ArrayList<>();
-        String tableName = getPostEventsTableName(attribute.name());
+        String tableName = getPostEventsTableName(attributeName);
         try {
-            ResultSet results = database.queryData(
+            ResultSet databaseResults = database.queryData(
                     "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
             );
-            while (results.next()) {
-                triggers.add(results.getBoolean("triggered"));
-            }
+            while (databaseResults.next())
+                triggers.add(databaseResults.getBoolean("triggered"));
         } catch (SQLException e) {
             System.err.println("Error retrieving post-event triggers for " + eventName + ": " + e.getMessage());
         }

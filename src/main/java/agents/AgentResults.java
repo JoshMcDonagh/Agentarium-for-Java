@@ -1,14 +1,23 @@
 package agents;
 
 import agents.attributes.AgentAttributeSet;
+import agents.attributes.event.AgentEvent;
+import agents.attributes.property.AgentProperty;
 import utilities.Database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AgentResults {
+    private List<String> propertyNamesList = new ArrayList<String>();
+    private Map<String, Class<?>> propertyTypesMap = new HashMap<String, Class<?>>();
+    private List<String> preEventNamesList = new ArrayList<String>();
+    private List<String> postEventNamesList = new ArrayList<String>();
+
     private String agentName;
     private List<AgentAttributeSet> attributes;
     private Database database;
@@ -30,9 +39,45 @@ public class AgentResults {
             database.createTable(propertiesTable, "id INTEGER PRIMARY KEY, property_name TEXT, value TEXT, type TEXT");
             database.createTable(preEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
             database.createTable(postEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
+
+            List<AgentProperty<?>> propertiesList = attribute.getProperties().getPropertiesList();
+            for (AgentProperty<?> property : propertiesList) {
+                if (property.isRecorded()) {
+                    propertyNamesList.add(property.name());
+                    propertyTypesMap.put(property.name(), property.type());
+                }
+            }
+
+            List<AgentEvent> preEventList = attribute.getPreEvents().getEventsList();
+            for (AgentEvent event : preEventList) {
+                if (event.isRecorded())
+                    preEventNamesList.add(event.name());
+            }
+
+            List<AgentEvent> postEventList = attribute.getPostEvents().getEventsList();
+            for (AgentEvent event : postEventList) {
+                if (event.isRecorded())
+                    postEventNamesList.add(event.name());
+            }
         }
 
         return database;
+    }
+
+    public List<String> getPropertyNamesList() {
+        return propertyNamesList;
+    }
+
+    public List<String> getPreEventNamesList() {
+        return preEventNamesList;
+    }
+
+    public List<String> getPostEventNamesList() {
+        return postEventNamesList;
+    }
+
+    public Class<?> getPropertyClass (String propertyName) {
+        return propertyTypesMap.get(propertyName);
     }
 
     private String getPropertiesTableName(String attributeName) {
@@ -54,8 +99,8 @@ public class AgentResults {
     public void recordProperty(AgentAttributeSet attribute, String propertyName, Object value) {
         String tableName = getPropertiesTableName(attribute.name());
         String type = value.getClass().getName();
-        String serialisedValue =  Database.serialiseValue(value);
-        database.insertData(tableName, "property_name, value", "?, ?, ?", propertyName, serialisedValue, type);
+        String serializedValue = Database.serialiseValue(value);
+        database.insertData(tableName, "property_name, value, type", "?, ?, ?", propertyName, serializedValue, type);
     }
 
     public void recordPreEvent(AgentAttributeSet attribute, String eventName, boolean triggered) {
@@ -68,49 +113,20 @@ public class AgentResults {
         database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
     }
 
-    public List<Double> getPropertyValues(String attributeName, String propertyName) {
-        List<Double> values = new ArrayList<>();
-        String tableName = getPropertiesTableName(attributeName);
-        try {
-            ResultSet databaseResults = database.queryData(
-                    "SELECT value FROM " + tableName + " WHERE property_name = ?", propertyName
-            );
-            while (databaseResults.next())
-                values.add(databaseResults.getDouble("value"));
-        } catch (SQLException e) {
-            System.err.println("Error retrieving property values for " + propertyName + ": " + e.getMessage());
-        }
-        return values;
+    public <T> List<T> getPropertyValues(String attributeName, String propertyName, Class<T> type) {
+        return database.getColumnAsList(attributeName, propertyName, type);
     }
 
     public List<Boolean> getPreEventTriggers(String attributeName, String eventName) {
-        List<Boolean> triggers = new ArrayList<>();
-        String tableName = getPreEventsTableName(attributeName);
-        try {
-            ResultSet databaseResults = database.queryData(
-                    "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
-            );
-            while (databaseResults.next())
-                triggers.add(databaseResults.getBoolean("triggered"));
-        } catch (SQLException e) {
-            System.err.println("Error retrieving pre-event triggers for " + eventName + ": " + e.getMessage());
-        }
-        return triggers;
+        return getEventTriggers(getPreEventsTableName(attributeName), eventName);
     }
 
     public List<Boolean> getPostEventTriggers(String attributeName, String eventName) {
-        List<Boolean> triggers = new ArrayList<>();
-        String tableName = getPostEventsTableName(attributeName);
-        try {
-            ResultSet databaseResults = database.queryData(
-                    "SELECT triggered FROM " + tableName + " WHERE event_name = ?", eventName
-            );
-            while (databaseResults.next())
-                triggers.add(databaseResults.getBoolean("triggered"));
-        } catch (SQLException e) {
-            System.err.println("Error retrieving post-event triggers for " + eventName + ": " + e.getMessage());
-        }
-        return triggers;
+        return getEventTriggers(getPostEventsTableName(attributeName), eventName);
+    }
+
+    private List<Boolean> getEventTriggers(String tableName, String eventName) {
+        return database.getColumnAsList(tableName, eventName, Boolean.class);
     }
 
     public String getAgentName() {

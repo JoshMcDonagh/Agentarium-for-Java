@@ -32,6 +32,10 @@ public abstract class AgentProperty<T> {
         return isRecorded;
     }
 
+    public Class<T> type() {
+        return (Class<T>) getClass();
+    }
+
     public abstract void set(T value);
     public abstract T get();
     public abstract void run();

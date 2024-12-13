@@ -144,7 +144,7 @@ public abstract class ModelResults {
     protected abstract List<?> mergeAgentPreEventResultsWithModelResults(
             String attributeName,
             String preEventName,
-            List<Boolean> modelResultsAgentPreEventTriggers,
+            List<?> modelResultsAgentPreEventTriggers,
             List<Boolean> agentResultsAgentPreEventTriggers
     );
 

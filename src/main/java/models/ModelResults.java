@@ -99,30 +99,32 @@ public abstract class ModelResults {
             for (AgentAttributeSet agentAttributeSet : agentAttributeSetList) {
                 String attributeName = agentAttributeSet.name();
 
-                List<AgentProperty<?>> agentPropertiesList = agentAttributeSet.getProperties().getPropertiesList();
                 String propertiesTableName = getPropertiesTableName(attributeName);
-                for (AgentProperty<?> agentProperty : agentPropertiesList) {
-                    List<String> propertyNamesList = agentResults.getPropertyNamesList();
-                    for (String propertyName : propertyNamesList) {
-                        Class<?> propertyType = agentResults.getPropertyClass(propertyName);
-                        List<?> modelValues = getPropertyValues(attributeName, propertyName, propertyType);
-                        List<?> agentValues = agentResults.getPropertyValues(attributeName, propertyName, propertyType);
-                        List<?> newModelValues = mergeAgentPropertyResultsWithModelResults(attributeName, propertyName, modelValues, agentValues);
-                        database.replaceColumn(propertiesTableName, propertyName, newModelValues);
-                    }
+                List<String> propertyNamesList = agentResults.getPropertyNamesList();
+                for (String propertyName : propertyNamesList) {
+                    Class<?> propertyType = agentResults.getPropertyClass(propertyName);
+                    List<?> modelValues = getPropertyValues(attributeName, propertyName, propertyType);
+                    List<?> agentValues = agentResults.getPropertyValues(attributeName, propertyName, propertyType);
+                    List<?> newModelValues = mergeAgentPropertyResultsWithModelResults(attributeName, propertyName, modelValues, agentValues);
+                    database.replaceColumn(propertiesTableName, propertyName, newModelValues);
                 }
 
-                List<AgentEvent> agentPreEventsList = agentAttributeSet.getPreEvents().getEventsList();
                 String preEventsTableName = getPreEventsTableName(attributeName);
-                for (AgentEvent agentEvent : agentPreEventsList) {
-                    // TODO: Implement agent pre-event merging
-
+                List<String> preEventNamesList = agentResults.getPreEventNamesList();
+                for (String eventName : preEventNamesList) {
+                    List<?> modelTriggers = getPreEventTriggers(attributeName, eventName);
+                    List<Boolean> agentTriggers = agentResults.getPreEventTriggers(attributeName, eventName);
+                    List<?> newModelTriggers = mergeAgentPreEventResultsWithModelResults(attributeName, eventName, modelTriggers, agentTriggers);
+                    database.replaceColumn(preEventsTableName, eventName, newModelTriggers);
                 }
 
-                List<AgentEvent> agentPostEventsList = agentAttributeSet.getPostEvents().getEventsList();
                 String postEventsTableName = getPostEventsTableName(attributeName);
-                for (AgentEvent agentEvent : agentPostEventsList) {
-                    // TODO: Implement agent post-event merging
+                List<String> postEventNamesList = agentResults.getPostEventNamesList();
+                for (String eventName : postEventNamesList) {
+                    List<?> modelTriggers = getPostEventTriggers(attributeName, eventName);
+                    List<Boolean> agentTriggers = agentResults.getPostEventTriggers(attributeName, eventName);
+                    List<?> newModelTriggers = mergeAgentPostEventResultsWithModelResults(attributeName, eventName, modelTriggers, agentTriggers);
+                    database.replaceColumn(postEventsTableName, eventName, newModelTriggers);
                 }
             }
         }
@@ -139,18 +141,18 @@ public abstract class ModelResults {
             List<?> agentResultsAgentPropertyValues
     );
 
-    protected abstract List<Boolean> mergeAgentPreEventResultsWithModelResults(
+    protected abstract List<?> mergeAgentPreEventResultsWithModelResults(
             String attributeName,
             String preEventName,
             List<Boolean> modelResultsAgentPreEventTriggers,
             List<Boolean> agentResultsAgentPreEventTriggers
     );
 
-    protected abstract List<Boolean> mergeAgentPostEventResultsWithModelResults(
+    protected abstract List<?> mergeAgentPostEventResultsWithModelResults(
             String attributeName,
             String postEventName,
-            List<Boolean> modelResultsAgentPostEventTriggers,
-            List<?> agentResultsAgentPostEventTriggers
+            List<?> modelResultsAgentPostEventTriggers,
+            List<Boolean> agentResultsAgentPostEventTriggers
     );
 
     protected abstract <T> List<T> mergePropertyResults(
@@ -160,17 +162,17 @@ public abstract class ModelResults {
             List<T> secondResultsAgentPropertyValues
     );
 
-    protected abstract List<Boolean> mergePreEventResults(
+    protected abstract <T> List<T> mergePreEventResults(
             String attributeName,
             String preEventName,
-            List<Boolean> firstResultsAgentPreEventTriggers,
-            List<Boolean> secondResultsAgentPreEventTriggers
+            List<T> firstResultsAgentPreEventTriggers,
+            List<T> secondResultsAgentPreEventTriggers
     );
 
-    protected abstract List<Boolean> mergePostEventResults(
+    protected abstract <T> List<T> mergePostEventResults(
             String attributeName,
             String postEventName,
-            List<Boolean> firstResultsAgentPostEventTriggers,
-            List<Boolean> secondResultsAgentPostEventTriggers
+            List<T> firstResultsAgentPostEventTriggers,
+            List<T> secondResultsAgentPostEventTriggers
     );
 }

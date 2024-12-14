@@ -74,7 +74,7 @@ public class Agent {
         // Record pre-events
         for (AgentAttributeSet attribute : attributeSetList) {
             attribute.getPreEvents().forEach(event ->
-                    results.recordPreEvent(attribute, event.name(), event.isTriggered())
+                    results.getAttributeResults(attribute.name()).recordPreEvent(event.name(), event.isTriggered())
             );
         }
 
@@ -90,7 +90,7 @@ public class Agent {
                     // Safely handle non-numeric property values
                     try {
                         double value = ((Number) property.get()).doubleValue();
-                        results.recordProperty(attribute, property.name(), value);
+                        results.getAttributeResults(attribute.name()).recordProperty(property.name(), value);
                     } catch (ClassCastException e) {
                         System.err.println("Non-numeric property '" + property.name() + "' cannot be recorded.");
                     }
@@ -101,7 +101,7 @@ public class Agent {
         // Record post-events
         for (AgentAttributeSet attribute : attributeSetList) {
             attribute.getPostEvents().forEach(event ->
-                    results.recordPostEvent(attribute, event.name(), event.isTriggered())
+                    results.getAttributeResults(attribute.name()).recordPostEvent(event.name(), event.isTriggered())
             );
         }
 

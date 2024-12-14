@@ -14,6 +14,7 @@ import java.util.List;
 
 public abstract class ModelResults {
     private final Database database;
+    private List<String> attributeNameList = new ArrayList<String>();
 
     public ModelResults(String name) {
         database = new Database(name + "_model_results.db");
@@ -21,6 +22,8 @@ public abstract class ModelResults {
 
     protected void setAttributes(List<AgentAttributeSet> attributes) {
         for (AgentAttributeSet attribute : attributes) {
+            attributeNameList.add(attribute.name());
+
             String propertiesTable = getPropertiesTableName(attribute.name());
             String preEventsTable = getPreEventsTableName(attribute.name());
             String postEventsTable = getPostEventsTableName(attribute.name());
@@ -130,7 +133,12 @@ public abstract class ModelResults {
         }
     }
 
-    public abstract void mergeWith(ModelResults otherResults);
+    public void mergeWith(ModelResults otherResults) {
+        for (String attributeName : attributeNameList) {
+            String propertiesTableName = getPropertiesTableName(attributeName);
+            List<String> propertyNamesList =
+        }
+    }
 
     public abstract ModelResults duplicate();
 

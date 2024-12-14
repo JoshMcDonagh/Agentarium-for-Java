@@ -5,8 +5,6 @@ import agents.attributes.event.AgentEvent;
 import agents.attributes.property.AgentProperty;
 import utilities.Database;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

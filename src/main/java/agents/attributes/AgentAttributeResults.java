@@ -21,7 +21,7 @@ public class AgentAttributeResults {
     private List<String> postEventNamesList = new ArrayList<String>();
 
     public AgentAttributeResults(String agentName, AgentAttributeSet agentAttributeSet) {
-        agentName = agentName;
+        this.agentName = agentName;
         attributeName = agentAttributeSet.name();
         this.agentAttributeSet = agentAttributeSet;
         database = new Database(agentName);
@@ -71,5 +71,62 @@ public class AgentAttributeResults {
 
     private String getPostEventsTableName() {
         return agentName + "_" + attributeName + "_post_events";
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public List<String> getPropertyNamesList() {
+        return propertyNamesList;
+    }
+
+    public List<String> getPreEventNamesList() {
+        return preEventNamesList;
+    }
+
+    public List<String> getPostEventNamesList() {
+        return postEventNamesList;
+    }
+
+    public Class<?> getPropertyClass (String propertyName) {
+        return propertyTypesMap.get(propertyName);
+    }
+
+    public void recordProperty(String propertyName, Object value) {
+        String tableName = getPropertiesTableName();
+        String type = value.getClass().getName();
+        String serialisedValue = Database.serialiseValue(value);
+        database.insertData(tableName, "property_name, value, type", "?, ?, ?", propertyName, serialisedValue, type);
+    }
+
+    public void recordPreEvent(String eventName, boolean triggered) {
+        String tableName = getPreEventsTableName();
+        database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
+    }
+
+    public void recordPostEvent(String eventName, boolean triggered) {
+        String tableName = getPostEventsTableName();
+        database.insertData(tableName, "event_name, triggered", "?, ?", eventName, triggered);
+    }
+
+    public <T> List<T> getPropertyValues(String propertyName, Class<T> type) {
+        return database.getColumnAsList(attributeName, propertyName, type);
+    }
+
+    public List<Boolean> getPreEventTriggers(String eventName) {
+        return getEventTriggers(getPreEventsTableName(), eventName);
+    }
+
+    public List<Boolean> getPostEventTriggers(String eventName) {
+        return getEventTriggers(getPostEventsTableName(), eventName);
+    }
+
+    private List<Boolean> getEventTriggers(String tableName, String eventName) {
+        return database.getColumnAsList(tableName, eventName, Boolean.class);
+    }
+
+    public void disconnectDatabase() {
+        database.disconnect();
     }
 }

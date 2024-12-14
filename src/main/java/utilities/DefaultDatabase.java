@@ -7,11 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Database {
+public class DefaultDatabase {
     private final String databasePath;
     private Connection connection = null;
 
-    public Database(String databasePath) {
+    public DefaultDatabase(String databasePath) {
         this.databasePath = databasePath;
         connect();
     }

@@ -2,7 +2,7 @@ package agents.attributes;
 
 import agents.attributes.event.AgentEvent;
 import agents.attributes.property.AgentProperty;
-import utilities.Database;
+import utilities.DefaultDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class AgentAttributeResults {
     private final String agentName;
     private final String attributeName;
-    private final Database database;
+    private final DefaultDatabase database;
 
     private final List<String> propertyNamesList = new ArrayList<String>();
     private final Map<String, Class<?>> propertyTypesMap = new HashMap<String, Class<?>>();
@@ -22,7 +22,7 @@ public class AgentAttributeResults {
     public AgentAttributeResults(String agentName, AgentAttributeSet agentAttributeSet) {
         this.agentName = agentName;
         attributeName = agentAttributeSet.name();
-        database = new Database(agentName);
+        database = new DefaultDatabase(agentName);
 
         List<AgentProperty<?>> propertiesList = agentAttributeSet.getProperties().getPropertiesList();
         for (AgentProperty<?> property : propertiesList) {
@@ -45,8 +45,8 @@ public class AgentAttributeResults {
         }
     }
 
-    private Database createDatabase() {
-        Database database = new Database(agentName + "_" + attributeName + "_agent_attribute_results.db");
+    private DefaultDatabase createDatabase() {
+        DefaultDatabase database = new DefaultDatabase(agentName + "_" + attributeName + "_agent_attribute_results.db");
 
         String propertiesTableName = getPropertiesTableName();
         String preEventsTableName = getPreEventsTableName();
@@ -94,7 +94,7 @@ public class AgentAttributeResults {
     public void recordProperty(String propertyName, Object value) {
         String tableName = getPropertiesTableName();
         String type = value.getClass().getName();
-        String serialisedValue = Database.serialiseValue(value);
+        String serialisedValue = DefaultDatabase.serialiseValue(value);
         database.insertData(tableName, "property_name, value, type", "?, ?, ?", propertyName, serialisedValue, type);
     }
 

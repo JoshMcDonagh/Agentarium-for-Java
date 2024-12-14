@@ -3,21 +3,17 @@ package models;
 import agents.Agent;
 import agents.AgentResults;
 import agents.attributes.AgentAttributeSet;
-import agents.attributes.event.AgentEvent;
-import agents.attributes.property.AgentProperty;
-import utilities.Database;
+import utilities.DefaultDatabase;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ModelResults {
-    private final Database database;
+    private final DefaultDatabase database;
     private List<String> attributeNameList = new ArrayList<String>();
 
     public ModelResults(String name) {
-        database = new Database(name + "_model_results.db");
+        database = new DefaultDatabase(name + "_model_results.db");
     }
 
     protected void setAttributes(List<AgentAttributeSet> attributes) {
@@ -56,7 +52,7 @@ public abstract class ModelResults {
             for (String propertyName : attribute.getProperties().getPropertyNames()) {
                 Object value = attribute.getProperties().getPropertyValue(propertyName);
                 String type = value.getClass().getName();
-                String serialisedValue = Database.serialiseValue(value);
+                String serialisedValue = DefaultDatabase.serialiseValue(value);
                 database.insertData(propertiesTable, "property_name, value, type", "?, ?, ?", propertyName, serialisedValue, type);
             }
 

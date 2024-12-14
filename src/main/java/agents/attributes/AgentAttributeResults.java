@@ -10,20 +10,18 @@ import java.util.List;
 import java.util.Map;
 
 public class AgentAttributeResults {
-    private String agentName;
-    private String attributeName;
-    private AgentAttributeSet agentAttributeSet;
-    private Database database;
+    private final String agentName;
+    private final String attributeName;
+    private final Database database;
 
-    private List<String> propertyNamesList = new ArrayList<String>();
-    private Map<String, Class<?>> propertyTypesMap = new HashMap<String, Class<?>>();
-    private List<String> preEventNamesList = new ArrayList<String>();
-    private List<String> postEventNamesList = new ArrayList<String>();
+    private final List<String> propertyNamesList = new ArrayList<String>();
+    private final Map<String, Class<?>> propertyTypesMap = new HashMap<String, Class<?>>();
+    private final List<String> preEventNamesList = new ArrayList<String>();
+    private final List<String> postEventNamesList = new ArrayList<String>();
 
     public AgentAttributeResults(String agentName, AgentAttributeSet agentAttributeSet) {
         this.agentName = agentName;
         attributeName = agentAttributeSet.name();
-        this.agentAttributeSet = agentAttributeSet;
         database = new Database(agentName);
 
         List<AgentProperty<?>> propertiesList = agentAttributeSet.getProperties().getPropertiesList();

@@ -25,11 +25,11 @@ public abstract class AttributeResultsDatabase {
         return;
     }
 
-    public abstract void addPropertyValue(String propertyName, Object propertyValue);
+    public abstract <T> void addPropertyValue(String propertyName, T propertyValue);
     public abstract void addPreEventTrigger(String preEventName, boolean preEventTrigger);
     public abstract void addPostEventTrigger(String postEventName, boolean postEventTrigger);
 
-    public abstract void replacePropertyColumn(String propertyName, List<?> propertyValues);
+    public abstract <T> void replacePropertyColumn(String propertyName, List<T> propertyValues);
     public abstract void replacePreEventTrigger(String preEventName, List<Boolean> preEventTriggers);
     public abstract void replacePostEventTrigger(String postEventName, List<Boolean> postEventTriggers);
 

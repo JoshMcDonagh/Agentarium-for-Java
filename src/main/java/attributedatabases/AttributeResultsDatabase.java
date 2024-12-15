@@ -3,14 +3,10 @@ package attributedatabases;
 import java.util.List;
 
 public abstract class AttributeResultsDatabase {
-    private final String databasePath;
+    private String databasePath;
 
-    public AttributeResultsDatabase(String databasePath) {
+    protected void setDatabasePath(String databasePath) {
         this.databasePath = databasePath;
-    }
-
-    public AttributeResultsDatabase() {
-        this.databasePath = null;
     }
 
     public String getDatabasePath() {

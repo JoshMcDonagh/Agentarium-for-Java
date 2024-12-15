@@ -19,10 +19,6 @@ public class StorageBasedDatabase extends AttributeResultsDatabase {
 
     private Connection connection;
 
-    public StorageBasedDatabase() {
-        super(RandomStringGenerator.generateRandomString(20) + ".db");
-    }
-
     @Override
     public void connect() {
         try {

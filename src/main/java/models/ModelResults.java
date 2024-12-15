@@ -3,7 +3,6 @@ package models;
 import agents.Agent;
 import agents.AgentResults;
 import agents.attributes.AgentAttributeSet;
-import utilities.DefaultDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

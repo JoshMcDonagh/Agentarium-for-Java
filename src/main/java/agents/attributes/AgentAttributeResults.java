@@ -2,7 +2,6 @@ package agents.attributes;
 
 import agents.attributes.event.AgentEvent;
 import agents.attributes.property.AgentProperty;
-import utilities.DefaultDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;

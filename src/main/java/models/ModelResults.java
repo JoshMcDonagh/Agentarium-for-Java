@@ -3,30 +3,23 @@ package models;
 import agents.Agent;
 import agents.AgentResults;
 import agents.attributes.AgentAttributeSet;
+import attributedatabases.AttributeResultsDatabase;
+import attributedatabases.AttributeResultsDatabaseFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ModelResults {
-    private final DefaultDatabase database;
+    private final AttributeResultsDatabase database;
     private List<String> attributeNameList = new ArrayList<String>();
 
     public ModelResults(String name) {
-        database = new DefaultDatabase(name + "_model_results.db");
+        database = AttributeResultsDatabaseFactory.createDatabase();
     }
 
     protected void setAttributes(List<AgentAttributeSet> attributes) {
-        for (AgentAttributeSet attribute : attributes) {
+        for (AgentAttributeSet attribute : attributes)
             attributeNameList.add(attribute.name());
-
-            String propertiesTable = getPropertiesTableName(attribute.name());
-            String preEventsTable = getPreEventsTableName(attribute.name());
-            String postEventsTable = getPostEventsTableName(attribute.name());
-
-            database.createTable(propertiesTable, "id INTEGER PRIMARY KEY, property_name TEXT, value TEXT, type TEXT");
-            database.createTable(preEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
-            database.createTable(postEventsTable, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
-        }
     }
 
     private String getPropertiesTableName(String attributeName) {

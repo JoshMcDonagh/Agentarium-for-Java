@@ -1,18 +1,18 @@
-package agents.attributes;
+package models.modelattributes;
 
 import agents.attributes.event.AgentEvent;
 import agents.attributes.property.AgentProperty;
 import attributedatabases.AttributeResultsDatabase;
 import attributedatabases.AttributeResultsDatabaseFactory;
-import attributedatabases.StorageBasedDatabase;
+import models.modelattributes.event.ModelEvent;
+import models.modelattributes.property.ModelProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AgentAttributeResults {
-    private final String agentName;
+public class ModelAttributeResults {
     private final String attributeName;
     private final AttributeResultsDatabase database;
 
@@ -21,35 +21,30 @@ public class AgentAttributeResults {
     private final List<String> preEventNamesList = new ArrayList<String>();
     private final List<String> postEventNamesList = new ArrayList<String>();
 
-    public AgentAttributeResults(String agentName, AgentAttributeSet agentAttributeSet) {
-        this.agentName = agentName;
-        attributeName = agentAttributeSet.name();
+    public ModelAttributeResults(ModelAttributeSet modelAttributeSet) {
+        attributeName = modelAttributeSet.name();
         database = AttributeResultsDatabaseFactory.createDatabase();
         database.connect();
 
-        List<AgentProperty<?>> propertiesList = agentAttributeSet.getProperties().getPropertiesList();
-        for (AgentProperty<?> property : propertiesList) {
+        List<ModelProperty<?>> propertiesList = modelAttributeSet.getProperties().getPropertiesList();
+        for (ModelProperty<?> property : propertiesList) {
             if (property.isRecorded()) {
                 propertyNamesList.add(property.name());
                 propertyTypesMap.put(property.name(), property.type());
             }
         }
 
-        List<AgentEvent> preEventList = agentAttributeSet.getPreEvents().getEventsList();
-        for (AgentEvent event : preEventList) {
+        List<ModelEvent> preEventList = modelAttributeSet.getPreEvents().getEventsList();
+        for (ModelEvent event : preEventList) {
             if (event.isRecorded())
                 preEventNamesList.add(event.name());
         }
 
-        List<AgentEvent> postEventList = agentAttributeSet.getPostEvents().getEventsList();
-        for (AgentEvent event : postEventList) {
+        List<ModelEvent> postEventList = modelAttributeSet.getPostEvents().getEventsList();
+        for (ModelEvent event : postEventList) {
             if (event.isRecorded())
                 postEventNamesList.add(event.name());
         }
-    }
-
-    public String getAgentName() {
-        return agentName;
     }
 
     public String getAttributeName() {

@@ -1,7 +1,5 @@
 package models.modelattributes;
 
-import agents.attributes.event.AgentEvent;
-import agents.attributes.property.AgentProperty;
 import attributedatabases.AttributeResultsDatabase;
 import attributedatabases.AttributeResultsDatabaseFactory;
 import models.modelattributes.event.ModelEvent;

@@ -1,5 +1,6 @@
 package models.modelattributes.event;
 
+import agents.attributes.event.AgentEvent;
 import models.modelattributes.ModelAttributeSet;
 import models.multithreading.threadutilities.AgentStore;
 
@@ -45,6 +46,10 @@ public class ModelEvents {
 
     public ModelEvent getEventByIndex(int index) {
         return eventsList.get(index);
+    }
+
+    public List<ModelEvent> getEventsList() {
+        return eventsList;
     }
 
     public int getEventCount() {

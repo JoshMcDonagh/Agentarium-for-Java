@@ -1,5 +1,6 @@
 package models.modelattributes.property;
 
+import agents.attributes.property.AgentProperty;
 import models.modelattributes.ModelAttributeSet;
 import models.multithreading.threadutilities.AgentStore;
 
@@ -41,6 +42,10 @@ public class ModelProperties {
 
     public ModelProperty<?> getPropertyByIndex(int index) {
         return propertiesList.get(index);
+    }
+
+    public List<ModelProperty<?>> getPropertiesList() {
+        return propertiesList;
     }
 
     public int getPropertyCount() {

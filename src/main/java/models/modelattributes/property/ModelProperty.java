@@ -56,6 +56,10 @@ public abstract class ModelProperty<T> {
         return agentStore;
     }
 
+    public Class<T> type() {
+        return (Class<T>) getClass();
+    }
+
     public abstract void set(T value);
     public abstract T get();
     public abstract void run();

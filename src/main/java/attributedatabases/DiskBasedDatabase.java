@@ -2,7 +2,6 @@ package attributedatabases;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import utilities.RandomStringGenerator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,12 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StorageBasedDatabase extends AttributeResultsDatabase {
+public class DiskBasedDatabase extends AttributeResultsDatabase {
     private final String PROPERTIES_TABLE_NAME = "H4BsmxQdcGK9fBfR";
     private final String PRE_EVENTS_TABLE_NAME = "H9Ym3mPySXCXozNt";
     private final String POST_EVENTS_TABLE_NAME = "7rFbEPJPRQgb7Fyi";
 
     private final Map<String, Class<?>> propertyClassesMap = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> preEventClassesMap = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> postEventClassesMap = new HashMap<String, Class<?>>();
 
     private Connection connection;
 
@@ -48,44 +49,52 @@ public class StorageBasedDatabase extends AttributeResultsDatabase {
     }
 
     @Override
-    public void addPreEventTrigger(String preEventName, boolean preEventTrigger) {
-        insertData(PRE_EVENTS_TABLE_NAME, "event_name, triggered", "?, ?", preEventName, preEventTrigger);
+    public <T> void addPreEventValue(String preEventName, T preEventValue) {
+        preEventClassesMap.put(preEventName, preEventValue.getClass());
+        String type = preEventValue.getClass().getName();
+        String serialisedValue = serialiseValue(preEventValue);
+        insertData(PRE_EVENTS_TABLE_NAME, "event_name, value, type", "?, ?, ?", preEventName, serialisedValue, type);
     }
 
     @Override
-    public void addPostEventTrigger(String postEventName, boolean postEventTrigger) {
-        insertData(POST_EVENTS_TABLE_NAME, "event_name, triggered", "?, ?", postEventName, postEventTrigger);
+    public <T> void addPostEventValue(String postEventName, T postEventValue) {
+        postEventClassesMap.put(postEventName, postEventValue.getClass());
+        String type = postEventValue.getClass().getName();
+        String serialisedValue = serialiseValue(postEventValue);
+        insertData(POST_EVENTS_TABLE_NAME, "event_name, value, type", "?, ?, ?", postEventName, serialisedValue, type);
     }
 
     @Override
-    public <T> void replacePropertyColumn(String propertyName, List<T> propertyValues) {
+    public void replacePropertyColumn(String propertyName, List<Object> propertyValues) {
         propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
         replaceColumn(PROPERTIES_TABLE_NAME, propertyName, propertyValues);
     }
 
     @Override
-    public void replacePreEventTrigger(String preEventName, List<Boolean> preEventTriggers) {
-        replaceColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventTriggers);
+    public void replacePreEventTrigger(String preEventName, List<Object> preEventValues) {
+        preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
+        replaceColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventValues);
     }
 
     @Override
-    public void replacePostEventTrigger(String postEventName, List<Boolean> postEventTriggers) {
-        replaceColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventTriggers);
+    public void replacePostEventTrigger(String postEventName, List<Object> postEventValues) {
+        postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
+        replaceColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
     }
 
     @Override
-    public List<?> getPropertyColumnAsList(String propertyName) {
+    public List<Object> getPropertyColumnAsList(String propertyName) {
         return getColumnAsList(PROPERTIES_TABLE_NAME, propertyName, propertyClassesMap.get(propertyName));
     }
 
     @Override
-    public List<Boolean> getPreEventColumnAsList(String preEventName) {
-        return getColumnAsList(PRE_EVENTS_TABLE_NAME, preEventName, Boolean.class);
+    public List<Object> getPreEventColumnAsList(String preEventName) {
+        return getColumnAsList(PRE_EVENTS_TABLE_NAME, preEventName, preEventClassesMap.get(preEventName));
     }
 
     @Override
-    public List<Boolean> getPostEventColumnAsList(String postEventName) {
-        return getColumnAsList(POST_EVENTS_TABLE_NAME, postEventName, Boolean.class);
+    public List<Object> getPostEventColumnAsList(String postEventName) {
+        return getColumnAsList(POST_EVENTS_TABLE_NAME, postEventName, postEventClassesMap.get(postEventName));
     }
 
     private void ensureConnection() {
@@ -106,8 +115,8 @@ public class StorageBasedDatabase extends AttributeResultsDatabase {
 
     private void createAttributeTables() {
         createTable(PROPERTIES_TABLE_NAME, "id INTEGER PRIMARY KEY, property_name TEXT, value TEXT, type TEXT");
-        createTable(PRE_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
-        createTable(POST_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, triggered BOOLEAN");
+        createTable(PRE_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, value TEXT, type TEXT");
+        createTable(POST_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, value TEXT, type TEXT");
     }
 
     private void insertData(String tableName, String columns, String values, Object... params) {
@@ -171,9 +180,9 @@ public class StorageBasedDatabase extends AttributeResultsDatabase {
         }
     }
 
-    private <T> List<T> getColumnAsList(String tableName, String columnName, Class<T> type) {
+    private <T> List<Object> getColumnAsList(String tableName, String columnName, Class<T> type) {
         ensureConnection();
-        List<T> result = new ArrayList<>();
+        List<Object> result = new ArrayList<>();
         String querySQL = "SELECT " + columnName + " FROM " + tableName + ";";
 
         try (PreparedStatement queryStmt = connection.prepareStatement(querySQL);

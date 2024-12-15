@@ -29,7 +29,7 @@ public abstract class AttributeResultsDatabase {
     public abstract void replacePreEventTrigger(String preEventName, List<Boolean> preEventTriggers);
     public abstract void replacePostEventTrigger(String postEventName, List<Boolean> postEventTriggers);
 
-    public abstract List<?> getPropertyColumnAsList(String propertyName);
+    public abstract <T> List<T> getPropertyColumnAsList(String propertyName);
     public abstract List<Boolean> getPreEventColumnAsList(String preEventName);
     public abstract List<Boolean> getPostEventColumnAsList(String postEventName);
 }

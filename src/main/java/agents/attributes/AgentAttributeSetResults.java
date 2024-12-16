@@ -76,23 +76,25 @@ public class AgentAttributeSetResults {
     }
 
     public void recordPreEvent(String eventName, boolean triggered) {
-        database.addPreEventTrigger(eventName, triggered);
+        database.addPreEventValue(eventName, triggered);
     }
 
     public void recordPostEvent(String eventName, boolean triggered) {
-        database.addPostEventTrigger(eventName, triggered);
+        database.addPostEventValue(eventName, triggered);
     }
 
-    public <T> List<T> getPropertyValues(String propertyName) {
+    public List<Object> getPropertyValues(String propertyName) {
         return database.getPropertyColumnAsList(propertyName);
     }
 
     public List<Boolean> getPreEventTriggers(String eventName) {
-        return database.getPreEventColumnAsList(eventName);
+        List<Object> rawList = database.getPreEventColumnAsList(eventName);
+        return (List<Boolean>) (List<?>) rawList;
     }
 
     public List<Boolean> getPostEventTriggers(String eventName) {
-        return database.getPostEventColumnAsList(eventName);
+        List<Object> rawList = database.getPostEventColumnAsList(eventName);
+        return (List<Boolean>) (List<?>) rawList;
     }
 
     public void disconnectDatabase() {

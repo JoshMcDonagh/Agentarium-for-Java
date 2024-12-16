@@ -11,8 +11,8 @@ import java.util.Map;
 public class AgentResults {
     private String agentName;
 
-    private List<AgentAttributeSetResults> agentAttributeResultsList = new ArrayList<AgentAttributeSetResults>();
-    private Map<String, AgentAttributeSetResults> agentAttributeResultsMap = new HashMap<String, AgentAttributeSetResults>();
+    private final List<AgentAttributeSetResults> agentAttributeResultsList = new ArrayList<AgentAttributeSetResults>();
+    private final Map<String, AgentAttributeSetResults> agentAttributeResultsMap = new HashMap<String, AgentAttributeSetResults>();
 
     public void setup(String agentName, List<AgentAttributeSet> attributes) {
         this.agentName = agentName;
@@ -25,6 +25,10 @@ public class AgentResults {
 
     public AgentAttributeSetResults getAttributeResults(String attributeName) {
         return agentAttributeResultsMap.get(attributeName);
+    }
+
+    public AgentAttributeSetResults getAttributeResultsByIndex(int index) {
+        return agentAttributeResultsList.get(index);
     }
 
     public String getAgentName() {

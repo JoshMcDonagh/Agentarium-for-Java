@@ -1,14 +1,11 @@
-package agents;
-
-import agents.attributes.AgentAttributeSetResults;
-import agents.attributes.AgentAttributeSet;
+package agents.attributes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AgentResults {
+public class AgentAttributeResults {
     private String agentName;
 
     private final List<AgentAttributeSetResults> agentAttributeResultsList = new ArrayList<AgentAttributeSetResults>();

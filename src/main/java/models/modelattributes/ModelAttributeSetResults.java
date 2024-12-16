@@ -70,23 +70,23 @@ public class ModelAttributeSetResults {
     }
 
     public void recordPreEvent(String eventName, boolean triggered) {
-        database.addPreEventTrigger(eventName, triggered);
+        database.addPreEventValue(eventName, triggered);
     }
 
     public void recordPostEvent(String eventName, boolean triggered) {
-        database.addPostEventTrigger(eventName, triggered);
+        database.addPostEventValue(eventName, triggered);
     }
 
-    public <T> List<T> getPropertyValues(String propertyName) {
+    public List<Object> getPropertyValues(String propertyName) {
         return database.getPropertyColumnAsList(propertyName);
     }
 
     public List<Boolean> getPreEventTriggers(String eventName) {
-        return database.getPreEventColumnAsList(eventName);
+        return (List<Boolean>) (List<?>) database.getPreEventColumnAsList(eventName);
     }
 
     public List<Boolean> getPostEventTriggers(String eventName) {
-        return database.getPostEventColumnAsList(eventName);
+        return (List<Boolean>) (List<?>) database.getPostEventColumnAsList(eventName);
     }
 
     public void disconnectDatabase() {

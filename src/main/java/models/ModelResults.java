@@ -1,7 +1,7 @@
 package models;
 
 import agents.Agent;
-import agents.AgentResults;
+import agents.attributes.AgentAttributeResults;
 import agents.attributes.AgentAttributeSet;
 import attributedatabases.AttributeResultsDatabase;
 import attributedatabases.AttributeResultsDatabaseFactory;
@@ -34,7 +34,7 @@ public abstract class ModelResults {
         return attributeName + "_post_events";
     }
 
-    public void storeAgentResults(String agentName, AgentResults agentResults) {
+    public void storeAgentResults(String agentName, AgentAttributeResults agentResults) {
         for (AgentAttributeSet attribute : agentResults.getAttributes()) {
             String propertiesTable = getPropertiesTableName(attribute.name());
             String preEventsTable = getPreEventsTableName(attribute.name());
@@ -86,7 +86,7 @@ public abstract class ModelResults {
     public void run(List<Agent> agents) {
         for (Agent agent : agents) {
             List<AgentAttributeSet> agentAttributeSetList = agent.getAttributeSetList();
-            AgentResults agentResults = agent.getResults();
+            AgentAttributeResults agentResults = agent.getResults();
             for (AgentAttributeSet agentAttributeSet : agentAttributeSetList) {
                 String attributeName = agentAttributeSet.name();
 

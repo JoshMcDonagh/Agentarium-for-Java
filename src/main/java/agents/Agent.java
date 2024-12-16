@@ -1,5 +1,6 @@
 package agents;
 
+import agents.attributes.AgentAttributeResults;
 import agents.attributes.AgentAttributeSet;
 import com.google.gson.reflect.TypeToken;
 import utilities.DeepCopier;
@@ -14,16 +15,16 @@ public class Agent {
     private final List<AgentAttributeSet> attributeSetList;
     private final Map<String, AgentAttributeSet> attributeSetMap = new HashMap<String, AgentAttributeSet>();
     private AgentAccessor agentAccessor;
-    private AgentResults results;
+    private AgentAttributeResults results;
 
-    public Agent(String name, List<AgentAttributeSet> attributeSetList, AgentResults results) {
+    public Agent(String name, List<AgentAttributeSet> attributeSetList, AgentAttributeResults results) {
         this.name = name;
         this.attributeSetList = attributeSetList;
         for (AgentAttributeSet attribute : attributeSetList)
             attributeSetMap.put(attribute.name(), attribute);
 
         if (results == null) {
-            this.results = new AgentResults();
+            this.results = new AgentAttributeResults();
             this.results.setup(name, attributeSetList);
         } else {
             this.results = results;
@@ -66,7 +67,7 @@ public class Agent {
         return attributeSetList;
     }
 
-    public AgentResults getResults() {
+    public AgentAttributeResults getResults() {
         return results;
     }
 

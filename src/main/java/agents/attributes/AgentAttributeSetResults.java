@@ -88,13 +88,11 @@ public class AgentAttributeSetResults {
     }
 
     public List<Boolean> getPreEventTriggers(String eventName) {
-        List<Object> rawList = database.getPreEventColumnAsList(eventName);
-        return (List<Boolean>) (List<?>) rawList;
+        return (List<Boolean>) (List<?>) database.getPreEventColumnAsList(eventName);
     }
 
     public List<Boolean> getPostEventTriggers(String eventName) {
-        List<Object> rawList = database.getPostEventColumnAsList(eventName);
-        return (List<Boolean>) (List<?>) rawList;
+        return (List<Boolean>) (List<?>) database.getPostEventColumnAsList(eventName);
     }
 
     public void disconnectDatabase() {

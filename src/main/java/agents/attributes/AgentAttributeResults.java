@@ -11,21 +11,25 @@ public class AgentAttributeResults {
     private final List<AgentAttributeSetResults> agentAttributeResultsList = new ArrayList<AgentAttributeSetResults>();
     private final Map<String, AgentAttributeSetResults> agentAttributeResultsMap = new HashMap<String, AgentAttributeSetResults>();
 
-    public void setup(String agentName, List<AgentAttributeSet> attributes) {
+    public void setup(String agentName, List<AgentAttributeSet> attributesSets) {
         this.agentName = agentName;
-        for (AgentAttributeSet attribute : attributes) {
-            AgentAttributeSetResults agentAttributesResults = new AgentAttributeSetResults(agentName, attribute);
+        for (AgentAttributeSet attributeSet : attributesSets) {
+            AgentAttributeSetResults agentAttributesResults = new AgentAttributeSetResults(agentName, attributeSet);
             agentAttributeResultsList.add(agentAttributesResults);
-            agentAttributeResultsMap.put(agentAttributesResults.getAgentName(), agentAttributesResults);
+            agentAttributeResultsMap.put(attributeSet.name(), agentAttributesResults);
         }
     }
 
-    public AgentAttributeSetResults getAttributeResults(String attributeName) {
-        return agentAttributeResultsMap.get(attributeName);
+    public AgentAttributeSetResults getAttributeResults(String attributeSetName) {
+        return agentAttributeResultsMap.get(attributeSetName);
     }
 
     public AgentAttributeSetResults getAttributeResultsByIndex(int index) {
         return agentAttributeResultsList.get(index);
+    }
+
+    public int getAttributeSetCount() {
+        return agentAttributeResultsList.size();
     }
 
     public String getAgentName() {

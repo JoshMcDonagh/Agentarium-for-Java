@@ -1,6 +1,6 @@
 package agents;
 
-import agents.attributes.AgentAttributeResults;
+import agents.attributes.results.AgentAttributeResults;
 import agents.attributes.AgentAttributeSet;
 import com.google.gson.reflect.TypeToken;
 import utilities.DeepCopier;

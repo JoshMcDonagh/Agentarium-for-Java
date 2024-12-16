@@ -1,4 +1,6 @@
-package agents.attributes;
+package agents.attributes.results;
+
+import agents.attributes.AgentAttributeSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;

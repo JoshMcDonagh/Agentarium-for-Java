@@ -1,7 +1,7 @@
 package models;
 
 import agents.Agent;
-import agents.attributes.AgentAttributeResults;
+import agents.attributes.results.AgentAttributeResults;
 import agents.attributes.AgentAttributeSet;
 import attributedatabases.AttributeResultsDatabase;
 import attributedatabases.AttributeResultsDatabaseFactory;
@@ -13,7 +13,7 @@ public abstract class ModelResults {
     private final AttributeResultsDatabase database;
     private List<String> attributeNameList = new ArrayList<String>();
 
-    public ModelResults(String name) {
+    public ModelResults() {
         database = AttributeResultsDatabaseFactory.createDatabase();
     }
 

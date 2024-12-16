@@ -1,4 +1,6 @@
-package models.modelattributes;
+package models.modelattributes.results;
+
+import models.modelattributes.ModelAttributeSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -21,9 +21,19 @@ public abstract class Results {
     private final List<AttributeResultsDatabase> accumulatedAgentAttributeResultsDatabasesList = new ArrayList<AttributeResultsDatabase>();
     private final List<AttributeResultsDatabase> accumulatedModelAttributeResultsDatabasesList = new ArrayList<AttributeResultsDatabase>();
 
+    private final List<String> agentNames = new ArrayList<>();
+
     private boolean isRawAgentAttributeDataConnected = false;
     private boolean isRawModelAttributeDataConnected = false;
     private boolean isAccumulatedModelAttributeDataConnected = false;
+
+    public void setAgentNames(List<String> agentNames) {
+        this.agentNames.addAll(agentNames);
+    }
+
+    public List<String> getAgentNames() {
+        return agentNames;
+    }
 
     public void setFinalAgentAttributeResults(FinalAgentAttributeResults finalAgentAttributeResults) {
         this.finalAgentAttributeResults = finalAgentAttributeResults;
@@ -37,16 +47,44 @@ public abstract class Results {
             isRawModelAttributeDataConnected = true;
     }
 
-    public FinalAgentAttributeResults getFinalAgentAttributeResults() {
+    public List<Object> getAgentPropertyValues(String agentName, String attributeName, String propertyName) {
         if (isRawAgentAttributeDataConnected)
-            return finalAgentAttributeResults;
+            return finalAgentAttributeResults.getAgentPropertyValues(agentName, attributeName, propertyName);
         else
             throw new IllegalStateException("Access of agent attribute database is not allowed when the appropriate database is disconnected.");
     }
 
-    public FinalModelAttributeResults getFinalModelAttributeResults() {
+    public List<Boolean> getAgentPreEventTriggers(String agentName, String attributeName, String eventName) {
+        if (isRawAgentAttributeDataConnected)
+            return finalAgentAttributeResults.getAgentPreEventTriggers(agentName, attributeName, eventName);
+        else
+            throw new IllegalStateException("Access of agent attribute database is not allowed when the appropriate database is disconnected.");
+    }
+
+    public List<Boolean> getAgentPostEventTriggers(String agentName, String attributeName, String eventName) {
+        if (isRawAgentAttributeDataConnected)
+            return finalAgentAttributeResults.getAgentPostEventTriggers(agentName, attributeName, eventName);
+        else
+            throw new IllegalStateException("Access of agent attribute database is not allowed when the appropriate database is disconnected.");
+    }
+
+    public List<Object> getModelPropertyValues(String attributeName, String propertyName) {
         if (isRawModelAttributeDataConnected)
-            return finalModelAttributeResults;
+            return finalModelAttributeResults.getModelPropertyValues(attributeName, propertyName);
+        else
+            throw new IllegalStateException("Access of model attribute database is not allowed when the appropriate database is disconnected.");
+    }
+
+    public List<Boolean> getModelPreEventTriggers(String attributeName, String eventName) {
+        if (isRawModelAttributeDataConnected)
+            return finalModelAttributeResults.getModelPreEventTriggers(attributeName, eventName);
+        else
+            throw new IllegalStateException("Access of model attribute database is not allowed when the appropriate database is disconnected.");
+    }
+
+    public List<Boolean> getModelPostEventTriggers(String attributeName, String eventName) {
+        if (isRawModelAttributeDataConnected)
+            return finalModelAttributeResults.getModelPostEventTriggers(attributeName, eventName);
         else
             throw new IllegalStateException("Access of model attribute database is not allowed when the appropriate database is disconnected.");
     }

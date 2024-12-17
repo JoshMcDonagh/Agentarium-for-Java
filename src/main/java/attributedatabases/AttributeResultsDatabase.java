@@ -75,28 +75,28 @@ public abstract class AttributeResultsDatabase {
     public abstract <T> void addPostEventValue(String postEventName, T postEventValue);
 
     /**
-     * Replaces all values for a specific property column.
+     * Sets all values for a specific property column.
      *
      * @param propertyName  Name of the property.
-     * @param propertyValues New values to replace the existing ones.
+     * @param propertyValues New values to set in the table.
      */
-    public abstract void replacePropertyColumn(String propertyName, List<Object> propertyValues);
+    public abstract void setPropertyColumn(String propertyName, List<Object> propertyValues);
 
     /**
-     * Replaces all values for a specific pre-event trigger.
+     * Sets all values for a specific pre-event trigger.
      *
      * @param preEventName  Name of the pre-event.
-     * @param preEventValues New values to replace the existing ones.
+     * @param preEventValues New values to set in the table.
      */
-    public abstract void replacePreEventTrigger(String preEventName, List<Object> preEventValues);
+    public abstract void setPreEventColumn(String preEventName, List<Object> preEventValues);
 
     /**
-     * Replaces all values for a specific post-event trigger.
+     * Sets all values for a specific post-event trigger.
      *
      * @param postEventName  Name of the post-event.
-     * @param postEventValues New values to replace the existing ones.
+     * @param postEventValues New values to set in the table.
      */
-    public abstract void replacePostEventTrigger(String postEventName, List<Object> postEventValues);
+    public abstract void setPostEventColumn(String postEventName, List<Object> postEventValues);
 
     /**
      * Retrieves all values for a specific property column.

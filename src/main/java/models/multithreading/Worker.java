@@ -3,7 +3,7 @@ package models.multithreading;
 import agents.Agent;
 import agents.AgentAccessor;
 import models.ModelClock;
-import models.ModelResults;
+import models.results.Results;
 import models.modelattributes.ModelAttributeSet;
 import models.multithreading.requestresponse.Request;
 import models.multithreading.requestresponse.RequestResponseOperator;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
-public class Worker<T extends ModelResults> implements Callable<ModelResults> {
+public class Worker<T extends Results> implements Callable<Results> {
     private final String threadName;
     private final ModelClock clock;
     private final AgentStore agentStore;
@@ -56,7 +56,7 @@ public class Worker<T extends ModelResults> implements Callable<ModelResults> {
     }
 
     @Override
-    public ModelResults call() throws Exception {
+    public Results call() throws Exception {
         WorkerCache cache;
         if (isCacheUsed)
             cache = new WorkerCache(doAgentStoresHoldAgentCopies);
@@ -77,7 +77,7 @@ public class Worker<T extends ModelResults> implements Callable<ModelResults> {
         if (areProcessesSynced)
             requestResponseOperator.updateCoordinatorAgents(agentStore);
 
-        ModelResults results = modelResultsClass.getDeclaredConstructor(String.class).newInstance(threadName);
+        Results results = modelResultsClass.getDeclaredConstructor(String.class).newInstance(threadName);
 
         for (int tick = 0; tick < clock.getTotalNumOfTicksToRun(); tick++) {
             for (Agent agent : updatedAgents) {

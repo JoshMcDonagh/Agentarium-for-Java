@@ -37,4 +37,11 @@ public class AgentAttributeResults {
     public String getAgentName() {
         return agentName;
     }
+
+    public void disconnectDatabases() {
+        for (AgentAttributeSetResults agentAttributeSetResults : agentAttributeResultsList)
+            agentAttributeSetResults.disconnectDatabase();
+        agentAttributeResultsMap.clear();
+        agentAttributeResultsList.clear();
+    }
 }

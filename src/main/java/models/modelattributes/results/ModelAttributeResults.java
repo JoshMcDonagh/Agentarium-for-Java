@@ -30,4 +30,11 @@ public class ModelAttributeResults {
     public int getAttributeSetCount() {
         return modelAttributeSetResultsList.size();
     }
+
+    public void disconnectDatabases() {
+        for (ModelAttributeSetResults modelAttributeSetResults : modelAttributeSetResultsList)
+            modelAttributeSetResults.disconnectDatabase();
+        modelAttributeSetResultsMap.clear();
+        modelAttributeSetResultsList.clear();
+    }
 }

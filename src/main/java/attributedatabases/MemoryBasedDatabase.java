@@ -98,7 +98,7 @@ public class MemoryBasedDatabase extends AttributeResultsDatabase {
      * @throws IllegalArgumentException If the property does not exist.
      */
     @Override
-    public void replacePropertyColumn(String propertyName, List<Object> propertyValues) {
+    public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
         if (propertiesMap.containsKey(propertyName)) {
             propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
             propertiesMap.put(propertyName, propertyValues);
@@ -115,7 +115,7 @@ public class MemoryBasedDatabase extends AttributeResultsDatabase {
      * @throws IllegalArgumentException If the pre-event does not exist.
      */
     @Override
-    public void replacePreEventTrigger(String preEventName, List<Object> preEventValues) {
+    public void setPreEventColumn(String preEventName, List<Object> preEventValues) {
         if (preEventsMap.containsKey(preEventName)) {
             preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
             preEventsMap.put(preEventName, preEventValues);
@@ -132,7 +132,7 @@ public class MemoryBasedDatabase extends AttributeResultsDatabase {
      * @throws IllegalArgumentException If the post-event does not exist.
      */
     @Override
-    public void replacePostEventTrigger(String postEventName, List<Object> postEventValues) {
+    public void setPostEventColumn(String postEventName, List<Object> postEventValues) {
         if (postEventsMap.containsKey(postEventName)) {
             postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
             postEventsMap.put(postEventName, postEventValues);

@@ -22,4 +22,12 @@ public class FinalModelAttributeResults {
     public List<Boolean> getModelPostEventTriggers(String attributeName, String eventName) {
         return modelAttributeResults.getAttributeResults(attributeName).getPostEventTriggers(eventName);
     }
+
+    public ModelAttributeResults get() {
+        return modelAttributeResults;
+    }
+
+    public void disconnectDatabases() {
+        modelAttributeResults.disconnectDatabases();
+    }
 }

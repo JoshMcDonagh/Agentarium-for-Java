@@ -23,6 +23,7 @@ public class ModelAttributeSetResults {
     public ModelAttributeSetResults(ModelAttributeSet modelAttributeSet) {
         attributeName = modelAttributeSet.name();
         database = AttributeResultsDatabaseFactory.createDatabase();
+        assert database != null;
         database.connect();
 
         List<ModelProperty<?>> propertiesList = modelAttributeSet.getProperties().getPropertiesList();

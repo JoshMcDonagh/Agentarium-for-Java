@@ -8,6 +8,7 @@ import models.multithreading.Worker;
 import models.multithreading.requestresponse.Request;
 import models.multithreading.requestresponse.Response;
 import models.multithreading.threadutilities.AgentStore;
+import models.results.Results;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class Model {
     private final int numOfAgents;
     private final ModelClock clock;
     private final AgentGenerator agentGenerator;
-    private final ModelResults results;
+    private final Results results;
 
     private int numOfCores = 1;
     private final Map<String, ModelAttributeSet> modelAttributeSetMap = new HashMap<String, ModelAttributeSet>();
@@ -28,7 +29,7 @@ public class Model {
     private boolean doAgentStoresHoldAgentCopies = true;
     private boolean isAgentCacheUsed = false;
 
-    public Model(int numOfAgents, ModelClock clock, AgentGenerator agentGenerator, ModelResults results) {
+    public Model(int numOfAgents, ModelClock clock, AgentGenerator agentGenerator, Results results) {
         this.numOfAgents = numOfAgents;
         this.clock = clock;
         this.agentGenerator = agentGenerator;
@@ -76,7 +77,7 @@ public class Model {
         List<List<Agent>> agentsForEachCore = agentGenerator.getAgentsForEachCore(agents);
 
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
-        List<Future<ModelResults>> futures = new ArrayList<Future<ModelResults>>();
+        List<Future<Results>> futures = new ArrayList<Future<Results>>();
 
         BlockingQueue<Request> requestQueue = new LinkedBlockingQueue<Request>();
         BlockingQueue<Response> responseQueue = new LinkedBlockingQueue<Response>();
@@ -91,9 +92,9 @@ public class Model {
         for (int coreIndex = 0; coreIndex < numOfCores; coreIndex++) {
             AgentStore coreAgentStore = new AgentStore(doAgentStoresHoldAgentCopies);
             coreAgentStore.addAgents(agentsForEachCore.get(coreIndex));
-            ModelResults coreResults = results.duplicate();
+            Results coreResults = results.duplicate();
 
-            Callable<ModelResults> worker = new Worker<>(
+            Callable<Results> worker = new Worker<>(
                     String.valueOf(coreIndex),
                     clock,
                     coreAgentStore,
@@ -112,8 +113,8 @@ public class Model {
 
         // Wait for all worker tasks to complete and merge results
         try {
-            for (Future<ModelResults> future : futures) {
-                ModelResults coreResult = future.get();
+            for (Future<Results> future : futures) {
+                Results coreResult = future.get();
                 results.mergeWith(coreResult);
             }
         } catch (InterruptedException | ExecutionException e) {

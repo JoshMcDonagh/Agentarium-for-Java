@@ -25,6 +25,7 @@ public class AgentAttributeSetResults {
         this.agentName = agentName;
         attributeName = agentAttributeSet.name();
         database = AttributeResultsDatabaseFactory.createDatabase();
+        assert database != null;
         database.connect();
 
         List<AgentProperty<?>> propertiesList = agentAttributeSet.getProperties().getPropertiesList();

@@ -104,27 +104,27 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
      * Replaces a column in the properties table with new values.
      */
     @Override
-    public void replacePropertyColumn(String propertyName, List<Object> propertyValues) {
+    public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
         propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
-        replaceColumn(PROPERTIES_TABLE_NAME, propertyName, propertyValues);
+        setColumn(PROPERTIES_TABLE_NAME, propertyName, propertyValues);
     }
 
     /**
      * Replaces a column in the pre-events table with new values.
      */
     @Override
-    public void replacePreEventTrigger(String preEventName, List<Object> preEventValues) {
+    public void setPreEventColumn(String preEventName, List<Object> preEventValues) {
         preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
-        replaceColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventValues);
+        setColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventValues);
     }
 
     /**
      * Replaces a column in the post-events table with new values.
      */
     @Override
-    public void replacePostEventTrigger(String postEventName, List<Object> postEventValues) {
+    public void setPostEventColumn(String postEventName, List<Object> postEventValues) {
         postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
-        replaceColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
+        setColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
     }
 
     /**
@@ -202,11 +202,22 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
         }
     }
 
-    // Replaces a column's data in a table
-    private <T> void replaceColumn(String tableName, String columnName, List<T> values) {
+    // Replaces a column's data in a table, creating the column if it doesn't exist
+    private <T> void setColumn(String tableName, String columnName, List<T> values) {
         ensureConnection();
         try {
             connection.setAutoCommit(false);
+
+            // Ensure the column exists, create it if necessary
+            String addColumnSQL = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " TEXT;";
+            try (PreparedStatement addColumnStmt = connection.prepareStatement(addColumnSQL)) {
+                addColumnStmt.executeUpdate();
+            } catch (SQLException e) {
+                // Ignore the error if the column already exists
+                if (!e.getMessage().contains("duplicate column name")) {
+                    throw e; // Re-throw if it's a different error
+                }
+            }
 
             // Clear existing column data
             String clearSQL = "UPDATE " + tableName + " SET " + columnName + " = NULL;";
@@ -240,6 +251,7 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
             }
         }
     }
+
 
     // Retrieves a column as a list
     private <T> List<Object> getColumnAsList(String tableName, String columnName, Class<T> type) {

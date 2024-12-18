@@ -94,7 +94,7 @@ public class Model {
         for (int coreIndex = 0; coreIndex < numOfCores; coreIndex++) {
             AgentStore coreAgentStore = new AgentStore(doAgentStoresHoldAgentCopies);
             coreAgentStore.addAgents(agentsForEachCore.get(coreIndex));
-            Results coreResults = results.duplicate();
+            //Results coreResults = results.duplicate();
 
             Callable<Results> worker = new Worker<>(
                     String.valueOf(coreIndex),

@@ -259,7 +259,7 @@ public abstract class Results {
         finalAgentAttributeResults.mergeWith(otherResults.finalAgentAttributeResults);
     }
 
-    public abstract Results duplicate();
+    //public abstract Results duplicate();
 
     protected List<?> processModelPropertyResults(String attributeName, String propertyName, List<?> propertyValues) {
         return propertyValues;

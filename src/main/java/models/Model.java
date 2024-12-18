@@ -8,6 +8,7 @@ import models.multithreading.Worker;
 import models.multithreading.requestresponse.Request;
 import models.multithreading.requestresponse.Response;
 import models.multithreading.threadutilities.AgentStore;
+import models.results.FinalModelAttributeResults;
 import models.results.Results;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class Model {
 
     public void run() {
         List<Agent> agents = agentGenerator.generateAgents(numOfAgents);
+        results.setAgentNames(agents);
         List<List<Agent>> agentsForEachCore = agentGenerator.getAgentsForEachCore(agents);
 
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
@@ -115,7 +117,7 @@ public class Model {
         try {
             for (Future<Results> future : futures) {
                 Results coreResult = future.get();
-                results.mergeWith(coreResult);
+                results.mergeWithBeforeAccumulation(coreResult);
             }
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -132,5 +134,9 @@ public class Model {
                 Thread.currentThread().interrupt();
             }
         }
+
+        results.setFinalModelAttributes(new FinalModelAttributeResults(modelAttributeSetList));
+        results.accumulateAgentAttributeData();
+        results.processModelAttributeData();
     }
 }

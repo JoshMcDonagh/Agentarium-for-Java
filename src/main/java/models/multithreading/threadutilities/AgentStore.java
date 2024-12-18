@@ -1,6 +1,8 @@
 package models.multithreading.threadutilities;
 
 import agents.Agent;
+import models.results.FinalAgentAttributeResults;
+import models.results.Results;
 
 import java.util.ArrayList;
 import java.util.HashMap;

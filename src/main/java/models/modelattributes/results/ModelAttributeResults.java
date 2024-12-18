@@ -11,7 +11,7 @@ public class ModelAttributeResults {
     private final List<ModelAttributeSetResults> modelAttributeSetResultsList = new ArrayList<ModelAttributeSetResults>();
     private final Map<String, ModelAttributeSetResults> modelAttributeSetResultsMap = new HashMap<String, ModelAttributeSetResults>();
 
-    public void setup(List<ModelAttributeSet> attributesSets) {
+    public ModelAttributeResults(List<ModelAttributeSet> attributesSets) {
         for (ModelAttributeSet attributeSet : attributesSets) {
             ModelAttributeSetResults modelAttributeSetResults = new ModelAttributeSetResults(attributeSet);
             modelAttributeSetResultsList.add(modelAttributeSetResults);

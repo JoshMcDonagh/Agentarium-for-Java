@@ -1,5 +1,6 @@
 package models.results;
 
+import models.modelattributes.ModelAttributeSet;
 import models.modelattributes.results.ModelAttributeResults;
 
 import java.util.List;
@@ -7,8 +8,8 @@ import java.util.List;
 public class FinalModelAttributeResults {
     private final ModelAttributeResults modelAttributeResults;
 
-    public FinalModelAttributeResults(ModelAttributeResults modelAttributeResults) {
-        this.modelAttributeResults = modelAttributeResults;
+    public FinalModelAttributeResults(List<ModelAttributeSet> modelAttributeSet) {
+        this.modelAttributeResults = new ModelAttributeResults(modelAttributeSet);
     }
 
     public List<Object> getModelPropertyValues(String attributeName, String propertyName) {

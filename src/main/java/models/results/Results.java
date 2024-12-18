@@ -1,5 +1,6 @@
 package models.results;
 
+import agents.Agent;
 import agents.attributes.results.AgentAttributeResults;
 import agents.attributes.results.AgentAttributeSetResults;
 import attributedatabases.AttributeResultsDatabase;
@@ -27,8 +28,9 @@ public abstract class Results {
     private boolean isRawModelAttributeDataConnected = false;
     private boolean isAccumulatedModelAttributeDataConnected = false;
 
-    public void setAgentNames(List<String> agentNames) {
-        this.agentNames.addAll(agentNames);
+    public void setAgentNames(List<Agent> agents) {
+        for (Agent agent : agents)
+            agentNames.add(agent.name());
     }
 
     public List<String> getAgentNames() {

@@ -3,6 +3,7 @@ package models.multithreading;
 import agents.Agent;
 import agents.AgentAccessor;
 import models.ModelClock;
+import models.results.FinalAgentAttributeResults;
 import models.results.Results;
 import models.modelattributes.ModelAttributeSet;
 import models.multithreading.requestresponse.Request;
@@ -77,8 +78,6 @@ public class Worker<T extends Results> implements Callable<Results> {
         if (areProcessesSynced)
             requestResponseOperator.updateCoordinatorAgents(agentStore);
 
-        Results results = modelResultsClass.getDeclaredConstructor(String.class).newInstance(threadName);
-
         for (int tick = 0; tick < clock.getTotalNumOfTicksToRun(); tick++) {
             for (Agent agent : updatedAgents) {
                 agent.setAgentAccessor(new AgentAccessor(
@@ -105,7 +104,11 @@ public class Worker<T extends Results> implements Callable<Results> {
                 cache.clear();
         }
 
-        results.run(updatedAgents);
+        List<Agent> finalAgentsList = agentStore.getAgentsList();
+        FinalAgentAttributeResults finalAgentAttributeResults = new FinalAgentAttributeResults(finalAgentsList);
+        Results results = modelResultsClass.getDeclaredConstructor(String.class).newInstance(threadName);
+        results.setAgentNames(finalAgentsList);
+        results.setFinalAgentAttributeResults(finalAgentAttributeResults);
         return results;
     }
 }

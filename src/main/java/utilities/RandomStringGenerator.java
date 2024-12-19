@@ -22,6 +22,10 @@ public class RandomStringGenerator {
      * @return A randomly generated string of the specified length.
      */
     public static String generateRandomString(int length) {
+        if (length < 0) {
+            throw new IllegalArgumentException("Length must be non-negative.");
+        }
+
         // StringBuilder is used for efficient string construction.
         StringBuilder sb = new StringBuilder(length);
 

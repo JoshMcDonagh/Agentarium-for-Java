@@ -69,6 +69,10 @@ public class Model {
         return numOfAgents;
     }
 
+    public int numberOfCores() {
+        return numOfCores;
+    }
+
     public ModelClock clock() {
         return clock;
     }

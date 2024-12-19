@@ -30,7 +30,7 @@ public class DefaultAgentGenerator extends AgentGenerator {
 
     @Override
     public List<List<Agent>> getAgentsForEachCore(List<Agent> agentsList) {
-        int numberOfCores = getAssociatedModel().getNumberOfCores();
+        int numberOfCores = getAssociatedModel().numberOfCores();
 
         if (numberOfCores < 1) {
             return new ArrayList<>();

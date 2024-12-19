@@ -11,25 +11,29 @@ import java.util.Map;
 
 /**
  * Implementation of {@link AttributeResultsDatabase} that stores attribute results in a SQLite database on disk.
+ * This class handles the creation, modification, and retrieval of data stored in three main tables:
+ * properties, pre-events, and post-events.
+ * <p>
+ * Each table stores data columns corresponding to various attributes, ensuring that
+ * attribute types are maintained and serialised/deserialised correctly.
  */
 public class DiskBasedDatabase extends AttributeResultsDatabase {
 
-    // Table names for properties, pre-events, and post-events
-    private final String PROPERTIES_TABLE_NAME = "H4BsmxQdcGK9fBfR";
-    private final String PRE_EVENTS_TABLE_NAME = "H9Ym3mPySXCXozNt";
-    private final String POST_EVENTS_TABLE_NAME = "7rFbEPJPRQgb7Fyi";
+    // Names of the attribute tables
+    private final String PROPERTIES_TABLE_NAME = "properties_table";
+    private final String PRE_EVENTS_TABLE_NAME = "pre_events_table";
+    private final String POST_EVENTS_TABLE_NAME = "post_events_table";
 
-    // Maps to store the class type of properties, pre-events, and post-events
+    // Maps to store the types of attributes for proper deserialisation
     private final Map<String, Class<?>> propertyClassesMap = new HashMap<>();
     private final Map<String, Class<?>> preEventClassesMap = new HashMap<>();
     private final Map<String, Class<?>> postEventClassesMap = new HashMap<>();
 
-    // Database connection
+    // SQLite connection object
     private Connection connection;
 
     /**
-     * Connects to the SQLite database at the specified path.
-     * Creates necessary tables if they do not already exist.
+     * Establishes a connection to the SQLite database and creates the necessary tables if they do not exist.
      */
     @Override
     public void connect() {
@@ -42,7 +46,7 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
     }
 
     /**
-     * Disconnects from the SQLite database.
+     * Closes the connection to the SQLite database, if open.
      */
     @Override
     public void disconnect() {
@@ -56,52 +60,52 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
     }
 
     /**
-     * Adds a property value to the properties table.
+     * Adds a single property value to the properties table.
      *
-     * @param propertyName  Name of the property.
-     * @param propertyValue Value of the property.
-     * @param <T>           Type of the property value.
+     * @param propertyName  The name of the property.
+     * @param propertyValue The value of the property to add.
+     * @param <T>           The type of the property value.
      */
     @Override
     public <T> void addPropertyValue(String propertyName, T propertyValue) {
         propertyClassesMap.put(propertyName, propertyValue.getClass());
-        String type = propertyValue.getClass().getName();
-        String serialisedValue = serialiseValue(propertyValue);
-        insertData(PROPERTIES_TABLE_NAME, "property_name, value, type", "?, ?, ?", propertyName, serialisedValue, type);
+        ensureColumnExists(PROPERTIES_TABLE_NAME, propertyName);
+        insertData(PROPERTIES_TABLE_NAME, propertyName, serialiseValue(propertyValue));
     }
 
     /**
-     * Adds a pre-event value to the pre-events table.
+     * Adds a single pre-event value to the pre-events table.
      *
-     * @param preEventName  Name of the pre-event.
-     * @param preEventValue Value of the pre-event.
-     * @param <T>           Type of the pre-event value.
+     * @param preEventName  The name of the pre-event.
+     * @param preEventValue The value of the pre-event to add.
+     * @param <T>           The type of the pre-event value.
      */
     @Override
     public <T> void addPreEventValue(String preEventName, T preEventValue) {
         preEventClassesMap.put(preEventName, preEventValue.getClass());
-        String type = preEventValue.getClass().getName();
-        String serialisedValue = serialiseValue(preEventValue);
-        insertData(PRE_EVENTS_TABLE_NAME, "event_name, value, type", "?, ?, ?", preEventName, serialisedValue, type);
+        ensureColumnExists(PRE_EVENTS_TABLE_NAME, preEventName);
+        insertData(PRE_EVENTS_TABLE_NAME, preEventName, serialiseValue(preEventValue));
     }
 
     /**
-     * Adds a post-event value to the post-events table.
+     * Adds a single post-event value to the post-events table.
      *
-     * @param postEventName  Name of the post-event.
-     * @param postEventValue Value of the post-event.
-     * @param <T>            Type of the post-event value.
+     * @param postEventName  The name of the post-event.
+     * @param postEventValue The value of the post-event to add.
+     * @param <T>            The type of the post-event value.
      */
     @Override
     public <T> void addPostEventValue(String postEventName, T postEventValue) {
         postEventClassesMap.put(postEventName, postEventValue.getClass());
-        String type = postEventValue.getClass().getName();
-        String serialisedValue = serialiseValue(postEventValue);
-        insertData(POST_EVENTS_TABLE_NAME, "event_name, value, type", "?, ?, ?", postEventName, serialisedValue, type);
+        ensureColumnExists(POST_EVENTS_TABLE_NAME, postEventName);
+        insertData(POST_EVENTS_TABLE_NAME, postEventName, serialiseValue(postEventValue));
     }
 
     /**
-     * Replaces a column in the properties table with new values.
+     * Replaces an entire column in the properties table with new values.
+     *
+     * @param propertyName  The name of the property column.
+     * @param propertyValues The list of new values for the column.
      */
     @Override
     public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
@@ -110,90 +114,184 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
     }
 
     /**
-     * Replaces a column in the pre-events table with new values.
+     * Sets a column in the pre-events table with the specified values.
+     *
+     * @param preEventName   The name of the pre-event column.
+     * @param preEventValues A list of values to replace the column contents with.
      */
     @Override
     public void setPreEventColumn(String preEventName, List<Object> preEventValues) {
+        // Update the class type map for the pre-event column
         preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
+        // Replace the column data
         setColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventValues);
     }
 
     /**
-     * Replaces a column in the post-events table with new values.
+     * Sets a column in the post-events table with the specified values.
+     *
+     * @param postEventName   The name of the post-event column.
+     * @param postEventValues A list of values to replace the column contents with.
      */
     @Override
     public void setPostEventColumn(String postEventName, List<Object> postEventValues) {
+        // Update the class type map for the post-event column
         postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
+        // Replace the column data
         setColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
     }
 
     /**
-     * Retrieves a property column as a list.
+     * Retrieves the values of a column from the properties table as a list.
+     *
+     * @param propertyName The name of the property column.
+     * @return A list of values retrieved from the column.
      */
     @Override
     public List<Object> getPropertyColumnAsList(String propertyName) {
-        return getColumnAsList(PROPERTIES_TABLE_NAME, propertyName, propertyClassesMap.get(propertyName));
+        return retrieveColumn(PROPERTIES_TABLE_NAME, propertyName, propertyClassesMap.get(propertyName));
     }
 
     /**
-     * Retrieves a pre-event column as a list.
+     * Retrieves the values of a column from the pre-events table as a list.
+     *
+     * @param preEventName The name of the pre-event column.
+     * @return A list of values retrieved from the column.
      */
     @Override
     public List<Object> getPreEventColumnAsList(String preEventName) {
-        return getColumnAsList(PRE_EVENTS_TABLE_NAME, preEventName, preEventClassesMap.get(preEventName));
+        return retrieveColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventClassesMap.get(preEventName));
     }
 
     /**
-     * Retrieves a post-event column as a list.
+     * Retrieves the values of a column from the post-events table as a list.
+     *
+     * @param postEventName The name of the post-event column.
+     * @return A list of values retrieved from the column.
      */
     @Override
     public List<Object> getPostEventColumnAsList(String postEventName) {
-        return getColumnAsList(POST_EVENTS_TABLE_NAME, postEventName, postEventClassesMap.get(postEventName));
+        return retrieveColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventClassesMap.get(postEventName));
     }
 
-    // Helper method to ensure the database connection is active
-    private void ensureConnection() {
-        if (connection == null) {
-            throw new IllegalStateException("No database connection established.");
-        }
-    }
-
-    // Creates a new table in the database
-    private void createTable(String tableName, String tableSchema) {
-        ensureConnection();
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + tableSchema + ");";
-        try (PreparedStatement stmt = connection.prepareStatement(createTableSQL)) {
-            stmt.execute();
-        } catch (SQLException e) {
-            System.err.println("Error creating table '" + tableName + "': " + e.getMessage());
-        }
-    }
-
-    // Creates attribute tables for properties, pre-events, and post-events
-    private void createAttributeTables() {
-        createTable(PROPERTIES_TABLE_NAME, "id INTEGER PRIMARY KEY, property_name TEXT, value TEXT, type TEXT");
-        createTable(PRE_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, value TEXT, type TEXT");
-        createTable(POST_EVENTS_TABLE_NAME, "id INTEGER PRIMARY KEY, event_name TEXT, value TEXT, type TEXT");
-    }
-
-    // Inserts data into a table
-    private void insertData(String tableName, String columns, String values, Object... params) {
-        ensureConnection();
-        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + values + ");";
-        try (PreparedStatement stmt = connection.prepareStatement(insertSQL)) {
-            for (int i = 0; i < params.length; i++) {
-                stmt.setObject(i + 1, params[i]);
-            }
+    /**
+     * Ensures that a specific column exists in a given table.
+     * If the column does not exist, it will be added to the table.
+     *
+     * @param tableName  The name of the table.
+     * @param columnName The name of the column to ensure exists.
+     */
+    private void ensureColumnExists(String tableName, String columnName) {
+        String addColumnSQL = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " TEXT;";
+        try (PreparedStatement stmt = connection.prepareStatement(addColumnSQL)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error inserting data into table '" + tableName + "': " + e.getMessage());
+            // Ignore errors related to duplicate column names
+            if (!e.getMessage().contains("duplicate column name")) {
+                throw new RuntimeException("Error ensuring column exists '" + columnName + "': " + e.getMessage(), e);
+            }
         }
     }
 
-    // Serialises complex values into JSON
+    /**
+     * Creates the main attribute tables (properties, pre-events, post-events) if they do not already exist.
+     */
+    private void createAttributeTables() {
+        createTable(PROPERTIES_TABLE_NAME);
+        createTable(PRE_EVENTS_TABLE_NAME);
+        createTable(POST_EVENTS_TABLE_NAME);
+    }
+
+    /**
+     * Creates a table in the database if it does not already exist.
+     *
+     * @param tableName The name of the table to create.
+     */
+    private void createTable(String tableName) {
+        String createSQL = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INTEGER PRIMARY KEY);";
+        try (PreparedStatement stmt = connection.prepareStatement(createSQL)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error creating table '" + tableName + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Inserts a serialised value into a specific column of a table.
+     *
+     * @param tableName  The name of the table.
+     * @param columnName The name of the column to insert data into.
+     * @param value      The serialised value to insert.
+     */
+    private void insertData(String tableName, String columnName, String value) {
+        ensureColumnExists(tableName, columnName);
+        String insertSQL = "INSERT INTO " + tableName + " (" + columnName + ") VALUES (?);";
+        try (PreparedStatement stmt = connection.prepareStatement(insertSQL)) {
+            stmt.setString(1, value);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error inserting data into '" + tableName + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Replaces the data in a column of a table with a new list of values.
+     * The existing data in the column will be cleared before new values are added.
+     *
+     * @param tableName  The name of the table.
+     * @param columnName The name of the column to replace.
+     * @param values     The list of values to insert into the column.
+     */
+    private void setColumn(String tableName, String columnName, List<Object> values) {
+        ensureColumnExists(tableName, columnName);
+        String deleteSQL = "DELETE FROM " + tableName + ";";
+        try (PreparedStatement deleteStmt = connection.prepareStatement(deleteSQL)) {
+            // Clear the existing column data
+            deleteStmt.executeUpdate();
+            // Insert new values into the column
+            for (Object value : values) {
+                insertData(tableName, columnName, serialiseValue(value));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error replacing column '" + columnName + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Retrieves all values from a specific column in a table as a list.
+     *
+     * @param tableName  The name of the table.
+     * @param columnName The name of the column to retrieve data from.
+     * @param type       The class type to deserialise the values into.
+     * @return A list of deserialised values from the column.
+     */
+    private List<Object> retrieveColumn(String tableName, String columnName, Class<?> type) {
+        ensureColumnExists(tableName, columnName);
+        String selectSQL = "SELECT " + columnName + " FROM " + tableName + ";";
+        List<Object> results = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(selectSQL);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String value = rs.getString(columnName);
+                if (value != null) {
+                    results.add(type != null ? deserialiseValue(value, type) : value);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving column '" + columnName + "': " + e.getMessage(), e);
+        }
+        return new ArrayList<>(results); // Ensure consistent List type
+    }
+
+    /**
+     * Serialises an object into a JSON string for storage in the database.
+     *
+     * @param value The object to serialise.
+     * @return A JSON string representation of the object.
+     */
     private static String serialiseValue(Object value) {
-        if (value instanceof Number || value instanceof Boolean || value instanceof String) {
-            return value.toString();
+        if (value == null) {
+            return null;
         }
         try {
             return new ObjectMapper().writeValueAsString(value);
@@ -202,81 +300,25 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
         }
     }
 
-    // Replaces a column's data in a table, creating the column if it doesn't exist
-    private <T> void setColumn(String tableName, String columnName, List<T> values) {
-        ensureConnection();
+    /**
+     * Deserialises a JSON string back into an object of the specified class type.
+     *
+     * @param value The JSON string to deserialise.
+     * @param type  The class type to deserialise into.
+     * @return The deserialised object.
+     */
+    private Object deserialiseValue(String value, Class<?> type) {
+        if (value == null) {
+            return null; // Handle null values gracefully
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("Cannot deserialise: type is null");
+        }
         try {
-            connection.setAutoCommit(false);
-
-            // Ensure the column exists, create it if necessary
-            String addColumnSQL = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " TEXT;";
-            try (PreparedStatement addColumnStmt = connection.prepareStatement(addColumnSQL)) {
-                addColumnStmt.executeUpdate();
-            } catch (SQLException e) {
-                // Ignore the error if the column already exists
-                if (!e.getMessage().contains("duplicate column name")) {
-                    throw e; // Re-throw if it's a different error
-                }
-            }
-
-            // Clear existing column data
-            String clearSQL = "UPDATE " + tableName + " SET " + columnName + " = NULL;";
-            try (PreparedStatement clearStmt = connection.prepareStatement(clearSQL)) {
-                clearStmt.executeUpdate();
-            }
-
-            // Update each row with the new value
-            String updateSQL = "UPDATE " + tableName + " SET " + columnName + " = ? WHERE ROWID = ?;";
-            try (PreparedStatement updateStmt = connection.prepareStatement(updateSQL)) {
-                for (int i = 0; i < values.size(); i++) {
-                    updateStmt.setObject(1, values.get(i));
-                    updateStmt.setInt(2, i + 1);
-                    updateStmt.executeUpdate();
-                }
-            }
-
-            connection.commit();
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException rollbackEx) {
-                System.err.println("Rollback failed: " + rollbackEx.getMessage());
-            }
-            System.err.println("Error replacing column: " + e.getMessage());
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                System.err.println("Failed to reset auto-commit: " + e.getMessage());
-            }
+            return new ObjectMapper().readValue(value, type);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error deserialising value: " + value + " with type: " + type.getName(), e);
         }
     }
 
-
-    // Retrieves a column as a list
-    private <T> List<Object> getColumnAsList(String tableName, String columnName, Class<T> type) {
-        ensureConnection();
-        List<Object> result = new ArrayList<>();
-        String querySQL = "SELECT " + columnName + " FROM " + tableName + ";";
-
-        try (PreparedStatement queryStmt = connection.prepareStatement(querySQL);
-             ResultSet resultSet = queryStmt.executeQuery()) {
-
-            while (resultSet.next()) {
-                Object value = resultSet.getObject(columnName);
-                if (value != null) {
-                    T castedValue = type.cast(value);
-                    result.add(castedValue);
-                } else {
-                    result.add(null);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving column as list: " + e.getMessage());
-        } catch (ClassCastException e) {
-            throw new RuntimeException("Error casting values to type " + type.getName() + ": " + e.getMessage(), e);
-        }
-
-        return result;
-    }
 }

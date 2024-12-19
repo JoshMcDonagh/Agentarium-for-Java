@@ -3,6 +3,7 @@ package attributedatabases;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,9 +52,15 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
     @Override
     public void disconnect() {
         try {
-            if (connection != null) {
+            if (connection != null)
                 connection.close();
-            }
+            // Get the database path and attempt to delete the file
+            String databasePath = getDatabasePath();
+            File databaseFile = new File(databasePath);
+            if (databaseFile.exists() && !databaseFile.delete())
+                System.err.println("Failed to delete database file: " + databasePath);
+            else
+                System.out.println("Database file deleted successfully: " + databasePath);
         } catch (SQLException e) {
             System.err.println("Error closing SQLite connection: " + e.getMessage());
         }

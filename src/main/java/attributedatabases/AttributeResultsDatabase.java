@@ -9,7 +9,7 @@ import java.util.List;
  */
 public abstract class AttributeResultsDatabase {
     // Path to the database (used in disk-based implementations)
-    private String databasePath;
+    private String databasePath = null;
 
     /**
      * Sets the database path.

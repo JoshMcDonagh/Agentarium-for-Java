@@ -25,6 +25,16 @@ public class MemoryBasedDatabase extends AttributeResultsDatabase {
     private final Map<String, Class<?>> postEventClassesMap = new HashMap<>();
 
     /**
+     * Sets the database path.
+     *
+     * @param databasePath Path to the database.
+     */
+    @Override
+    protected void setDatabasePath(String databasePath) {
+        // Memory-based databases do not require a database path, so ignore this setting.
+    }
+
+    /**
      * Adds a property value to the in-memory storage.
      *
      * @param propertyName  Name of the property.

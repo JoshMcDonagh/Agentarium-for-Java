@@ -59,8 +59,6 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
             File databaseFile = new File(databasePath);
             if (databaseFile.exists() && !databaseFile.delete())
                 System.err.println("Failed to delete database file: " + databasePath);
-            else
-                System.out.println("Database file deleted successfully: " + databasePath);
         } catch (SQLException e) {
             System.err.println("Error closing SQLite connection: " + e.getMessage());
         }

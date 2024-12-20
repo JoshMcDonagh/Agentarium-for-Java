@@ -17,15 +17,19 @@ public abstract class AgentProperty<T> {
     // Flag indicating whether the property is recorded (used for logging or persistence purposes).
     private final boolean isRecorded;
 
+    private final Class<T> type;
+
     /**
      * Constructs an AgentProperty with a specified name and recorded status.
      *
      * @param name       The name of the property.
      * @param isRecorded Whether the property is recorded.
+     * @param type       Type of data stored.
      */
-    public AgentProperty(String name, boolean isRecorded) {
+    public AgentProperty(String name, boolean isRecorded, Class<T> type) {
         this.name = name;
         this.isRecorded = isRecorded;
+        this.type = type;
         agentPropertyCount++; // Increment the counter to track created properties.
     }
 
@@ -33,25 +37,29 @@ public abstract class AgentProperty<T> {
      * Constructs an AgentProperty with an auto-generated name and specified recorded status.
      *
      * @param isRecorded Whether the property is recorded.
+     * @param type       Type of data stored.
      */
-    public AgentProperty(boolean isRecorded) {
-        this("Agent Property " + agentPropertyCount, isRecorded);
+    public AgentProperty(boolean isRecorded, Class<T> type) {
+        this("Agent Property " + agentPropertyCount, isRecorded, type);
     }
 
     /**
      * Constructs an AgentProperty with a specified name and assumes the property is recorded by default.
      *
      * @param name The name of the property.
+     * @param type Type of data stored.
      */
-    public AgentProperty(String name) {
-        this(name, true);
+    public AgentProperty(String name, Class<T> type) {
+        this(name, true, type);
     }
 
     /**
      * Constructs an AgentProperty with an auto-generated name and assumes the property is recorded by default.
+     *
+     * @param type Type of data stored.
      */
-    public AgentProperty() {
-        this("Agent Property " + agentPropertyCount, true);
+    public AgentProperty(Class<T> type) {
+        this("Agent Property " + agentPropertyCount, true, type);
     }
 
     /**
@@ -77,9 +85,8 @@ public abstract class AgentProperty<T> {
      *
      * @return The class type of the value.
      */
-    @SuppressWarnings("unchecked") // Suppress warnings for the unchecked cast.
     public Class<T> type() {
-        return (Class<T>) getClass();
+        return type;
     }
 
     /**

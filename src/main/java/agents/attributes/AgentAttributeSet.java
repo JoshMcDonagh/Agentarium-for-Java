@@ -13,29 +13,44 @@ public class AgentAttributeSet {
     private static int agentAttributeCount = 0;
 
     // Container for properties associated with this attribute set.
-    private final AgentProperties properties = new AgentProperties();
+    private final AgentProperties properties;
 
     // Container for pre-events associated with this attribute set.
-    private final AgentEvents preEvents = new AgentEvents();
+    private final AgentEvents preEvents;
 
     // Container for post-events associated with this attribute set.
-    private final AgentEvents postEvents = new AgentEvents();
+    private final AgentEvents postEvents;
 
     // Name of the attribute set.
     private final String name;
 
     /**
-     * Constructs an `AgentAttributeSet` with a specific name.
+     * Constructs an `AgentAttributeSet` with specific components and a specific name.
      *
-     * @param name The name of the attribute set.
+     * @param name       The name of the attribute set.
+     * @param properties The `AgentProperties` instance.
+     * @param preEvents  The `AgentEvents` instance for pre-events.
+     * @param postEvents The `AgentEvents` instance for post-events.
      */
-    public AgentAttributeSet(String name) {
+    public AgentAttributeSet(String name, AgentProperties properties, AgentEvents preEvents, AgentEvents postEvents) {
         this.name = name;
+        this.properties = properties;
+        this.preEvents = preEvents;
+        this.postEvents = postEvents;
         agentAttributeCount++;
     }
 
     /**
-     * Constructs an `AgentAttributeSet` with a default name.
+     * Constructs an `AgentAttributeSet` with default components and a specific name.
+     *
+     * @param name The name of the attribute set.
+     */
+    public AgentAttributeSet(String name) {
+        this(name, new AgentProperties(), new AgentEvents(), new AgentEvents());
+    }
+
+    /**
+     * Constructs an `AgentAttributeSet` with default components and a default name.
      * The default name is generated based on the current value of the static counter.
      */
     public AgentAttributeSet() {

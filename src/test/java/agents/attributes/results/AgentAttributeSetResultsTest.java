@@ -21,6 +21,8 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the {@link AgentAttributeSetResults} class.
+ * These tests verify the initialisation, property/event recording,
+ * data retrieval, and database disconnection functionality of the class.
  */
 class AgentAttributeSetResultsTest {
 
@@ -34,6 +36,11 @@ class AgentAttributeSetResultsTest {
 
     private AutoCloseable closeable;
 
+    /**
+     * Sets up mocks and test environment before each test.
+     * - Initialises a mock database and configures it in the factory.
+     * - Creates a mock `AgentAttributeSet` and its components.
+     */
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
@@ -79,14 +86,20 @@ class AgentAttributeSetResultsTest {
         agentAttributeSetResults = new AgentAttributeSetResults("MockAgent", mockAttributeSet);
     }
 
+    /**
+     * Cleans up mocks and resets state after each test.
+     */
     @AfterEach
     void tearDown() {
         // Clear the static mock to avoid conflicts in subsequent tests
         Mockito.clearAllCaches();
     }
 
+    /**
+     * Tests the initialisation of {@link AgentAttributeSetResults}.
+     */
     @Test
-    void testInitialization() {
+    void testInitialisation() {
         assertEquals("MockAgent", agentAttributeSetResults.getAgentName());
         assertEquals("MockAttributeSet", agentAttributeSetResults.getAttributeName());
         assertEquals(List.of("MockProperty"), agentAttributeSetResults.getPropertyNamesList());
@@ -95,24 +108,36 @@ class AgentAttributeSetResultsTest {
         assertEquals(Integer.class, agentAttributeSetResults.getPropertyClass("MockProperty"));
     }
 
+    /**
+     * Verifies that a property value is correctly recorded in the database.
+     */
     @Test
     void testRecordProperty() {
         agentAttributeSetResults.recordProperty("MockProperty", 42);
         verify(mockDatabase).addPropertyValue("MockProperty", 42);
     }
 
+    /**
+     * Verifies that a pre-event value is correctly recorded in the database.
+     */
     @Test
     void testRecordPreEvent() {
         agentAttributeSetResults.recordPreEvent("MockPreEvent", true);
         verify(mockDatabase).addPreEventValue("MockPreEvent", true);
     }
 
+    /**
+     * Verifies that a post-event value is correctly recorded in the database.
+     */
     @Test
     void testRecordPostEvent() {
         agentAttributeSetResults.recordPostEvent("MockPostEvent", false);
         verify(mockDatabase).addPostEventValue("MockPostEvent", false);
     }
 
+    /**
+     * Ensures that property values can be retrieved from the database.
+     */
     @Test
     void testGetPropertyValues() {
         List<Object> mockValues = List.of(1, 2, 3);
@@ -123,6 +148,9 @@ class AgentAttributeSetResultsTest {
         verify(mockDatabase).getPropertyColumnAsList("MockProperty");
     }
 
+    /**
+     * Ensures that pre-event triggers can be retrieved from the database.
+     */
     @Test
     void testGetPreEventTriggers() {
         List<Boolean> mockTriggers = List.of(true, false, true);
@@ -133,6 +161,9 @@ class AgentAttributeSetResultsTest {
         verify(mockDatabase).getPreEventColumnAsList("MockPreEvent");
     }
 
+    /**
+     * Ensures that post-event triggers can be retrieved from the database.
+     */
     @Test
     void testGetPostEventTriggers() {
         List<Boolean> mockTriggers = List.of(false, true, false);
@@ -143,6 +174,9 @@ class AgentAttributeSetResultsTest {
         verify(mockDatabase).getPostEventColumnAsList("MockPostEvent");
     }
 
+    /**
+     * Verifies that the database connection is properly disconnected.
+     */
     @Test
     void testDisconnectDatabase() {
         agentAttributeSetResults.disconnectDatabase();

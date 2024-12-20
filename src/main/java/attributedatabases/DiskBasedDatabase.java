@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of {@link AttributeResultsDatabase} that stores attribute results in a SQLite database on disk.
@@ -19,6 +17,10 @@ import java.util.Map;
  * attribute types are maintained and serialised/deserialised correctly.
  */
 public class DiskBasedDatabase extends AttributeResultsDatabase {
+
+    // Thread-safe list for active databases
+    private static final List<DiskBasedDatabase> activeDatabases = Collections.synchronizedList(new ArrayList<>());
+    private static boolean shutdownHookRegistered = false;
 
     // Names of the attribute tables
     private final String PROPERTIES_TABLE_NAME = "properties_table";
@@ -34,10 +36,46 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
     private Connection connection;
 
     /**
+     * Constructs a new instance of the {@link DiskBasedDatabase} class.
+     * The registered instances will be disconnected automatically when the JVM shuts down.
+     *
+     * During the JVM shutdown, all active database connections are closed,
+     * and associated database files are deleted if they exist.
+     *
+     * This design ensures that no database connections remain open unintentionally,
+     * preventing potential resource leaks or file locks.
+     */
+    public DiskBasedDatabase() {
+        synchronized (activeDatabases) {
+            activeDatabases.add(this);
+            if (!shutdownHookRegistered) {
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    // Create a copy of the list for iteration to avoid concurrent modification
+                    List<DiskBasedDatabase> databasesSnapshot;
+                    synchronized (activeDatabases) {
+                        databasesSnapshot = new ArrayList<>(activeDatabases);
+                    }
+                    for (DiskBasedDatabase db : databasesSnapshot) {
+                        try {
+                            db.disconnect();
+                        } catch (Exception e) {
+                            System.err.println("Error while disconnecting database during shutdown: " + e.getMessage());
+                        }
+                    }
+                }));
+                shutdownHookRegistered = true;
+            }
+        }
+    }
+
+    /**
      * Establishes a connection to the SQLite database and creates the necessary tables if they do not exist.
      */
     @Override
     public void connect() {
+        if (connection != null)
+            return;
+
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:" + getDatabasePath());
             createAttributeTables();
@@ -51,16 +89,21 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
      */
     @Override
     public void disconnect() {
-        try {
-            if (connection != null)
+        synchronized (activeDatabases) {
+            if (connection == null)
+                return;
+
+            try {
                 connection.close();
-            // Get the database path and attempt to delete the file
-            String databasePath = getDatabasePath();
-            File databaseFile = new File(databasePath);
-            if (databaseFile.exists() && !databaseFile.delete())
-                System.err.println("Failed to delete database file: " + databasePath);
-        } catch (SQLException e) {
-            System.err.println("Error closing SQLite connection: " + e.getMessage());
+                String databasePath = getDatabasePath();
+                File databaseFile = new File(databasePath);
+                if (databaseFile.exists() && !databaseFile.delete())
+                    System.err.println("Failed to delete database file: " + databasePath);
+            } catch (SQLException e) {
+                System.err.println("Error closing SQLite connection: " + e.getMessage());
+            } finally {
+                activeDatabases.remove(this);
+            }
         }
     }
 
@@ -325,5 +368,4 @@ public class DiskBasedDatabase extends AttributeResultsDatabase {
             throw new RuntimeException("Error deserialising value: " + value + " with type: " + type.getName(), e);
         }
     }
-
 }

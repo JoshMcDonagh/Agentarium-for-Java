@@ -45,9 +45,8 @@ public abstract class AgentGenerator {
         List<Agent> agents = new ArrayList<Agent>();
 
         // Generate the specified number of agents and add them to the list.
-        for (int i = 0; i < numOfAgents; i++) {
+        for (int i = 0; i < numOfAgents; i++)
             agents.add(generateAgent());
-        }
 
         return agents;
     }

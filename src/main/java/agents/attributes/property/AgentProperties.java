@@ -35,9 +35,18 @@ public class AgentProperties {
      * @param newProperties An array of properties to be added.
      */
     public void addProperties(AgentProperty<?>[] newProperties) {
-        for (AgentProperty<?> newProperty : newProperties) {
-            addProperty(newProperty); // Reuse addProperty to ensure consistency.
-        }
+        for (AgentProperty<?> newProperty : newProperties)
+            addProperty(newProperty);
+    }
+
+    /**
+     * Adds multiple properties to the collection.
+     *
+     * @param newProperties A list of properties to be added.
+     */
+    public void addProperties(List<AgentProperty<?>> newProperties) {
+        for (AgentProperty<?> newProperty : newProperties)
+            addProperty(newProperty);
     }
 
     /**

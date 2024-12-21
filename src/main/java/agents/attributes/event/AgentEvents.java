@@ -34,9 +34,18 @@ public class AgentEvents {
      * @param newEvents An array of events to be added.
      */
     public void addEvents(AgentEvent[] newEvents) {
-        for (AgentEvent newEvent : newEvents) {
-            addEvent(newEvent); // Reuse addEvent to ensure consistency.
-        }
+        for (AgentEvent newEvent : newEvents)
+            addEvent(newEvent);
+    }
+
+    /**
+     * Adds multiple events to the collection.
+     *
+     * @param newEvents A list of events to be added.
+     */
+    public void addEvents(List<AgentEvent> newEvents) {
+        for (AgentEvent newEvent : newEvents)
+            addEvent(newEvent);
     }
 
     /**

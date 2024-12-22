@@ -28,9 +28,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # Build the project using Maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    # Run tests and build the project using Maven
+    - name: Run tests and build
+      run: mvn -B verify --file pom.xml
 
     # Submit the dependency graph to GitHub for Dependabot alerts and security analysis
     - name: Submit dependency graph

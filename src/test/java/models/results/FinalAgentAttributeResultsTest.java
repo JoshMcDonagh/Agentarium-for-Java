@@ -92,9 +92,9 @@ class FinalAgentAttributeResultsTest {
     void testGetAgentPropertyValues() {
         // Mock attribute results
         when(mockResults1.getAttributeResults("Attribute1")).thenReturn(mock(AgentAttributeSetResults.class));
-        AgentAttributeSetResults mockAttributeResults = mock(AgentAttributeSetResults.class);
-        when(mockResults1.getAttributeResults("Attribute1")).thenReturn(mockAttributeResults);
-        when(mockAttributeResults.getPropertyValues("Property1")).thenReturn(List.of(1, 2, 3));
+        AgentAttributeSetResults mockAttributeSetResults = mock(AgentAttributeSetResults.class);
+        when(mockResults1.getAttributeResults("Attribute1")).thenReturn(mockAttributeSetResults);
+        when(mockAttributeSetResults.getPropertyValues("Property1")).thenReturn(List.of(1, 2, 3));
 
         List<Object> values = finalAgentAttributeResults.getAgentPropertyValues("Agent1", "Attribute1", "Property1");
         assertEquals(List.of(1, 2, 3), values);

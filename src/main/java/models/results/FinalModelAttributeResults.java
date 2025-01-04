@@ -26,6 +26,15 @@ public class FinalModelAttributeResults {
     }
 
     /**
+     * Constructs the `FinalModelAttributeResults` using a modelAttributeResults object.
+     *
+     * @param modelAttributeResults The modelAttributeResults object.
+     */
+    public FinalModelAttributeResults(ModelAttributeResults modelAttributeResults) {
+        this.modelAttributeResults = modelAttributeResults;
+    }
+
+    /**
      * Retrieves the property values of a specific property for a model attribute.
      *
      * @param attributeName The name of the model attribute.

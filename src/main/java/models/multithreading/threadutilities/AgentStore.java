@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 /**
  * The `AgentStore` class provides functionality to manage and store a collection of agents.
- *
+ * <p>
  * It supports storing agents as original instances or as copies (without records),
  * updating the store, and filtering agents based on criteria.
  */
@@ -51,7 +51,7 @@ public class AgentStore {
 
     /**
      * Adds a single agent to the store.
-     *
+     * <p>
      * If storing copies is enabled, a duplicate of the agent (without records) is added.
      *
      * @param agent The agent to add to the store.
@@ -65,7 +65,7 @@ public class AgentStore {
 
     /**
      * Adds a list of agents to the store.
-     *
+     * <p>
      * Each agent is processed according to the store's copy behaviour.
      *
      * @param agents The list of agents to add to the store.
@@ -96,7 +96,7 @@ public class AgentStore {
 
     /**
      * Updates the store with agents from another `AgentStore`.
-     *
+     * <p>
      * Agents are added or replaced in the current store based on the names from the other store.
      * Copies of agents are stored if the copy behaviour is enabled.
      *

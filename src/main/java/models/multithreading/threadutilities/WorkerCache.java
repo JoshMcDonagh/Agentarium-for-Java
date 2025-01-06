@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 /**
  * The `WorkerCache` class provides a centralised cache for agents, agent filters,
  * and model attribute sets to facilitate multi-threaded operations in simulations.
- * 
+ * <p>
  * This class integrates with the `AgentStore` to manage agents and maintains a
  * collection of filters and model attribute sets for efficient querying and processing.
  */

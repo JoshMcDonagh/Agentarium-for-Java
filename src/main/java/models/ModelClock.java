@@ -5,7 +5,7 @@ import agents.AgentClock;
 /**
  * Represents the clock used in a simulation model to manage and track the
  * total number of ticks and warm-up ticks.
- *
+ * <p>
  * The `ModelClock` class is responsible for creating agent-specific clocks
  * and providing simulation runtime information.
  */
@@ -29,7 +29,7 @@ public class ModelClock {
 
     /**
      * Generates an `AgentClock` for use by individual agents in the simulation.
-     *
+     * <p>
      * The `AgentClock` created will have the same configuration as this `ModelClock`,
      * ensuring consistency across all agents.
      *

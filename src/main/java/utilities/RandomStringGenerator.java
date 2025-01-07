@@ -1,6 +1,8 @@
 package utilities;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility class for generating random strings.
@@ -14,14 +16,17 @@ public class RandomStringGenerator {
     // SecureRandom is used to ensure a higher level of randomness and security compared to Random.
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    // A list containing all the previously generated strings.
+    private static final List<String> generatedStrings = new ArrayList<String>();
+
     /**
-     * Generates a random string of the specified length.
+     * Generates a random string of the specified length without considering the string's uniqueness.
      * The string will consist of uppercase and lowercase letters, as well as digits.
      *
      * @param length The desired length of the random string.
      * @return A randomly generated string of the specified length.
      */
-    public static String generateRandomString(int length) {
+    private static String generateRawRandomString(int length) {
         if (length < 0) {
             throw new IllegalArgumentException("Length must be non-negative.");
         }
@@ -37,5 +42,41 @@ public class RandomStringGenerator {
 
         // Return the generated random string.
         return sb.toString();
+    }
+
+    /**
+     * Generates a random string of the specified length.
+     * The string will consist of uppercase and lowercase letters, as well as digits.
+     *
+     * @param length The desired length of the random string.
+     * @param isUnique Whether the random string generated is unique or not.
+     * @return A randomly generated string of the specified length.
+     */
+    public static String generateRandomString(int length, boolean isUnique) {
+        while (true) {
+            String randomString = generateRawRandomString(length);
+            if (isUnique && !generatedStrings.contains(randomString)) {
+                generatedStrings.add(randomString);
+                return randomString;
+            }
+        }
+    }
+
+    /**
+     * Generates a random unique string of the specified length.
+     * The string will consist of uppercase and lowercase letters, as well as digits.
+     *
+     * @param length The desired length of the random string.
+     * @return A randomly generated string of the specified length.
+     */
+    public static String generateRandomString(int length) {
+        return generateRandomString(length, true);
+    }
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private RandomStringGenerator() {
+        // This class should not be instantiated.
     }
 }

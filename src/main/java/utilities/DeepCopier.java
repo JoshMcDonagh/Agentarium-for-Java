@@ -43,4 +43,11 @@ public class DeepCopier {
         // Deserialise the JSON string back into the specified type to create a deep copy.
         return gson.fromJson(json, typeOfT);
     }
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private DeepCopier() {
+        // This class should not be instantiated.
+    }
 }

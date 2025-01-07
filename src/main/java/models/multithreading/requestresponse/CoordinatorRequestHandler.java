@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 /**
  * The `CoordinatorRequestHandler` is an abstract class responsible for processing
- * and managing requests between threads in a multi-threaded simulation.
+ * and managing requests received by the Coordinator from Workers.
  * <p>
  * It provides specialised handlers for different request types and facilitates communication
  * between worker threads and the coordinator thread.

@@ -11,11 +11,35 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 
+/**
+ * The `CoordinatorRequestHandler` is an abstract class responsible for processing
+ * and managing requests between threads in a multi-threaded simulation.
+ * <p>
+ * It provides specialised handlers for different request types and facilitates communication
+ * between worker threads and the coordinator thread.
+ */
 public abstract class CoordinatorRequestHandler {
+
+    // Map linking request codes to their corresponding handler instances.
     private static Map<String, CoordinatorRequestHandler> requestHandlersMap;
 
-    public static void initialise(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
-        requestHandlersMap = new HashMap<String, CoordinatorRequestHandler>();
+    /**
+     * Initialises the request handlers with the necessary configurations for processing requests.
+     *
+     * @param threadName          The name of the coordinator thread.
+     * @param numOfCores          The number of worker threads.
+     * @param modelAttributeSetMap A map of model attribute sets managed by the coordinator.
+     * @param responseQueue       A shared queue for sending responses.
+     * @param globalAgentStore    A shared store for managing agents.
+     */
+    public static void initialise(
+            String threadName,
+            int numOfCores,
+            Map<String, ModelAttributeSet> modelAttributeSetMap,
+            BlockingQueue<Response> responseQueue,
+            AgentStore globalAgentStore
+    ) {
+        requestHandlersMap = new HashMap<>();
         requestHandlersMap.put(RequestCodes.ALL_WORKERS_FINISH_TICK,
                 new AllWorkersFinishTick(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
         requestHandlersMap.put(RequestCodes.ALL_WORKERS_UPDATE_COORDINATOR,
@@ -30,18 +54,43 @@ public abstract class CoordinatorRequestHandler {
                 new ModelAttributesAccess(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore));
     }
 
+    /**
+     * Handles a coordinator request by delegating to the appropriate handler.
+     *
+     * @param request The request to process.
+     * @throws InterruptedException If interrupted while processing the request.
+     */
     public static void handleCoordinatorRequest(Request request) throws InterruptedException {
-        requestHandlersMap.get(request.getRequestCode()).handleRequest(request);
+        CoordinatorRequestHandler handler = requestHandlersMap.get(request.getRequestCode());
+        if (handler != null) {
+            handler.handleRequest(request);
+        }
     }
 
+    // Instance-specific attributes
     private final String threadName;
     private final int numOfCores;
     private final Map<String, ModelAttributeSet> modelAttributeSetMap;
     private final BlockingQueue<Response> responseQueue;
     private final AgentStore globalAgentStore;
-    private List<String> workersWaiting = new ArrayList<String>();
+    private List<String> workersWaiting = new ArrayList<>();
 
-    public CoordinatorRequestHandler(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+    /**
+     * Constructs a `CoordinatorRequestHandler` with the specified parameters.
+     *
+     * @param threadName          The name of the coordinator thread.
+     * @param numOfCores          The number of worker threads.
+     * @param modelAttributeSetMap A map of model attribute sets.
+     * @param responseQueue       A shared queue for sending responses.
+     * @param globalAgentStore    A shared store for managing agents.
+     */
+    public CoordinatorRequestHandler(
+            String threadName,
+            int numOfCores,
+            Map<String, ModelAttributeSet> modelAttributeSetMap,
+            BlockingQueue<Response> responseQueue,
+            AgentStore globalAgentStore
+    ) {
         this.threadName = threadName;
         this.numOfCores = numOfCores;
         this.modelAttributeSetMap = modelAttributeSetMap;
@@ -49,6 +98,7 @@ public abstract class CoordinatorRequestHandler {
         this.globalAgentStore = globalAgentStore;
     }
 
+    // Getters for handler attributes
     protected String getThreadName() {
         return threadName;
     }
@@ -69,94 +119,125 @@ public abstract class CoordinatorRequestHandler {
         return globalAgentStore;
     }
 
-    protected void setWorkersWaiting(List<String> workersWaiting) {
-        this.workersWaiting = workersWaiting;
-    }
-
     protected List<String> getWorkersWaiting() {
         return workersWaiting;
     }
 
+    protected void setWorkersWaiting(List<String> workersWaiting) {
+        this.workersWaiting = workersWaiting;
+    }
+
+    /**
+     * Handles a specific request type. Must be implemented by subclasses.
+     *
+     * @param request The request to process.
+     * @throws InterruptedException If interrupted while processing the request.
+     */
     public abstract void handleRequest(Request request) throws InterruptedException;
 
+    // Subclasses implementing specific request handling behaviours.
+
     public static class AllWorkersFinishTick extends CoordinatorRequestHandler {
-        public AllWorkersFinishTick(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public AllWorkersFinishTick(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
         public void handleRequest(Request request) throws InterruptedException {
             getWorkersWaiting().add(request.getRequester());
-
             if (getWorkersWaiting().size() == getNumOfCores()) {
-                for (String worker : getWorkersWaiting())
+                for (String worker : getWorkersWaiting()) {
                     getResponseQueue().put(new Response(getThreadName(), worker, ResponseCodes.ALL_WORKERS_FINISH_TICK, null));
-                setWorkersWaiting(new ArrayList<String>());
+                }
+                setWorkersWaiting(new ArrayList<>());
             }
         }
     }
 
     public static class AllWorkersUpdateCoordinator extends CoordinatorRequestHandler {
-        public AllWorkersUpdateCoordinator(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public AllWorkersUpdateCoordinator(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
         public void handleRequest(Request request) throws InterruptedException {
             getWorkersWaiting().add(request.getRequester());
-
             if (getWorkersWaiting().size() == getNumOfCores()) {
-                for (String worker : getWorkersWaiting())
+                for (String worker : getWorkersWaiting()) {
                     getResponseQueue().put(new Response(getThreadName(), worker, ResponseCodes.ALL_WORKERS_UPDATE_COORDINATOR, null));
-                setWorkersWaiting(new ArrayList<String>());
+                }
+                setWorkersWaiting(new ArrayList<>());
 
-                for (ModelAttributeSet modelAttributeSet : getModelAttributeSetMap().values())
+                for (ModelAttributeSet modelAttributeSet : getModelAttributeSetMap().values()) {
                     modelAttributeSet.run();
+                }
             }
         }
     }
 
     public static class AgentAccess extends CoordinatorRequestHandler {
-        public AgentAccess(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public AgentAccess(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
         public void handleRequest(Request request) throws InterruptedException {
-            getResponseQueue().put(new Response(getThreadName(), request.getRequester(), ResponseCodes.AGENT_ACCESS, getGlobalAgentStore().get((String) request.getPayload())));
+            getResponseQueue().put(new Response(getThreadName(), request.getRequester(), ResponseCodes.AGENT_ACCESS,
+                    getGlobalAgentStore().get((String) request.getPayload())));
         }
     }
 
     public static class UpdateCoordinatorAgents extends CoordinatorRequestHandler {
-        public UpdateCoordinatorAgents(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public UpdateCoordinatorAgents(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
-        public void handleRequest(Request request) throws InterruptedException {
+        public void handleRequest(Request request) {
             getGlobalAgentStore().update((AgentStore) request.getPayload());
         }
     }
 
     public static class FilteredAgentsAccess extends CoordinatorRequestHandler {
-        public FilteredAgentsAccess(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public FilteredAgentsAccess(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
         public void handleRequest(Request request) throws InterruptedException {
-            getResponseQueue().put(new Response(getThreadName(), request.getRequester(), ResponseCodes.FILTERED_AGENTS_ACCESS, getGlobalAgentStore().getFilteredAgents((Predicate<Agent>) request.getPayload())));
+            getResponseQueue().put(new Response(getThreadName(), request.getRequester(),
+                    ResponseCodes.FILTERED_AGENTS_ACCESS,
+                    getGlobalAgentStore().getFilteredAgents((Predicate<Agent>) request.getPayload())));
         }
     }
 
     public static class ModelAttributesAccess extends CoordinatorRequestHandler {
-        public ModelAttributesAccess(String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap, BlockingQueue<Response> responseQueue, AgentStore globalAgentStore) {
+        public ModelAttributesAccess(
+                String threadName, int numOfCores, Map<String, ModelAttributeSet> modelAttributeSetMap,
+                BlockingQueue<Response> responseQueue, AgentStore globalAgentStore
+        ) {
             super(threadName, numOfCores, modelAttributeSetMap, responseQueue, globalAgentStore);
         }
 
         @Override
         public void handleRequest(Request request) throws InterruptedException {
-            getResponseQueue().put(new Response(getThreadName(), request.getRequester(), ResponseCodes.MODEL_ATTRIBUTES_ACCESS, getModelAttributeSetMap()));
+            getResponseQueue().put(new Response(getThreadName(), request.getRequester(),
+                    ResponseCodes.MODEL_ATTRIBUTES_ACCESS, getModelAttributeSetMap()));
         }
     }
 }

@@ -1,4 +1,6 @@
 package agentarium.environments;
 
-public class Environment {
+import agentarium.ModelElement;
+
+public class Environment extends ModelElement {
 }

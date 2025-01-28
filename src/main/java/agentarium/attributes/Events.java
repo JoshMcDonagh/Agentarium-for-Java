@@ -30,4 +30,11 @@ public class Events {
     public int size() {
         return events.size();
     }
+
+    public void run() {
+        for (Event event : events) {
+            if (event.isTriggered())
+                event.run();
+        }
+    }
 }

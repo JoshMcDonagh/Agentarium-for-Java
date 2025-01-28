@@ -14,4 +14,8 @@ public abstract class ModelElement {
     public String getName() {
         return name;
     }
+
+    protected AttributeSetCollection getAttributeSetCollection() {
+        return attributeSets;
+    }
 }

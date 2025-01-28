@@ -30,4 +30,9 @@ public class Properties {
     public int size() {
         return properties.size();
     }
+
+    public void run() {
+        for (Property<?> property : properties)
+            property.run();
+    }
 }

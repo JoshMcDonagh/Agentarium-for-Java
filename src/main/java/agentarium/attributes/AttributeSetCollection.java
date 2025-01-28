@@ -30,4 +30,9 @@ public class AttributeSetCollection {
     public int size() {
         return attributeSets.size();
     }
+
+    public void run() {
+        for (AttributeSet attributeSet : attributeSets)
+            attributeSet.run();
+    }
 }

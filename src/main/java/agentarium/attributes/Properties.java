@@ -1,16 +1,10 @@
 package agentarium.attributes;
 
 import java.util.List;
-import java.util.Map;
 
-public class Properties {
-    private Map<String, Integer> propertyIndexes;
-    private List<Property<?>> properties;
-
+public class Properties extends Attributes {
     public <T> void add(Property<T> property) {
-        Integer index = properties.size();
-        propertyIndexes.put(property.getName(), index);
-        properties.add(property);
+        addAttribute(property);
     }
 
     public void add(List<Property<?>> properties) {
@@ -18,21 +12,17 @@ public class Properties {
             add(property);
     }
 
-    public Property<?> getProperty(String name) {
-        int index = propertyIndexes.get(name);
-        return properties.get(index);
+    public Property<?> get(String name) {
+        return (Property<?>) getAttribute(name);
     }
 
-    public Property<?> getProperty(int index) {
-        return properties.get(index);
+    public Property<?> get(int index) {
+        return (Property<?>) getAttribute(index);
     }
 
-    public int size() {
-        return properties.size();
-    }
-
+    @Override
     public void run() {
-        for (Property<?> property : properties)
-            property.run();
+        for (int i = 0; i < size(); i++)
+            get(i).run();
     }
 }

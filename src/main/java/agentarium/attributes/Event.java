@@ -1,14 +1,10 @@
 package agentarium.attributes;
 
-public abstract class Event {
+public abstract class Event extends Attribute {
     private static int eventCount = 0;
 
-    private final String name;
-    private final boolean isRecorded;
-
     public Event(String name, boolean isRecorded) {
-        this.name = name;
-        this.isRecorded = isRecorded;
+        super(name, isRecorded);
         eventCount++;
     }
 
@@ -22,14 +18,6 @@ public abstract class Event {
 
     public Event() {
         this("Event " + eventCount++, true);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isRecorded() {
-        return isRecorded;
     }
 
     public abstract boolean isTriggered();

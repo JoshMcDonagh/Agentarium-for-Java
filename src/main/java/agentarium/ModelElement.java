@@ -18,4 +18,6 @@ public abstract class ModelElement {
     protected AttributeSetCollection getAttributeSetCollection() {
         return attributeSets;
     }
+
+    public abstract void run();
 }

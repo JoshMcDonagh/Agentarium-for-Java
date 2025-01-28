@@ -1,15 +1,12 @@
 package agentarium.attributes;
 
-public abstract class Property<T> {
+public abstract class Property<T> extends Attribute {
     private static int propertyCount = 0;
 
-    private final String name;
-    private final boolean isRecorded;
     private final Class<T> type;
 
     public Property(String name, boolean isRecorded, Class<T> type) {
-        this.name = name;
-        this.isRecorded = isRecorded;
+        super(name, isRecorded);
         this.type = type;
         propertyCount++;
     }
@@ -24,14 +21,6 @@ public abstract class Property<T> {
 
     public Property(Class<T> type) {
         this("Property " + propertyCount, true, type);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isRecorded() {
-        return isRecorded;
     }
 
     public Class<T> getType() {

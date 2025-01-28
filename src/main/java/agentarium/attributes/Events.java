@@ -3,14 +3,12 @@ package agentarium.attributes;
 import java.util.List;
 import java.util.Map;
 
-public class Events {
+public class Events extends Attributes {
     private Map<String, Integer> eventIndexes;
     private List<Event> events;
 
     public void add(Event event) {
-        int index = events.size();
-        eventIndexes.put(event.getName(), index);
-        events.add(event);
+        addAttribute(event);
     }
 
     public void add(List<Event> events) {
@@ -19,20 +17,16 @@ public class Events {
     }
 
     public Event get(String name) {
-        Integer index = eventIndexes.get(name);
-        return events.get(index);
+        return (Event) getAttribute(name);
     }
 
     public Event get(int index) {
-        return events.get(index);
-    }
-
-    public int size() {
-        return events.size();
+        return (Event) getAttribute(index);
     }
 
     public void run() {
-        for (Event event : events) {
+        for (int i = 0; i < size(); i++) {
+            Event event = get(i);
             if (event.isTriggered())
                 event.run();
         }

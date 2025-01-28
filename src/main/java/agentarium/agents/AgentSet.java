@@ -36,14 +36,19 @@ public class AgentSet {
     }
 
     public void add(Agent agent) {
-        if (doesAgentExist(agent.getName())) {
-            int index = agentIndexes.get(agent.getName());
-            agents.set(index, agent);
-        } else {
-            int index = agents.size();
+        int index;
+
+        if (doesAgentExist(agent.getName()))
+            index = agentIndexes.get(agent.getName());
+        else {
+            index = agents.size();
             agentIndexes.put(agent.getName(), index);
-            agents.add(agent);
         }
+
+        if (isStoringAgentCopies)
+            agents.set(index, agent.deepCopyDuplicate());
+        else
+            agents.set(index, agent);
     }
 
     public void add(List<Agent> agents) {

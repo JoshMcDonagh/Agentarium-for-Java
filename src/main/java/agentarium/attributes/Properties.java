@@ -19,7 +19,7 @@ public class Properties {
     }
 
     public Property<?> getProperty(String name) {
-        Integer index = propertyIndexes.get(name);
+        int index = propertyIndexes.get(name);
         return properties.get(index);
     }
 

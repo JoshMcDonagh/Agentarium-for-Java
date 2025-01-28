@@ -19,7 +19,7 @@ public class AttributeSetCollection {
     }
 
     public AttributeSet get(String name) {
-        Integer index = attributeSetIndexes.get(name);
+        int index = attributeSetIndexes.get(name);
         return attributeSets.get(index);
     }
 

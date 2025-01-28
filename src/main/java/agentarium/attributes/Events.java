@@ -8,7 +8,7 @@ public class Events {
     private List<Event> events;
 
     public void add(Event event) {
-        Integer index = events.size();
+        int index = events.size();
         eventIndexes.put(event.getName(), index);
         events.add(event);
     }

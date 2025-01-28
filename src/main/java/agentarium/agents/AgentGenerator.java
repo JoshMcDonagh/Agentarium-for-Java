@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AgentGenerator {
-    public List<Agent> generateAgents(int numOfAgents) {
+    public List<Agent> generateAgents(int numOfAgents, ModelSettings modelSettings) {
         List<Agent> agents = new ArrayList<>();
 
         for (int i = 0; i < numOfAgents; i++)
-            agents.add(generateAgent());
+            agents.add(generateAgent(modelSettings));
 
         return agents;
     }
 
-    public List<List<Agent>> getAgentsForEachCode(int numOfAgents, int numOfCores) {
-        List<Agent> agents = generateAgents(numOfAgents);
+    public List<List<Agent>> getAgentsForEachCode(int numOfAgents, int numOfCores, ModelSettings modelSettings) {
+        List<Agent> agents = generateAgents(numOfAgents, modelSettings);
 
         if (numOfCores < 1)
             return new ArrayList<>();
@@ -40,5 +40,5 @@ public abstract class AgentGenerator {
         return agentsForEachCore;
     }
 
-    protected abstract Agent generateAgent();
+    protected abstract Agent generateAgent(ModelSettings modelSettings);
 }

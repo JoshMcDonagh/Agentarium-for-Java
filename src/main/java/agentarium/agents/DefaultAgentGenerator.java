@@ -8,8 +8,8 @@ public class DefaultAgentGenerator extends agentarium.agents.AgentGenerator {
 
     @Override
     protected Agent generateAgent(ModelSettings modelSettings) {
-        AttributeSetCollection agentAttributeSetCollection = modelSettings.getBaseAgentAttributeSetCollection();
-        Agent newAgent = new Agent("Agent_" + agentCount, agentAttributeSetCollection.deepCopyDuplicate());
+        AttributeSetCollection agentAttributeSetCollection = modelSettings.getBaseAgentAttributeSetCollection().deepCopyDuplicate();
+        Agent newAgent = new Agent("Agent_" + agentCount, agentAttributeSetCollection);
         agentCount++;
         return newAgent;
     }

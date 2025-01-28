@@ -1,10 +1,14 @@
 package agentarium;
 
+import agentarium.attributes.AttributeSetCollection;
+
 public class ModelSettings {
     private int numOfAgents = 1;
     private int numOfCores = 1;
     private int numOfTicksToRun = 1;
     private int numOfWarmUpTicks = 0;
+    private AttributeSetCollection baseAgentAttributeSetCollection = new AttributeSetCollection();
+    private AttributeSetCollection baseEnvironmentAttributeSetCollection = new AttributeSetCollection();
 
     public void setNumOfAgents(int numOfAgents) {
         this.numOfAgents = numOfAgents;
@@ -36,5 +40,21 @@ public class ModelSettings {
 
     public int getNumOfWarmUpTicks() {
         return numOfWarmUpTicks;
+    }
+
+    public void setBaseAgentAttributeSetCollection(AttributeSetCollection baseAgentAttributeSetCollection) {
+        this.baseAgentAttributeSetCollection = baseAgentAttributeSetCollection;
+    }
+
+    public void setBaseEnvironmentAttributeSetCollection(AttributeSetCollection baseEnvironmentAttributeSetCollection) {
+        this.baseEnvironmentAttributeSetCollection = baseEnvironmentAttributeSetCollection;
+    }
+
+    public AttributeSetCollection getBaseAgentAttributeSetCollection() {
+        return baseAgentAttributeSetCollection;
+    }
+
+    public AttributeSetCollection getBaseEnvironmentAttributeSetCollection() {
+        return baseEnvironmentAttributeSetCollection;
     }
 }

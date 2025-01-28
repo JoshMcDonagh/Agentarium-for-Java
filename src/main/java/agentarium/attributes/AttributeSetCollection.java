@@ -1,5 +1,8 @@
 package agentarium.attributes;
 
+import com.google.gson.reflect.TypeToken;
+import utils.DeepCopier;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,5 +37,9 @@ public class AttributeSetCollection {
     public void run() {
         for (AttributeSet attributeSet : attributeSets)
             attributeSet.run();
+    }
+    
+    public AttributeSetCollection deepCopyDuplicate() {
+        return DeepCopier.deepCopy(this, new TypeToken<AttributeSetCollection>() {}.getType());
     }
 }

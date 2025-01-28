@@ -1,13 +1,15 @@
 package agentarium.agents;
 
 import agentarium.ModelSettings;
+import agentarium.attributes.AttributeSetCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AgentGenerator {
-    public AgentSet generateAgents(int numOfAgents, ModelSettings modelSettings) {
+    public AgentSet generateAgents(ModelSettings modelSettings) {
         AgentSet agents = new AgentSet();
+        int numOfAgents = modelSettings.getNumOfAgents();
 
         for (int i = 0; i < numOfAgents; i++)
             agents.add(generateAgent(modelSettings));
@@ -15,8 +17,10 @@ public abstract class AgentGenerator {
         return agents;
     }
 
-    public List<AgentSet> getAgentsForEachCore(int numOfAgents, int numOfCores, ModelSettings modelSettings) {
-        AgentSet agents = generateAgents(numOfAgents, modelSettings);
+    public List<AgentSet> getAgentsForEachCore(ModelSettings modelSettings) {
+        AgentSet agents = generateAgents(modelSettings);
+
+        int numOfCores = modelSettings.getNumOfCores();
 
         if (numOfCores < 1)
             return new ArrayList<>();

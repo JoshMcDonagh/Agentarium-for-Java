@@ -93,6 +93,12 @@ public class AgentSet implements Iterable<Agent> {
         return new AgentSet(filteredAgents);
     }
 
+    public Iterator<Agent> getRandomIterator() {
+        List<Agent> shuffledAgents = new ArrayList<>(agents);
+        Collections.shuffle(shuffledAgents);
+        return shuffledAgents.iterator();
+    }
+
     @Override
     public Iterator<Agent> iterator() {
         return agents.iterator();

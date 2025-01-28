@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AgentGenerator {
-    public List<Agent> generateAgents(int numOfAgents, ModelSettings modelSettings) {
-        List<Agent> agents = new ArrayList<>();
+    public AgentSet generateAgents(int numOfAgents, ModelSettings modelSettings) {
+        AgentSet agents = new AgentSet();
 
         for (int i = 0; i < numOfAgents; i++)
             agents.add(generateAgent(modelSettings));
@@ -15,21 +15,21 @@ public abstract class AgentGenerator {
         return agents;
     }
 
-    public List<List<Agent>> getAgentsForEachCode(int numOfAgents, int numOfCores, ModelSettings modelSettings) {
-        List<Agent> agents = generateAgents(numOfAgents, modelSettings);
+    public List<AgentSet> getAgentsForEachCore(int numOfAgents, int numOfCores, ModelSettings modelSettings) {
+        AgentSet agents = generateAgents(numOfAgents, modelSettings);
 
         if (numOfCores < 1)
             return new ArrayList<>();
 
         if (numOfCores == 1) {
-            List<List<Agent>> singleCoreList = new ArrayList<>();
+            List<AgentSet> singleCoreList = new ArrayList<>();
             singleCoreList.add(agents);
             return singleCoreList;
         }
 
-        List<List<Agent>> agentsForEachCore = new ArrayList<>();
+        List<AgentSet> agentsForEachCore = new ArrayList<>();
         for (int i = 0; i < numOfCores; i++)
-            agentsForEachCore.add(new ArrayList<>());
+            agentsForEachCore.add(new AgentSet());
 
         int core = 0;
         for (Agent agent : agents) {

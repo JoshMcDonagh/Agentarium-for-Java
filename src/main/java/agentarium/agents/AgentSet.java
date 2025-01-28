@@ -1,12 +1,9 @@
 package agentarium.agents;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class AgentSet {
+public class AgentSet implements Iterable<Agent> {
     private boolean isStoringAgentCopies;
     private Map<String, Integer> agentIndexes;
     private List<Agent> agents;
@@ -94,5 +91,10 @@ public class AgentSet {
         }
 
         return new AgentSet(filteredAgents);
+    }
+
+    @Override
+    public Iterator<Agent> iterator() {
+        return agents.iterator();
     }
 }

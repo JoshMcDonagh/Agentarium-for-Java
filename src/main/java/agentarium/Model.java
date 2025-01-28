@@ -2,6 +2,7 @@ package agentarium;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentGenerator;
+import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
 import agentarium.environments.EnvironmentGenerator;
 
@@ -18,7 +19,7 @@ public class Model {
     }
 
     public void run() {
-        List<List<Agent>> agentsForEachCore = agentGenerator.getAgentsForEachCode(modelSettings.getNumOfAgents(), modelSettings.getNumOfCores(), modelSettings);
+        List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(modelSettings.getNumOfAgents(), modelSettings.getNumOfCores(), modelSettings);
         Environment environment = environmentGenerator.generateEnvironment(modelSettings);
     }
 }

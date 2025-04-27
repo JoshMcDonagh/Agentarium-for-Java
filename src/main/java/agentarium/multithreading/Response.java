@@ -21,7 +21,7 @@ public class Response {
         return destination;
     }
 
-    public ResponseType getRequestType() {
+    public ResponseType getResponseType() {
         return responseType;
     }
 

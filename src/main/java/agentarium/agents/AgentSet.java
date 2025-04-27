@@ -53,6 +53,10 @@ public class AgentSet implements Iterable<Agent> {
             add(agent);
     }
 
+    public void add(AgentSet agentSet) {
+        add(agentSet.getAsList());
+    }
+
     public Agent get(String agentName) {
         int index = agentIndexes.get(agentName);
         return agents.get(index);
@@ -60,6 +64,10 @@ public class AgentSet implements Iterable<Agent> {
 
     public Agent get(int index) {
         return agents.get(index);
+    }
+
+    public List<Agent> getAsList() {
+        return agents;
     }
 
     public int size() {

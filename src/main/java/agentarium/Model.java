@@ -9,20 +9,20 @@ import agentarium.scheduler.ModelScheduler;
 import java.util.List;
 
 public class Model {
-    private ModelSettings modelSettings;
+    private ModelSettings settings;
     private AgentGenerator agentGenerator;
     private EnvironmentGenerator environmentGenerator;
-    private ModelScheduler modelScheduler;
+    private ModelScheduler scheduler;
 
-    public Model(ModelSettings modelSettings, AgentGenerator agentGenerator, EnvironmentGenerator environmentGenerator, ModelScheduler modelScheduler) {
-        this.modelSettings = modelSettings;
+    public Model(ModelSettings settings, AgentGenerator agentGenerator, EnvironmentGenerator environmentGenerator, ModelScheduler scheduler) {
+        this.settings = settings;
         this.agentGenerator = agentGenerator;
         this.environmentGenerator = environmentGenerator;
-        this.modelScheduler = modelScheduler;
+        this.scheduler = scheduler;
     }
 
     public void run() {
-        List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(modelSettings);
-        Environment environment = environmentGenerator.generateEnvironment(modelSettings);
+        List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(settings);
+        Environment environment = environmentGenerator.generateEnvironment(settings);
     }
 }

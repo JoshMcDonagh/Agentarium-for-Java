@@ -15,7 +15,7 @@ public abstract class ModelElement {
         return name;
     }
 
-    protected AttributeSetCollection getAttributeSetCollection() {
+    public AttributeSetCollection getAttributeSetCollection() {
         return attributeSets;
     }
 

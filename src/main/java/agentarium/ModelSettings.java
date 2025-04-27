@@ -9,6 +9,9 @@ public class ModelSettings {
     private int numOfWarmUpTicks = 0;
     private AttributeSetCollection baseAgentAttributeSetCollection = new AttributeSetCollection();
     private AttributeSetCollection baseEnvironmentAttributeSetCollection = new AttributeSetCollection();
+    private boolean areProcessesSynced = false;
+    private boolean doAgentStoresHoldAgentCopies = false;
+    private boolean isCacheUsed = false;
 
     public void setNumOfAgents(int numOfAgents) {
         this.numOfAgents = numOfAgents;
@@ -24,6 +27,26 @@ public class ModelSettings {
 
     public void setNumOfWarmUpTicks(int numOfWarmUpTicks) {
         this.numOfWarmUpTicks = numOfWarmUpTicks;
+    }
+
+    public void setBaseAgentAttributeSetCollection(AttributeSetCollection baseAgentAttributeSetCollection) {
+        this.baseAgentAttributeSetCollection = baseAgentAttributeSetCollection;
+    }
+
+    public void setBaseEnvironmentAttributeSetCollection(AttributeSetCollection baseEnvironmentAttributeSetCollection) {
+        this.baseEnvironmentAttributeSetCollection = baseEnvironmentAttributeSetCollection;
+    }
+
+    public void setAreProcessesSynced(boolean areProcessesSynced) {
+        this.areProcessesSynced = areProcessesSynced;
+    }
+
+    public void setDoAgentStoresHoldAgentCopies(boolean doAgentStoresHoldAgentCopies) {
+        this.doAgentStoresHoldAgentCopies = doAgentStoresHoldAgentCopies;
+    }
+
+    public void setIsCacheUsed(boolean isCacheUsed) {
+        this.isCacheUsed = isCacheUsed;
     }
 
     public int getNumOfAgents() {
@@ -42,19 +65,23 @@ public class ModelSettings {
         return numOfWarmUpTicks;
     }
 
-    public void setBaseAgentAttributeSetCollection(AttributeSetCollection baseAgentAttributeSetCollection) {
-        this.baseAgentAttributeSetCollection = baseAgentAttributeSetCollection;
-    }
-
-    public void setBaseEnvironmentAttributeSetCollection(AttributeSetCollection baseEnvironmentAttributeSetCollection) {
-        this.baseEnvironmentAttributeSetCollection = baseEnvironmentAttributeSetCollection;
-    }
-
     public AttributeSetCollection getBaseAgentAttributeSetCollection() {
         return baseAgentAttributeSetCollection;
     }
 
     public AttributeSetCollection getBaseEnvironmentAttributeSetCollection() {
         return baseEnvironmentAttributeSetCollection;
+    }
+
+    public boolean getAreProcessesSynced() {
+        return areProcessesSynced;
+    }
+
+    public boolean getDoAgentStoresHoldAgentCopies() {
+        return doAgentStoresHoldAgentCopies;
+    }
+
+    public boolean getIsCacheUsed() {
+        return isCacheUsed;
     }
 }

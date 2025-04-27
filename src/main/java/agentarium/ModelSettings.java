@@ -65,6 +65,10 @@ public class ModelSettings {
         return numOfWarmUpTicks;
     }
 
+    public int getTotalNumOfTicks() {
+        return getNumOfWarmUpTicks() + getNumOfTicksToRun();
+    }
+
     public AttributeSetCollection getBaseAgentAttributeSetCollection() {
         return baseAgentAttributeSetCollection;
     }

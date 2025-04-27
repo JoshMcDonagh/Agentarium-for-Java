@@ -21,7 +21,7 @@ public class RequestResponseController {
         return responseQueue;
     }
 
-    public RequestResponseOperator getOperator(String name) {
-        return new RequestResponseOperator(name, areProcessesSynced, requestQueue, responseQueue);
+    public RequestResponseInterface getInterface(String name) {
+        return new RequestResponseInterface(name, areProcessesSynced, requestQueue, responseQueue);
     };
 }

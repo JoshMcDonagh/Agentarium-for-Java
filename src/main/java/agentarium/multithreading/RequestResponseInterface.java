@@ -9,13 +9,13 @@ import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 
-public class RequestResponseOperator {
+public class RequestResponseInterface {
     private final String name;
     private final boolean areProcessesSynced;
     private final BlockingQueue<Request> requestQueue;
     private final BlockingQueue<Response> responseQueue;
 
-    RequestResponseOperator(String name, boolean areProcessesSynced, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
+    RequestResponseInterface(String name, boolean areProcessesSynced, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
         this.name = name;
         this.areProcessesSynced = areProcessesSynced;
         this.requestQueue = requestQueue;

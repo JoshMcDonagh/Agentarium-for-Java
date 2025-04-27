@@ -107,6 +107,10 @@ public class AgentSet implements Iterable<Agent> {
         return shuffledAgents.iterator();
     }
 
+    public AgentSet duplicate() {
+        return new AgentSet(agents, isStoringAgentCopies);
+    }
+
     @Override
     public Iterator<Agent> iterator() {
         return agents.iterator();

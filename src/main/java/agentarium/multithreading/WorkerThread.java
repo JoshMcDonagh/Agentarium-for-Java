@@ -1,40 +1,33 @@
 package agentarium.multithreading;
 
 import agentarium.ModelSettings;
-import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
-import agentarium.environments.Environment;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
 import agentarium.results.AgentResults;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
-import utils.DeepCopier;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.Callable;
 
-public class Worker <T extends Results> implements Callable<Results> {
-    private final String name;
+public class WorkerThread<T extends Results> implements Callable<Results> {
+    private final String threadName;
     private final ModelSettings settings;
-    private final Environment environment;
     private final ModelScheduler scheduler;
     private final RequestResponseController requestResponseController;
     private final AgentSet agents;
     private final AgentSet updatedAgents;
 
 
-    public Worker(String name,
-                  ModelSettings settings,
-                  Environment environment,
-                  ModelScheduler scheduler,
-                  RequestResponseController requestResponseController,
-                  AgentSet agents) {
-        this.name = name;
+    public WorkerThread(String name,
+                        ModelSettings settings,
+                        ModelScheduler scheduler,
+                        RequestResponseController requestResponseController,
+                        AgentSet agents) {
+        this.threadName = name;
         this.settings = settings;
-        this.environment = environment;
         this.scheduler = scheduler;
         this.requestResponseController = requestResponseController;
         this.agents = agents;
@@ -49,7 +42,7 @@ public class Worker <T extends Results> implements Callable<Results> {
         else
             cache = null;
 
-        RequestResponseInterface requestResponseInterface = requestResponseController.getInterface(name);
+        RequestResponseInterface requestResponseInterface = requestResponseController.getInterface(threadName);
 
         if (settings.getAreProcessesSynced())
             requestResponseInterface.updateCoordinatorAgents(agents);

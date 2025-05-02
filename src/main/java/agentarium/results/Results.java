@@ -1,6 +1,7 @@
 package agentarium.results;
 
 import agentarium.agents.Agent;
+import agentarium.agents.AgentSet;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.attributes.results.AttributeSetResults;
 import agentarium.attributes.results.databases.AttributeSetResultsDatabase;
@@ -27,7 +28,7 @@ public abstract class Results {
     private boolean isAccumulatedAgentAttributeSetDataConnected = false;
     private boolean isProcessedEnvironmentAttributeSetDataConnected = false;
 
-    public void setAgentNames(List<Agent> agents) {
+    public void setAgentNames(AgentSet agents) {
         for (Agent agent : agents)
             agentNames.add(agent.getName());
     }
@@ -219,7 +220,7 @@ public abstract class Results {
         AttributeSetCollectionResults environmentAttributeSetCollectionResults = environmentResults.getAttributeSetCollectionResults();
 
         if (processedEnvironmentAttributeSetResultsDatabaseList.isEmpty()) {
-            for (int i = 0; i < environmentAttributeSetCollectionResults.getAttributeSetCount(); j++) {
+            for (int i = 0; i < environmentAttributeSetCollectionResults.getAttributeSetCount(); i++) {
                 String attributeName = environmentAttributeSetCollectionResults.getAttributeSetResults(i).getAttributeSetName();
                 AttributeSetResultsDatabase newDatabase = AttributeSetResultsDatabaseFactory.createDatabase();
                 assert newDatabase != null;

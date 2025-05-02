@@ -1,6 +1,7 @@
 package agentarium;
 
 import agentarium.attributes.AttributeSetCollection;
+import agentarium.results.Results;
 
 public class ModelSettings {
     private int numOfAgents = 1;
@@ -12,6 +13,7 @@ public class ModelSettings {
     private boolean areProcessesSynced = false;
     private boolean doAgentStoresHoldAgentCopies = false;
     private boolean isCacheUsed = false;
+    private Class<? extends Results> resultsClass;
 
     public void setNumOfAgents(int numOfAgents) {
         this.numOfAgents = numOfAgents;
@@ -47,6 +49,10 @@ public class ModelSettings {
 
     public void setIsCacheUsed(boolean isCacheUsed) {
         this.isCacheUsed = isCacheUsed;
+    }
+
+    public <T extends Results> void setResultsClass(Class<T> resultsClass) {
+        this.resultsClass = resultsClass;
     }
 
     public int getNumOfAgents() {
@@ -87,5 +93,9 @@ public class ModelSettings {
 
     public boolean getIsCacheUsed() {
         return isCacheUsed;
+    }
+
+    public Class<? extends Results> getResultsClass() {
+        return resultsClass;
     }
 }

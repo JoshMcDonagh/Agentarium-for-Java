@@ -7,9 +7,12 @@ import agentarium.environments.Environment;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
+import agentarium.results.AgentResults;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
+import utils.DeepCopier;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -22,7 +25,13 @@ public class Worker <T extends Results> implements Callable<Results> {
     private final AgentSet agents;
     private final AgentSet updatedAgents;
 
-    public Worker(String name, ModelSettings settings, Environment environment, ModelScheduler scheduler, RequestResponseController requestResponseController, AgentSet agents) {
+
+    public Worker(String name,
+                  ModelSettings settings,
+                  Environment environment,
+                  ModelScheduler scheduler,
+                  RequestResponseController requestResponseController,
+                  AgentSet agents) {
         this.name = name;
         this.settings = settings;
         this.environment = environment;
@@ -33,7 +42,7 @@ public class Worker <T extends Results> implements Callable<Results> {
     }
 
     @Override
-    public Results call() throws Exception {
+    public Results call() throws InterruptedException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         WorkerCache cache;
         if (settings.getIsCacheUsed())
             cache = new WorkerCache(settings.getDoAgentStoresHoldAgentCopies());
@@ -60,7 +69,10 @@ public class Worker <T extends Results> implements Callable<Results> {
         }
 
         agents.setup();
-        List<Agent> finalAgentsList = agents.getAsList();
-
+        AgentResults agentResults = new AgentResults(agents);
+        Results results = settings.getResultsClass().getDeclaredConstructor().newInstance();
+        results.setAgentNames(agents);
+        results.setAgentResults(agentResults);
+        return results;
     }
 }

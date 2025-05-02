@@ -1,5 +1,6 @@
 package agentarium.attributes;
 
+import agentarium.attributes.results.AttributeSetCollectionResults;
 import com.google.gson.reflect.TypeToken;
 import utils.DeepCopier;
 
@@ -7,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 public class AttributeSetCollection {
+    private String modelElementName;
     private Map<String, Integer> attributeSetIndexes;
     private List<AttributeSet> attributeSets;
+
+    private AttributeSetCollectionResults attributeSetCollectionResults;
 
     public void add(AttributeSet attributeSet) {
         Integer index = attributeSets.size();
@@ -34,9 +38,23 @@ public class AttributeSetCollection {
         return attributeSets.size();
     }
 
+    public void setup(String modelElementName) {
+        this.modelElementName = modelElementName;
+        attributeSetCollectionResults = new AttributeSetCollectionResults();
+        attributeSetCollectionResults.setup(modelElementName, attributeSets);
+    }
+
+    public String getModelElementName() {
+        return modelElementName;
+    }
+
+    public AttributeSetCollectionResults getResults() {
+        return attributeSetCollectionResults;
+    }
+
     public void run() {
         for (AttributeSet attributeSet : attributeSets)
-            attributeSet.run();
+            attributeSet.run(getResults().getAttributeSetResults(attributeSet.getName()));
     }
     
     public AttributeSetCollection deepCopyDuplicate() {

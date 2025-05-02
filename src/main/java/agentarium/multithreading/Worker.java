@@ -1,12 +1,16 @@
 package agentarium.multithreading;
 
 import agentarium.ModelSettings;
+import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
+import agentarium.multithreading.requestresponse.RequestResponseController;
+import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class Worker <T extends Results> implements Callable<Results> {
@@ -54,5 +58,9 @@ public class Worker <T extends Results> implements Callable<Results> {
             if (settings.getIsCacheUsed())
                 cache.clear();
         }
+
+        agents.setup();
+        List<Agent> finalAgentsList = agents.getAsList();
+
     }
 }

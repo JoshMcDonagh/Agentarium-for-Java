@@ -24,5 +24,7 @@ public class Model {
     public void run() {
         List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(settings);
         Environment environment = environmentGenerator.generateEnvironment(settings);
+
+        environment.setup();
     }
 }

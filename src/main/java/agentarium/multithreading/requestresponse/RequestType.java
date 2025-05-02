@@ -1,4 +1,4 @@
-package agentarium.multithreading;
+package agentarium.multithreading.requestresponse;
 
 public enum RequestType {
     ALL_WORKERS_FINISH_TICK,

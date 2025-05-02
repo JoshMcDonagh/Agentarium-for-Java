@@ -1,4 +1,4 @@
-package agentarium.multithreading;
+package agentarium.multithreading.requestresponse;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;

@@ -1,5 +1,7 @@
 package agentarium.agents;
 
+import agentarium.ModelElement;
+
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -105,6 +107,11 @@ public class AgentSet implements Iterable<Agent> {
         List<Agent> shuffledAgents = new ArrayList<>(agents);
         Collections.shuffle(shuffledAgents);
         return shuffledAgents.iterator();
+    }
+
+    public void setup() {
+        for (Agent agent : agents)
+            agent.setup();
     }
 
     public AgentSet duplicate() {

@@ -4,11 +4,11 @@ import agentarium.attributes.AttributeSetCollection;
 
 public abstract class ModelElement {
     private final String name;
-    private AttributeSetCollection attributeSets;
+    private AttributeSetCollection attributeSetCollection;
 
-    public ModelElement(String name, AttributeSetCollection attributeSets) {
+    public ModelElement(String name, AttributeSetCollection attributeSetCollection) {
         this.name = name;
-        this.attributeSets = attributeSets;
+        this.attributeSetCollection = attributeSetCollection;
     }
 
     public String getName() {
@@ -16,7 +16,11 @@ public abstract class ModelElement {
     }
 
     public AttributeSetCollection getAttributeSetCollection() {
-        return attributeSets;
+        return attributeSetCollection;
+    }
+
+    public void setup() {
+        attributeSetCollection.setup(getName());
     }
 
     public abstract void run();

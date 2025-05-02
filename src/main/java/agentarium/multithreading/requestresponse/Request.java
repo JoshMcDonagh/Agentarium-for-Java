@@ -1,4 +1,4 @@
-package agentarium.multithreading;
+package agentarium.multithreading.requestresponse;
 
 public class Request {
     private final String requester;

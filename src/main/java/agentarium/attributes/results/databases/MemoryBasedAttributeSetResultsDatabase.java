@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MemoryBasedAttributeResultsDatabase extends AttributeResultsDatabase {
+public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsDatabase {
     private final Map<String, List<Object>> propertiesMap = new HashMap<>();
     private final Map<String, Class<?>> propertyClassesMap = new HashMap<>();
 

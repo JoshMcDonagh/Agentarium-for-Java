@@ -4,22 +4,22 @@ import utils.RandomStringGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class AttributeResultsDatabaseFactory {
+public abstract class AttributeSetResultsDatabaseFactory {
     private static Class<?> databaseClass = null;
 
-    public static <T extends AttributeResultsDatabase> void setDatabaseClass(Class<T> databaseClass) {
-        AttributeResultsDatabaseFactory.databaseClass = databaseClass;
+    public static <T extends AttributeSetResultsDatabase> void setDatabaseClass(Class<T> databaseClass) {
+        AttributeSetResultsDatabaseFactory.databaseClass = databaseClass;
     }
 
     public static void setDatabaseToMemoryBased() {
-        setDatabaseClass(MemoryBasedAttributeResultsDatabase.class);
+        setDatabaseClass(MemoryBasedAttributeSetResultsDatabase.class);
     }
 
     public static void setDatabaseToDiskBased() {
-        setDatabaseClass(DiskBasedAttributeResultsDatabase.class);
+        setDatabaseClass(DiskBasedAttributeSetResultsDatabase.class);
     }
 
-    public static AttributeResultsDatabase createDatabase() {
+    public static AttributeSetResultsDatabase createDatabase() {
         // If no database class is set, default to disk-based database
         if (databaseClass == null) {
             setDatabaseToDiskBased();
@@ -27,7 +27,7 @@ public abstract class AttributeResultsDatabaseFactory {
 
         try {
             // Use reflection to instantiate the configured database class
-            AttributeResultsDatabase database = (AttributeResultsDatabase) databaseClass.getDeclaredConstructor().newInstance();
+            AttributeSetResultsDatabase database = (AttributeSetResultsDatabase) databaseClass.getDeclaredConstructor().newInstance();
             // Generate a unique path for the database
             database.setDatabasePath(RandomStringGenerator.generateRandomString(20) + ".db");
             return database;

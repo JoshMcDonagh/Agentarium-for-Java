@@ -2,7 +2,7 @@ package agentarium.attributes.results.databases;
 
 import java.util.List;
 
-public abstract class AttributeResultsDatabase {
+public abstract class AttributeSetResultsDatabase {
     private String databasePath = null;
 
     protected void setDatabasePath(String databasePath) {

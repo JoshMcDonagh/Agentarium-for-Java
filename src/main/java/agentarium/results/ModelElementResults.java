@@ -1,8 +1,6 @@
 package agentarium.results;
 
 import agentarium.ModelElement;
-import agentarium.agents.Agent;
-import agentarium.agents.AgentSet;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 
 import java.util.ArrayList;
@@ -60,7 +58,7 @@ public class ModelElementResults {
         return attributeSetCollectionResultsList.get(index);
     }
 
-    public int getAttributeSetCollectionCount() {
+    public int getAttributeSetCollectionSetCount() {
         return attributeSetCollectionResultsList.size();
     }
 

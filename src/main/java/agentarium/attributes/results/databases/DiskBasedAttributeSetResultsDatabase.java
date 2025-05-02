@@ -7,8 +7,8 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
-public class DiskBasedAttributeResultsDatabase extends AttributeResultsDatabase {
-    private static final List<DiskBasedAttributeResultsDatabase> activeDatabases = Collections.synchronizedList(new ArrayList<>());
+public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDatabase {
+    private static final List<DiskBasedAttributeSetResultsDatabase> activeDatabases = Collections.synchronizedList(new ArrayList<>());
     private static boolean shutdownHookRegistered = false;
 
     private final String PROPERTIES_TABLE_NAME = "properties_table";
@@ -21,16 +21,16 @@ public class DiskBasedAttributeResultsDatabase extends AttributeResultsDatabase 
 
     private Connection connection;
 
-    public DiskBasedAttributeResultsDatabase() {
+    public DiskBasedAttributeSetResultsDatabase() {
         synchronized (activeDatabases) {
             activeDatabases.add(this);
             if (!shutdownHookRegistered) {
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    List<DiskBasedAttributeResultsDatabase> databasesSnapshot;
+                    List<DiskBasedAttributeSetResultsDatabase> databasesSnapshot;
                     synchronized (activeDatabases) {
                         databasesSnapshot = new ArrayList<>(activeDatabases);
                     }
-                    for (DiskBasedAttributeResultsDatabase db : databasesSnapshot) {
+                    for (DiskBasedAttributeSetResultsDatabase db : databasesSnapshot) {
                         try {
                             db.disconnect();
                         } catch (Exception e) {

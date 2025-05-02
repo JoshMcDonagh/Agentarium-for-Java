@@ -3,8 +3,8 @@ package agentarium.attributes.results;
 import agentarium.attributes.AttributeSet;
 import agentarium.attributes.Event;
 import agentarium.attributes.Property;
-import agentarium.attributes.results.databases.AttributeResultsDatabase;
-import agentarium.attributes.results.databases.AttributeResultsDatabaseFactory;
+import agentarium.attributes.results.databases.AttributeSetResultsDatabase;
+import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class AttributeSetResults {
     private final String modelElementName;
     private final String attributeSetName;
-    private final AttributeResultsDatabase database;
+    private final AttributeSetResultsDatabase database;
 
     private final List<String> propertyNamesList = new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class AttributeSetResults {
     public AttributeSetResults(String modelElementName, AttributeSet attributeSet) {
         this.modelElementName = modelElementName;
         this.attributeSetName = attributeSet.getName();
-        this.database = AttributeResultsDatabaseFactory.createDatabase();
+        this.database = AttributeSetResultsDatabaseFactory.createDatabase();
         assert database != null;
         database.connect();
 

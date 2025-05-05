@@ -4,7 +4,7 @@ import agentarium.attributes.AttributeSetCollection;
 
 public abstract class ModelElement {
     private final String name;
-    private AttributeSetCollection attributeSetCollection;
+    private final AttributeSetCollection attributeSetCollection;
     private ModelElementAccessor modelElementAccessor;
 
     public ModelElement(String name, AttributeSetCollection attributeSetCollection) {

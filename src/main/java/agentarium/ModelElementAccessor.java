@@ -81,19 +81,20 @@ public class ModelElementAccessor {
     }
 
     public Environment getEnvironment() {
+        if (!settings.getAreProcessesSynced())
+            return localEnvironment;
+
         if (settings.getIsCacheUsed() && cache.doesEnvironmentExist())
             return cache.getEnvironment();
 
         Environment requestedEnvironment;
-        if (settings.getAreProcessesSynced()) {
-            try {
-                requestedEnvironment = requestResponseInterface.getEnvironmentFromCoordinator(modelElement.getName());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        } else
-            requestedEnvironment = localEnvironment;
+
+        try {
+            requestedEnvironment = requestResponseInterface.getEnvironmentFromCoordinator(modelElement.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
 
         if (settings.getIsCacheUsed())
             cache.addEnvironment(requestedEnvironment);

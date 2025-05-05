@@ -3,6 +3,7 @@ package agentarium.multithreading.requestresponse;
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.attributes.AttributeSet;
+import agentarium.environments.Environment;
 
 import java.util.Map;
 import java.util.Objects;
@@ -70,14 +71,14 @@ public class RequestResponseInterface {
         }
     }
 
-    public Map<String, AttributeSet> getEnvironmentAttributesFromCoordinator(String requesterAgentName) throws InterruptedException {
+    public Environment getEnvironmentFromCoordinator(String requesterAgentName) throws InterruptedException {
         requestQueue.put(new Request(requesterAgentName, null, RequestType.ENVIRONMENT_ATTRIBUTES_ACCESS, null));
 
         while (true) {
             while (responseQueue.isEmpty());
             Response response = responseQueue.poll();
             if (Objects.equals(response.getResponseType(), ResponseType.ENVIRONMENT_ATTRIBUTES_ACCESS) && Objects.equals(response.getDestination(), name))
-                return (Map<String, AttributeSet>) response.getPayload();
+                return (Environment) response.getPayload();
             responseQueue.put(response);
         }
     }

@@ -14,7 +14,6 @@ public class Model {
     private final AgentGenerator agentGenerator;
     private final EnvironmentGenerator environmentGenerator;
     private ModelScheduler scheduler;
-    private final Results results;
 
     public Model(ModelSettings settings,
                  AgentGenerator agentGenerator,
@@ -25,10 +24,9 @@ public class Model {
         this.agentGenerator = agentGenerator;
         this.environmentGenerator = environmentGenerator;
         this.scheduler = scheduler;
-        this.results = results;
     }
 
-    public void run() {
+    public Results run() {
         List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(settings);
         Environment environment = environmentGenerator.generateEnvironment(settings);
 

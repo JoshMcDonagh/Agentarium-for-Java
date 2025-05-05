@@ -28,7 +28,15 @@ public abstract class Results {
     private boolean isAccumulatedAgentAttributeSetDataConnected = false;
     private boolean isProcessedEnvironmentAttributeSetDataConnected = false;
 
+    private boolean isImmutable = false;
+
+    public void seal() {
+        isImmutable = true;
+    }
+
     public void setAgentNames(AgentSet agents) {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         for (Agent agent : agents)
             agentNames.add(agent.getName());
     }
@@ -38,12 +46,16 @@ public abstract class Results {
     }
 
     public void setAgentResults(AgentResults agentResults) {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         this.agentResults = agentResults;
         if (agentResults != null)
             isRawAgentAttributeSetDataConnected = true;
     }
 
     public void setEnvironmentResults(EnvironmentResults environmentResults) {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         this.environmentResults = environmentResults;
         if (agentResults != null)
             isRawEnvironmentAttributeSetDataConnected = true;
@@ -170,6 +182,8 @@ public abstract class Results {
 
 
     public void accumulateAgentAttributeData() {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         for (int i = 0; i < agentResults.getAttributeSetCollectionSetCount(); i++) {
             AttributeSetCollectionResults agentAttributeSetCollectionResults = agentResults.getAttributeSetCollectionResults(i);
 
@@ -217,6 +231,8 @@ public abstract class Results {
     }
 
     public void processModelAttributeData() {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         AttributeSetCollectionResults environmentAttributeSetCollectionResults = environmentResults.getAttributeSetCollectionResults();
 
         if (processedEnvironmentAttributeSetResultsDatabaseList.isEmpty()) {
@@ -259,6 +275,8 @@ public abstract class Results {
     }
 
     public void mergeWithBeforeAccumulation(Results otherResults) {
+        if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
+
         agentResults.mergeWith(otherResults.agentResults);
     }
 

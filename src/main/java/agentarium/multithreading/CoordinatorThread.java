@@ -3,6 +3,8 @@ package agentarium.multithreading;
 import agentarium.ModelSettings;
 import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
+import agentarium.multithreading.requestresponse.CoordinatorRequestHandler;
+import agentarium.multithreading.requestresponse.Request;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 
 public class CoordinatorThread implements Runnable {
@@ -25,6 +27,22 @@ public class CoordinatorThread implements Runnable {
     @Override
     public void run() {
         AgentSet globalAgentSet = new AgentSet();
+        CoordinatorRequestHandler.initialise(
+                threadName,
+                settings,
+                requestResponseController.getResponseQueue(),
+                globalAgentSet,
+                environment);
 
+        while (true) {
+            if (!requestResponseController.getRequestQueue().isEmpty()) {
+                Request request = requestResponseController.getRequestQueue().poll();
+                try {
+                    CoordinatorRequestHandler.handleCoordinatorRequest(request);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 }

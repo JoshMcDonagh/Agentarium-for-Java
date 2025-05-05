@@ -21,12 +21,12 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
     private final AgentSet updatedAgents;
 
 
-    public WorkerThread(String name,
+    public WorkerThread(String threadName,
                         ModelSettings settings,
                         ModelScheduler scheduler,
                         RequestResponseController requestResponseController,
                         AgentSet agents) {
-        this.threadName = name;
+        this.threadName = threadName;
         this.settings = settings;
         this.scheduler = scheduler;
         this.requestResponseController = requestResponseController;

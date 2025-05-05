@@ -1,5 +1,6 @@
 package agentarium.multithreading.requestresponse;
 
+import agentarium.ModelSettings;
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.attributes.AttributeSet;
@@ -16,11 +17,11 @@ public class RequestResponseInterface {
     private final BlockingQueue<Request> requestQueue;
     private final BlockingQueue<Response> responseQueue;
 
-    RequestResponseInterface(String name, boolean areProcessesSynced, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
+    public RequestResponseInterface(String name, ModelSettings settings, RequestResponseController requestResponseController) {
         this.name = name;
-        this.areProcessesSynced = areProcessesSynced;
-        this.requestQueue = requestQueue;
-        this.responseQueue = responseQueue;
+        this.areProcessesSynced = settings.getAreProcessesSynced();
+        this.requestQueue = requestResponseController.getRequestQueue();
+        this.responseQueue = requestResponseController.getResponseQueue();
     }
 
     private void wait(RequestType requestType, ResponseType responseType) throws InterruptedException {
@@ -47,8 +48,8 @@ public class RequestResponseInterface {
         wait(RequestType.UPDATE_COORDINATOR_AGENTS, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR);
     }
 
-    public Agent getAgentFromCoordinator(String requesterAgentName, Predicate<Agent> agentFilter) throws InterruptedException {
-        requestQueue.put(new Request(requesterAgentName, null, RequestType.AGENT_ACCESS, agentFilter));
+    public Agent getAgentFromCoordinator(String requesterAgentName, String targetAgentName) throws InterruptedException {
+        requestQueue.put(new Request(requesterAgentName, targetAgentName, RequestType.AGENT_ACCESS, null));
 
         while (true) {
             while (responseQueue.isEmpty());

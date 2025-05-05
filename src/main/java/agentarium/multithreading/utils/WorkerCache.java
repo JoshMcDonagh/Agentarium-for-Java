@@ -3,6 +3,7 @@ package agentarium.multithreading.utils;
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.attributes.AttributeSet;
+import agentarium.environments.Environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +13,9 @@ import java.util.function.Predicate;
 
 public class WorkerCache {
     private final List<Predicate<Agent>> agentFiltersCacheList = new ArrayList<>();
-    private final Map<String, AttributeSet> environmentAttributeSetMap = new HashMap<>();
     private final AgentSet agentSetCache;
+
+    private Environment environment = null;
 
     public WorkerCache(boolean isAgentCopiesHeld) {
         agentSetCache = new AgentSet(isAgentCopiesHeld);
@@ -21,8 +23,8 @@ public class WorkerCache {
 
     public void clear() {
         agentFiltersCacheList.clear();
-        environmentAttributeSetMap.clear();
         agentSetCache.clear();
+        environment = null;
     }
 
     public boolean doesAgentFilterExist(Predicate<Agent> agentFilter) {
@@ -53,15 +55,15 @@ public class WorkerCache {
         agentSetCache.add(agentSet);
     }
 
-    public boolean doEnvironmentAttributeSetsExist() {
-        return !environmentAttributeSetMap.isEmpty();
+    public boolean doesEnvironmentExist() {
+        return environment != null;
     }
 
-    public void setEnvironmentAttributeSet(AttributeSet environmentAttributeSet) {
-        environmentAttributeSetMap.put(environmentAttributeSet.getName(), environmentAttributeSet);
+    public Environment getEnvironment() {
+        return environment;
     }
 
-    public AttributeSet getEnvironmentAttributeSet(String attributeSetName) {
-        return environmentAttributeSetMap.get(attributeSetName);
+    public void addEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

@@ -41,6 +41,11 @@ public abstract class Results {
             agentNames.add(agent.getName());
     }
 
+    public void setAgentNames(List<AgentSet> agentSetList) {
+        for (AgentSet agents : agentSetList)
+            setAgentNames(agents);
+    }
+
     public List<String> getAgentNames() {
         return agentNames;
     }
@@ -230,7 +235,7 @@ public abstract class Results {
         }
     }
 
-    public void processModelAttributeData() {
+    public void processEnvironmentAttributeData() {
         if (isImmutable) throw new IllegalStateException("Cannot modify Results: object is immutable.");
 
         AttributeSetCollectionResults environmentAttributeSetCollectionResults = environmentResults.getAttributeSetCollectionResults();

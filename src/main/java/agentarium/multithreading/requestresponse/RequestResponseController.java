@@ -1,16 +1,15 @@
 package agentarium.multithreading.requestresponse;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class RequestResponseController {
     private final boolean areProcessesSynced;
-    private final BlockingQueue<Request> requestQueue;
-    private final BlockingQueue<Response> responseQueue;
+    private final BlockingQueue<Request> requestQueue = new LinkedBlockingQueue<>();;
+    private final BlockingQueue<Response> responseQueue = new LinkedBlockingQueue<>();;
 
-    public RequestResponseController(boolean areProcessesSynced, BlockingQueue<Request> requestQueue, BlockingQueue<Response> responseQueue) {
+    public RequestResponseController(boolean areProcessesSynced) {
         this.areProcessesSynced = areProcessesSynced;
-        this.requestQueue = requestQueue;
-        this.responseQueue = responseQueue;
     }
 
     public BlockingQueue<Request> getRequestQueue() {

@@ -1,101 +1,177 @@
 package agentarium;
 
+import agentarium.agents.AgentGenerator;
 import agentarium.attributes.AttributeSetCollection;
+import agentarium.environments.EnvironmentGenerator;
 import agentarium.results.Results;
+import agentarium.scheduler.ModelScheduler;
 
+/**
+ * Encapsulates all configurable settings for a simulation model run.
+ *
+ * <p>Provides setters for various parameters such as the number of agents,
+ * simulation length, multithreading behaviour, result handling,
+ * and environment/agent generators.
+ */
 public class ModelSettings {
+
+    // Core simulation parameters
     private int numOfAgents = 1;
     private int numOfCores = 1;
     private int numOfTicksToRun = 1;
     private int numOfWarmUpTicks = 0;
+
+    // Attribute configurations for agents and the environment
     private AttributeSetCollection baseAgentAttributeSetCollection = new AttributeSetCollection();
     private AttributeSetCollection baseEnvironmentAttributeSetCollection = new AttributeSetCollection();
+
+    // Flags for process coordination and optimisation
     private boolean areProcessesSynced = false;
     private boolean doAgentStoresHoldAgentCopies = false;
     private boolean isCacheUsed = false;
-    private Class<? extends Results> resultsClass;
 
+    // Core components required for simulation
+    private Class<? extends Results> resultsClass;
+    private AgentGenerator agentGenerator;
+    private EnvironmentGenerator environmentGenerator;
+    private ModelScheduler modelScheduler;
+
+    // === Setters ===
+
+    /** Sets the number of agents to initialise. */
     public void setNumOfAgents(int numOfAgents) {
         this.numOfAgents = numOfAgents;
     }
 
+    /** Sets the number of processing cores to use for simulation. */
     public void setNumOfCores(int numOfCores) {
         this.numOfCores = numOfCores;
     }
 
+    /** Sets the number of simulation ticks (excluding warm-up). */
     public void setNumOfTicksToRun(int numOfTicksToRun) {
         this.numOfTicksToRun = numOfTicksToRun;
     }
 
+    /** Sets the number of warm-up ticks before data is collected. */
     public void setNumOfWarmUpTicks(int numOfWarmUpTicks) {
         this.numOfWarmUpTicks = numOfWarmUpTicks;
     }
 
+    /** Sets the base attribute configuration for all agents. */
     public void setBaseAgentAttributeSetCollection(AttributeSetCollection baseAgentAttributeSetCollection) {
         this.baseAgentAttributeSetCollection = baseAgentAttributeSetCollection;
     }
 
+    /** Sets the base attribute configuration for the environment. */
     public void setBaseEnvironmentAttributeSetCollection(AttributeSetCollection baseEnvironmentAttributeSetCollection) {
         this.baseEnvironmentAttributeSetCollection = baseEnvironmentAttributeSetCollection;
     }
 
+    /** Specifies whether simulation processes are synchronised (e.g., central coordinator). */
     public void setAreProcessesSynced(boolean areProcessesSynced) {
         this.areProcessesSynced = areProcessesSynced;
     }
 
+    /** Sets whether agent stores retain copies of agents or references. */
     public void setDoAgentStoresHoldAgentCopies(boolean doAgentStoresHoldAgentCopies) {
         this.doAgentStoresHoldAgentCopies = doAgentStoresHoldAgentCopies;
     }
 
+    /** Enables or disables use of caching mechanisms within agent stores. */
     public void setIsCacheUsed(boolean isCacheUsed) {
         this.isCacheUsed = isCacheUsed;
     }
 
+    /** Sets the results class that will be used to store and process simulation data. */
     public <T extends Results> void setResultsClass(Class<T> resultsClass) {
         this.resultsClass = resultsClass;
     }
 
+    /** Sets the generator responsible for creating initial agent populations. */
+    public void setAgentGenerator(AgentGenerator agentGenerator) {
+        this.agentGenerator = agentGenerator;
+    }
+
+    /** Sets the generator responsible for creating the simulation environment. */
+    public void setEnvironmentGenerator(EnvironmentGenerator environmentGenerator) {
+        this.environmentGenerator = environmentGenerator;
+    }
+
+    /** Sets the scheduler used to coordinate agent and environment updates. */
+    public void setModelScheduler(ModelScheduler modelScheduler) {
+        this.modelScheduler = modelScheduler;
+    }
+
+    // === Getters ===
+
+    /** @return the number of agents configured for the model */
     public int getNumOfAgents() {
         return numOfAgents;
     }
 
+    /** @return the number of cores the simulation will use */
     public int getNumOfCores() {
         return numOfCores;
     }
 
+    /** @return the number of active simulation ticks (excluding warm-up) */
     public int getNumOfTicksToRun() {
         return numOfTicksToRun;
     }
 
+    /** @return the number of warm-up ticks before simulation begins recording data */
     public int getNumOfWarmUpTicks() {
         return numOfWarmUpTicks;
     }
 
+    /** @return the total number of ticks including warm-up and active simulation */
     public int getTotalNumOfTicks() {
         return getNumOfWarmUpTicks() + getNumOfTicksToRun();
     }
 
+    /** @return the default attribute set assigned to agents at creation */
     public AttributeSetCollection getBaseAgentAttributeSetCollection() {
         return baseAgentAttributeSetCollection;
     }
 
+    /** @return the default attribute set assigned to the environment */
     public AttributeSetCollection getBaseEnvironmentAttributeSetCollection() {
         return baseEnvironmentAttributeSetCollection;
     }
 
+    /** @return true if processes are synchronised during simulation */
     public boolean getAreProcessesSynced() {
         return areProcessesSynced;
     }
 
+    /** @return true if agent stores are configured to hold agent copies */
     public boolean getDoAgentStoresHoldAgentCopies() {
         return doAgentStoresHoldAgentCopies;
     }
 
+    /** @return true if caching is enabled for agent lookups */
     public boolean getIsCacheUsed() {
         return isCacheUsed;
     }
 
+    /** @return the results class used to process and store simulation output */
     public Class<? extends Results> getResultsClass() {
         return resultsClass;
+    }
+
+    /** @return the agent generator assigned to this model run */
+    public AgentGenerator getAgentGenerator() {
+        return agentGenerator;
+    }
+
+    /** @return the environment generator assigned to this model run */
+    public EnvironmentGenerator getEnvironmentGenerator() {
+        return environmentGenerator;
+    }
+
+    /** @return the scheduler used for simulation progression */
+    public ModelScheduler getModelScheduler() {
+        return modelScheduler;
     }
 }

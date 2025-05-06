@@ -1,10 +1,8 @@
 package agentarium;
 
 import agentarium.agents.Agent;
-import agentarium.agents.AgentGenerator;
 import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
-import agentarium.environments.EnvironmentGenerator;
 import agentarium.multithreading.CoordinatorThread;
 import agentarium.multithreading.WorkerThread;
 import agentarium.multithreading.requestresponse.RequestResponseController;
@@ -12,7 +10,6 @@ import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
 import agentarium.results.EnvironmentResults;
 import agentarium.results.Results;
-import agentarium.scheduler.ModelScheduler;
 import utils.DeepCopier;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,36 +17,61 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+/**
+ * Main class for executing an agent-based model using multithreaded execution.
+ *
+ * <p>This class is responsible for configuring the environment, distributing agents across worker threads,
+ * running the simulation (synchronously or asynchronously), and collecting results.
+ */
 public class Model {
-    private final ModelSettings settings;
-    private final AgentGenerator agentGenerator;
-    private final EnvironmentGenerator environmentGenerator;
-    private ModelScheduler scheduler;
 
-    public Model(ModelSettings settings,
-                 AgentGenerator agentGenerator,
-                 EnvironmentGenerator environmentGenerator,
-                 ModelScheduler scheduler) {
+    /** Configuration settings for this model run */
+    private final ModelSettings settings;
+
+    /**
+     * Constructs a new model instance with the specified settings.
+     *
+     * @param settings the settings to use for model initialisation and execution
+     */
+    public Model(ModelSettings settings) {
         this.settings = settings;
-        this.agentGenerator = agentGenerator;
-        this.environmentGenerator = environmentGenerator;
-        this.scheduler = scheduler;
     }
 
-    public Results run() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        List<AgentSet> agentsForEachCore = agentGenerator.getAgentsForEachCore(settings);
-        Environment environment = environmentGenerator.generateEnvironment(settings);
+    /**
+     * Runs the agent-based model according to the configured settings.
+     *
+     * @return a {@link Results} object containing accumulated simulation data
+     * @throws NoSuchMethodException if the results class has no default constructor
+     * @throws InvocationTargetException if constructor invocation fails
+     * @throws InstantiationException if instantiating the results class fails
+     * @throws IllegalAccessException if the constructor is not accessible
+     */
+    public Results run() throws NoSuchMethodException, InvocationTargetException,
+            InstantiationException, IllegalAccessException {
+
+        // Distribute agents among cores
+        List<AgentSet> agentsForEachCore = settings.getAgentGenerator().getAgentsForEachCore(settings);
+
+        // Generate the simulation environment
+        Environment environment = settings.getEnvironmentGenerator().generateEnvironment(settings);
+
+        // Instantiate results container
         Results results = settings.getResultsClass().getDeclaredConstructor().newInstance();
         results.setAgentNames(agentsForEachCore);
 
+        // Prepare the environment
         environment.setup();
 
+        // Set up multithreaded execution
         ExecutorService executorService = Executors.newFixedThreadPool(settings.getNumOfCores());
         List<Future<Results>> futures = new ArrayList<>();
 
+        // Shared controller for inter-thread communication
         RequestResponseController requestResponseController = new RequestResponseController(settings.getAreProcessesSynced());
+
         Thread coordinatorThread = null;
 
+        // Set up accessor for the environment model element
         ModelElementAccessor environmentModelElementAccessor = new ModelElementAccessor(
                 environment,
                 new AgentSet(),
@@ -58,25 +80,34 @@ public class Model {
                 new RequestResponseInterface(environment.getName(), settings, requestResponseController),
                 environment
         );
+
         environment.setModelElementAccessor(environmentModelElementAccessor);
 
+        // Launch central coordinator if synchronisation is required
         if (settings.getAreProcessesSynced()) {
             CoordinatorThread coordinator = new CoordinatorThread(
                     String.valueOf(settings.getNumOfCores()),
                     settings,
                     environment,
-                    requestResponseController);
+                    requestResponseController
+            );
             coordinatorThread = new Thread(coordinator);
             coordinatorThread.start();
         }
 
+        // Launch worker threads
         for (int coreIndex = 0; coreIndex < settings.getNumOfCores(); coreIndex++) {
+
+            // Create an agent set for the current core
             AgentSet coreAgentSet = new AgentSet(settings.getDoAgentStoresHoldAgentCopies());
 
+            // Optional local cache for worker thread
             WorkerCache cache = null;
-            if (settings.getIsCacheUsed())
+            if (settings.getIsCacheUsed()) {
                 cache = new WorkerCache(settings.getDoAgentStoresHoldAgentCopies());
+            }
 
+            // Prepare agents for this core and assign them accessors
             for (Agent agent : coreAgentSet) {
                 Environment localEnvironment = DeepCopier.deepCopy(environment, Environment.class);
                 ModelElementAccessor agentModelElementAccessor = new ModelElementAccessor(
@@ -87,32 +118,35 @@ public class Model {
                         new RequestResponseInterface(agent.getName(), settings, requestResponseController),
                         localEnvironment
                 );
+                // Note: model element accessor is prepared but not stored in this scope
             }
 
+            // Add the pre-assigned agent set for this core
             coreAgentSet.add(agentsForEachCore.get(coreIndex));
 
+            // Create and submit the worker task
             Callable<Results> worker = new WorkerThread<>(
-                String.valueOf(coreIndex),
+                    String.valueOf(coreIndex),
                     settings,
-                    scheduler,
                     requestResponseController,
                     coreAgentSet
             );
-
             futures.add(executorService.submit(worker));
         }
 
+        // Collect results from each worker thread
         try {
             for (Future<Results> future : futures) {
                 Results coreResult = future.get();
                 results.mergeWithBeforeAccumulation(coreResult);
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Consider logging or propagating
         } finally {
             executorService.shutdown();
         }
 
+        // Gracefully stop the coordinator thread if it was used
         if (settings.getAreProcessesSynced() && coordinatorThread != null) {
             coordinatorThread.interrupt();
             try {
@@ -122,10 +156,12 @@ public class Model {
             }
         }
 
+        // Post-processing of results
         results.setEnvironmentResults(new EnvironmentResults(environment));
         results.accumulateAgentAttributeData();
         results.processEnvironmentAttributeData();
-        results.seal();
+        results.seal(); // Finalise results
+
         return results;
     }
 }

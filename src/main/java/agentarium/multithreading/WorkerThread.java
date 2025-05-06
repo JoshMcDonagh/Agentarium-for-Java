@@ -15,7 +15,6 @@ import java.util.concurrent.Callable;
 public class WorkerThread<T extends Results> implements Callable<Results> {
     private final String threadName;
     private final ModelSettings settings;
-    private final ModelScheduler scheduler;
     private final RequestResponseController requestResponseController;
     private final AgentSet agents;
     private final AgentSet updatedAgents;
@@ -23,12 +22,10 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
 
     public WorkerThread(String threadName,
                         ModelSettings settings,
-                        ModelScheduler scheduler,
                         RequestResponseController requestResponseController,
                         AgentSet agents) {
         this.threadName = threadName;
         this.settings = settings;
-        this.scheduler = scheduler;
         this.requestResponseController = requestResponseController;
         this.agents = agents;
         this.updatedAgents = this.agents.duplicate();
@@ -48,7 +45,7 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
             requestResponseInterface.updateCoordinatorAgents(agents);
 
         for (int tick = 0; tick < settings.getTotalNumOfTicks(); tick++) {
-            scheduler.runTick(agents);
+            this.settings.getModelScheduler().runTick(agents);
 
             if (settings.getAreProcessesSynced()) {
                 requestResponseInterface.waitUntilAllWorkersFinishTick();

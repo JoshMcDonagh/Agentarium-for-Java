@@ -67,7 +67,7 @@ public class Model {
         List<Future<Results>> futures = new ArrayList<>();
 
         // Shared controller for inter-thread communication
-        RequestResponseController requestResponseController = new RequestResponseController(settings.getAreProcessesSynced());
+        RequestResponseController requestResponseController = new RequestResponseController(settings);
 
         Thread coordinatorThread = null;
 

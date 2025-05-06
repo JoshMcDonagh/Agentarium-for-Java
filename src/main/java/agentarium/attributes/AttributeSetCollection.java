@@ -4,6 +4,8 @@ import agentarium.attributes.results.AttributeSetCollectionResults;
 import com.google.gson.reflect.TypeToken;
 import utils.DeepCopier;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +26,10 @@ public class AttributeSetCollection {
     private String modelElementName;
 
     /** Maps attribute set names to their list indexes for fast access */
-    private Map<String, Integer> attributeSetIndexes;
+    private final Map<String, Integer> attributeSetIndexes = new HashMap<String, Integer>();
 
     /** Ordered list of attribute sets in this collection */
-    private List<AttributeSet> attributeSets;
+    private final List<AttributeSet> attributeSets = new ArrayList<AttributeSet>();
 
     /** Results structure for recording attribute data across ticks */
     private AttributeSetCollectionResults attributeSetCollectionResults;

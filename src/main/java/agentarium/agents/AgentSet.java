@@ -84,7 +84,7 @@ public class AgentSet implements Iterable<Agent> {
         } else {
             index = agents.size();
             agentIndexes.put(agent.getName(), index);
-            agents.add(null); // Ensure list is long enough before setting
+            agents.add(agent); // Ensure list is long enough before setting
         }
 
         if (isStoringAgentCopies)

@@ -29,7 +29,7 @@ public abstract class AttributeSetResultsDatabaseFactory {
             // Use reflection to instantiate the configured database class
             AttributeSetResultsDatabase database = (AttributeSetResultsDatabase) databaseClass.getDeclaredConstructor().newInstance();
             // Generate a unique path for the database
-            database.setDatabasePath(RandomStringGenerator.generateRandomString(20) + ".db");
+            database.setDatabasePath(RandomStringGenerator.generateUniqueRandomString(20) + ".db");
             return database;
         } catch (NoSuchMethodException e) {
             System.err.println("Error: The specified database class does not have a no-argument constructor.");

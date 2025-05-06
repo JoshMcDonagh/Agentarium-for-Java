@@ -4,33 +4,68 @@ import utils.RandomStringGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Factory class for creating instances of {@link AttributeSetResultsDatabase}.
+ *
+ * <p>Supports dynamic switching between in-memory and disk-based result storage
+ * via static configuration methods. This allows the simulation to use different
+ * result backends without changing core logic.
+ */
 public abstract class AttributeSetResultsDatabaseFactory {
+
+    /** The class used to instantiate new database instances */
     private static Class<?> databaseClass = null;
 
+    /**
+     * Manually sets the class used for creating result databases.
+     *
+     * @param databaseClass a class that extends {@link AttributeSetResultsDatabase} and has a no-argument constructor
+     * @param <T> the database type
+     */
     public static <T extends AttributeSetResultsDatabase> void setDatabaseClass(Class<T> databaseClass) {
         AttributeSetResultsDatabaseFactory.databaseClass = databaseClass;
     }
 
+    /**
+     * Sets the results database to use an in-memory backend.
+     * Useful for lightweight or test simulations.
+     */
     public static void setDatabaseToMemoryBased() {
         setDatabaseClass(MemoryBasedAttributeSetResultsDatabase.class);
     }
 
+    /**
+     * Sets the results database to use a disk-based SQLite backend.
+     * Useful for full-scale runs or persistent storage.
+     */
     public static void setDatabaseToDiskBased() {
         setDatabaseClass(DiskBasedAttributeSetResultsDatabase.class);
     }
 
+    /**
+     * Creates a new instance of the configured results database.
+     *
+     * <p>If no database class has been configured, the default is a disk-based database.
+     * A unique database path is generated automatically.
+     *
+     * @return a new {@link AttributeSetResultsDatabase} instance, or {@code null} on error
+     */
     public static AttributeSetResultsDatabase createDatabase() {
-        // If no database class is set, default to disk-based database
+        // Default to disk-based if not already set
         if (databaseClass == null) {
             setDatabaseToDiskBased();
         }
 
         try {
-            // Use reflection to instantiate the configured database class
-            AttributeSetResultsDatabase database = (AttributeSetResultsDatabase) databaseClass.getDeclaredConstructor().newInstance();
-            // Generate a unique path for the database
+            // Instantiate the configured database class using reflection
+            AttributeSetResultsDatabase database =
+                    (AttributeSetResultsDatabase) databaseClass.getDeclaredConstructor().newInstance();
+
+            // Assign a unique filename as the database path (even for memory-based, for traceability)
             database.setDatabasePath(RandomStringGenerator.generateUniqueRandomString(20) + ".db");
+
             return database;
+
         } catch (NoSuchMethodException e) {
             System.err.println("Error: The specified database class does not have a no-argument constructor.");
             e.printStackTrace();
@@ -44,6 +79,7 @@ public abstract class AttributeSetResultsDatabaseFactory {
             System.err.println("Error: Constructor of the database class is not accessible.");
             e.printStackTrace();
         }
+
         return null;
     }
 }

@@ -5,7 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An in-memory implementation of {@link AttributeSetResultsDatabase}.
+ *
+ * <p>This class stores all simulation results directly in RAM, using Java collections.
+ * It is useful for lightweight simulations, unit tests, or post-processing before output.
+ *
+ * <p>Unlike {@link DiskBasedAttributeSetResultsDatabase}, this class does not persist results to disk.
+ */
 public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsDatabase {
+
+    // === Internal maps to store values by name ===
+
     private final Map<String, List<Object>> propertiesMap = new HashMap<>();
     private final Map<String, Class<?>> propertyClassesMap = new HashMap<>();
 
@@ -15,11 +26,18 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
     private final Map<String, List<Object>> postEventsMap = new HashMap<>();
     private final Map<String, Class<?>> postEventClassesMap = new HashMap<>();
 
+    /**
+     * Overrides setDatabasePath but ignores the value, as memory-based storage does not require a file path.
+     *
+     * @param databasePath ignored
+     */
     @Override
     protected void setDatabasePath(String databasePath) {
-        // Memory-based databases do not require a database path, so ignore this setting.
+        // No-op for in-memory implementation
         return;
     }
+
+    // === Tick-by-tick value addition ===
 
     @Override
     public <T> void addPropertyValue(String propertyName, T propertyValue) {
@@ -31,7 +49,7 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
         if (propertyClassesMap.get(propertyName).isInstance(propertyValue))
             propertiesMap.get(propertyName).add(propertyValue);
         else
-            throw new IllegalArgumentException("Property " + propertyName + " is not an instance of " + propertyValue.getClass());
+            throw new IllegalArgumentException("Property '" + propertyName + "' is not an instance of " + propertyValue.getClass().getSimpleName());
     }
 
     @Override
@@ -44,7 +62,7 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
         if (preEventClassesMap.get(preEventName).isInstance(preEventValue))
             preEventsMap.get(preEventName).add(preEventValue);
         else
-            throw new IllegalArgumentException("Pre-Event " + preEventName + " is not an instance of " + preEventValue.getClass());
+            throw new IllegalArgumentException("Pre-event '" + preEventName + "' is not an instance of " + preEventValue.getClass().getSimpleName());
     }
 
     @Override
@@ -57,16 +75,19 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
         if (postEventClassesMap.get(postEventName).isInstance(postEventValue))
             postEventsMap.get(postEventName).add(postEventValue);
         else
-            throw new IllegalArgumentException("Post-Event " + postEventName + " is not an instance of " + postEventValue.getClass());
+            throw new IllegalArgumentException("Post-event '" + postEventName + "' is not an instance of " + postEventValue.getClass().getSimpleName());
     }
+
+    // === Column replacement ===
 
     @Override
     public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
         if (propertiesMap.containsKey(propertyName)) {
             propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
             propertiesMap.put(propertyName, propertyValues);
-        } else
-            throw new IllegalArgumentException("Property " + propertyName + " does not exist and cannot be replaced.");
+        } else {
+            throw new IllegalArgumentException("Property '" + propertyName + "' does not exist and cannot be replaced.");
+        }
     }
 
     @Override
@@ -74,8 +95,9 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
         if (preEventsMap.containsKey(preEventName)) {
             preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
             preEventsMap.put(preEventName, preEventValues);
-        } else
-            throw new IllegalArgumentException("Pre-Event " + preEventName + " does not exist and cannot be replaced.");
+        } else {
+            throw new IllegalArgumentException("Pre-event '" + preEventName + "' does not exist and cannot be replaced.");
+        }
     }
 
     @Override
@@ -83,9 +105,12 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
         if (postEventsMap.containsKey(postEventName)) {
             postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
             postEventsMap.put(postEventName, postEventValues);
-        } else
-            throw new IllegalArgumentException("Post-Event " + postEventName + " does not exist and cannot be replaced.");
+        } else {
+            throw new IllegalArgumentException("Post-event '" + postEventName + "' does not exist and cannot be replaced.");
+        }
     }
+
+    // === Column retrieval ===
 
     @Override
     public List<Object> getPropertyColumnAsList(String propertyName) {

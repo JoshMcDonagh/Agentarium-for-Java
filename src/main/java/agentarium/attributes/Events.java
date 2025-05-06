@@ -3,27 +3,69 @@ package agentarium.attributes;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A concrete collection class for managing {@link Event} attributes.
+ *
+ * <p>Each event is uniquely named and stored internally. During each simulation tick,
+ * the {@link #run()} method checks whether each event is triggered before executing its logic.
+ *
+ * <p>This class extends {@link Attributes} and uses the underlying storage and indexing mechanisms
+ * provided there.
+ */
 public class Events extends Attributes {
+
+    /** Optional separate index map for direct access to events by name (not currently used) */
     private Map<String, Integer> eventIndexes;
+
+    /** Optional separate list of events (not currently used directly; storage is inherited) */
     private List<Event> events;
 
+    /**
+     * Adds a single event to the collection.
+     *
+     * @param event the event to add
+     */
     public void add(Event event) {
         addAttribute(event);
     }
 
+    /**
+     * Adds a list of events to the collection.
+     *
+     * @param events a list of {@link Event} instances
+     */
     public void add(List<Event> events) {
         for (Event event : events)
             add(event);
     }
 
+    /**
+     * Retrieves an event by name.
+     *
+     * @param name the name of the event
+     * @return the matching {@link Event}, or null if not found
+     */
     public Event get(String name) {
         return (Event) getAttribute(name);
     }
 
+    /**
+     * Retrieves an event by index.
+     *
+     * @param index the index of the event
+     * @return the {@link Event} at the given index
+     */
     public Event get(int index) {
         return (Event) getAttribute(index);
     }
 
+    /**
+     * Executes all triggered events in the collection.
+     *
+     * <p>Each event is first checked with {@code isTriggered()} before being run.
+     * This allows events to conditionally execute based on internal or external logic.
+     */
+    @Override
     public void run() {
         for (int i = 0; i < size(); i++) {
             Event event = get(i);

@@ -7,7 +7,18 @@ import java.io.File;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Concrete implementation of {@link AttributeSetResultsDatabase} that stores results
+ * in a temporary SQLite database file.
+ *
+ * <p>Each run of the simulation creates a new SQLite database that is deleted on shutdown.
+ * Values are serialised to JSON strings to support flexible data types.
+ *
+ * <p>This class supports both incremental (`addXValue`) and bulk (`setXColumn`) writes.
+ */
 public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDatabase {
+
+    /** Thread-safe list of currently active databases to auto-disconnect on JVM shutdown */
     private static final List<DiskBasedAttributeSetResultsDatabase> activeDatabases = Collections.synchronizedList(new ArrayList<>());
     private static boolean shutdownHookRegistered = false;
 
@@ -21,16 +32,17 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
 
     private Connection connection;
 
+    /** Registers this instance for automatic disconnect on JVM shutdown */
     public DiskBasedAttributeSetResultsDatabase() {
         synchronized (activeDatabases) {
             activeDatabases.add(this);
             if (!shutdownHookRegistered) {
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    List<DiskBasedAttributeSetResultsDatabase> databasesSnapshot;
+                    List<DiskBasedAttributeSetResultsDatabase> snapshot;
                     synchronized (activeDatabases) {
-                        databasesSnapshot = new ArrayList<>(activeDatabases);
+                        snapshot = new ArrayList<>(activeDatabases);
                     }
-                    for (DiskBasedAttributeSetResultsDatabase db : databasesSnapshot) {
+                    for (DiskBasedAttributeSetResultsDatabase db : snapshot) {
                         try {
                             db.disconnect();
                         } catch (Exception e) {
@@ -43,6 +55,9 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         }
     }
 
+    /**
+     * Establishes an SQLite connection and creates the required tables.
+     */
     @Override
     public void connect() {
         if (connection != null)
@@ -56,6 +71,9 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         }
     }
 
+    /**
+     * Closes the SQLite connection and deletes the database file.
+     */
     @Override
     public void disconnect() {
         synchronized (activeDatabases) {
@@ -75,6 +93,8 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
             }
         }
     }
+
+    // === Property/Event Value Recording (Per-Tick) ===
 
     @Override
     public <T> void addPropertyValue(String propertyName, T propertyValue) {
@@ -97,6 +117,8 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         insertData(POST_EVENTS_TABLE_NAME, postEventName, serialiseValue(postEventValue));
     }
 
+    // === Bulk Column Replacement ===
+
     @Override
     public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
         propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
@@ -115,6 +137,8 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         setColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
     }
 
+    // === Column Retrieval ===
+
     @Override
     public List<Object> getPropertyColumnAsList(String propertyName) {
         return retrieveColumn(PROPERTIES_TABLE_NAME, propertyName, propertyClassesMap.get(propertyName));
@@ -130,9 +154,12 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         return retrieveColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventClassesMap.get(postEventName));
     }
 
+    // === Table & Column Management ===
+
+    /** Ensures a table column exists, creating it if needed. */
     private void ensureColumnExists(String tableName, String columnName) {
-        String addColumnSQL = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " TEXT;";
-        try (PreparedStatement stmt = connection.prepareStatement(addColumnSQL)) {
+        String sql = "ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " TEXT;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
             if (!e.getMessage().contains("duplicate column name"))
@@ -140,25 +167,28 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         }
     }
 
+    /** Creates base tables for properties and events if they do not exist. */
     private void createAttributeTables() {
         createTable(PROPERTIES_TABLE_NAME);
         createTable(PRE_EVENTS_TABLE_NAME);
         createTable(POST_EVENTS_TABLE_NAME);
     }
 
+    /** Creates a new table with a primary key and no columns by default. */
     private void createTable(String tableName) {
-        String createSQL = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INTEGER PRIMARY KEY);";
-        try (PreparedStatement stmt = connection.prepareStatement(createSQL)) {
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (id INTEGER PRIMARY KEY);";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error creating table '" + tableName + "': " + e.getMessage(), e);
         }
     }
 
+    /** Inserts a single value into a column. */
     private void insertData(String tableName, String columnName, String value) {
         ensureColumnExists(tableName, columnName);
-        String insertSQL = "INSERT INTO " + tableName + " (" + columnName + ") VALUES (?);";
-        try (PreparedStatement stmt = connection.prepareStatement(insertSQL)) {
+        String sql = "INSERT INTO " + tableName + " (" + columnName + ") VALUES (?);";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, value);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -166,6 +196,7 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         }
     }
 
+    /** Replaces all rows in a column with the provided values. */
     private void setColumn(String tableName, String columnName, List<Object> values) {
         ensureColumnExists(tableName, columnName);
         String deleteSQL = "DELETE FROM " + tableName + ";";
@@ -178,11 +209,12 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         }
     }
 
+    /** Retrieves all rows from a column, deserialising them to the correct type. */
     private List<Object> retrieveColumn(String tableName, String columnName, Class<?> type) {
         ensureColumnExists(tableName, columnName);
-        String selectSQL = "SELECT " + columnName + " FROM " + tableName + ";";
+        String sql = "SELECT " + columnName + " FROM " + tableName + ";";
         List<Object> results = new ArrayList<>();
-        try (PreparedStatement stmt = connection.prepareStatement(selectSQL);
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 String value = rs.getString(columnName);
@@ -192,13 +224,14 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
         } catch (SQLException e) {
             throw new RuntimeException("Error retrieving column '" + columnName + "': " + e.getMessage(), e);
         }
-        return new ArrayList<>(results);
+        return results;
     }
+
+    // === JSON (De)serialisation Utilities ===
 
     private static String serialiseValue(Object value) {
         if (value == null)
             return null;
-
         try {
             return new ObjectMapper().writeValueAsString(value);
         } catch (JsonProcessingException e) {
@@ -209,10 +242,8 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
     private Object deserialiseValue(String value, Class<?> type) {
         if (value == null)
             return null;
-
         if (type == null)
             throw new IllegalArgumentException("Cannot deserialise: type is null");
-
         try {
             return new ObjectMapper().readValue(value, type);
         } catch (JsonProcessingException e) {

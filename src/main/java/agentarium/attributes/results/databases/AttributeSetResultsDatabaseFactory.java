@@ -3,6 +3,7 @@ package agentarium.attributes.results.databases;
 import utils.RandomStringGenerator;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
 
 /**
  * Factory class for creating instances of {@link AttributeSetResultsDatabase}.
@@ -16,6 +17,9 @@ public abstract class AttributeSetResultsDatabaseFactory {
     /** The class used to instantiate new database instances */
     private static Class<?> databaseClass = null;
 
+    /** Optional supplier used for test-time custom injection */
+    private static Supplier<AttributeSetResultsDatabase> customFactory = null;
+
     /**
      * Manually sets the class used for creating result databases.
      *
@@ -24,6 +28,23 @@ public abstract class AttributeSetResultsDatabaseFactory {
      */
     public static <T extends AttributeSetResultsDatabase> void setDatabaseClass(Class<T> databaseClass) {
         AttributeSetResultsDatabaseFactory.databaseClass = databaseClass;
+    }
+
+    /**
+     * Sets a custom factory to be used instead of the default class-based instantiation.
+     * This is useful for testing.
+     *
+     * @param factory the custom supplier of {@link AttributeSetResultsDatabase} instances
+     */
+    public static void setCustomFactory(Supplier<AttributeSetResultsDatabase> factory) {
+        customFactory = factory;
+    }
+
+    /**
+     * Clears any custom factory that was previously set, reverting to default behaviour.
+     */
+    public static void clearCustomFactory() {
+        customFactory = null;
     }
 
     /**
@@ -51,6 +72,11 @@ public abstract class AttributeSetResultsDatabaseFactory {
      * @return a new {@link AttributeSetResultsDatabase} instance, or {@code null} on error
      */
     public static AttributeSetResultsDatabase createDatabase() {
+        // Use the custom factory if one has been provided (e.g. during tests)
+        if (customFactory != null) {
+            return customFactory.get();
+        }
+
         // Default to disk-based if not already set
         if (databaseClass == null) {
             setDatabaseToDiskBased();

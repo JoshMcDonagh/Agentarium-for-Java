@@ -2,6 +2,7 @@ package agentarium.results;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
+import agentarium.attributes.AttributeSetCollection;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.attributes.results.AttributeSetResults;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,20 +27,34 @@ public class AgentResultsTest {
 
     @BeforeEach
     void setUp() {
-        // Mock agents and attribute results
+        // Mock agents and their attribute collections
         mockAgent1 = mock(Agent.class);
         mockAgent2 = mock(Agent.class);
+
+        // Mock AttributeSetCollection and its results
         results1 = mock(AttributeSetCollectionResults.class);
         results2 = mock(AttributeSetCollectionResults.class);
+        AttributeSetCollection attrCollection1 = mock(AttributeSetCollection.class);
+        AttributeSetCollection attrCollection2 = mock(AttributeSetCollection.class);
+
+        // Connect agents to their attribute set collections
+        when(mockAgent1.getAttributeSetCollection()).thenReturn(attrCollection1);
+        when(mockAgent2.getAttributeSetCollection()).thenReturn(attrCollection2);
+
+        // Connect attribute set collections to their results
+        when(attrCollection1.getResults()).thenReturn(results1);
+        when(attrCollection2.getResults()).thenReturn(results2);
+
+        // Mock attribute set results
         mockAttrResults1 = mock(AttributeSetResults.class);
         mockAttrResults2 = mock(AttributeSetResults.class);
 
-        when(mockAgent1.getAttributeSetCollection().getResults()).thenReturn(results1);
-        when(mockAgent2.getAttributeSetCollection().getResults()).thenReturn(results2);
         when(results1.getModelElementName()).thenReturn("A1");
         when(results2.getModelElementName()).thenReturn("A2");
+
         when(results1.getAttributeSetResults("behaviour")).thenReturn(mockAttrResults1);
         when(results2.getAttributeSetResults("behaviour")).thenReturn(mockAttrResults2);
+
         when(mockAttrResults1.getPropertyValues("prop")).thenReturn(List.of("X"));
         when(mockAttrResults2.getPostEventValues("event")).thenReturn(List.of(true));
     }

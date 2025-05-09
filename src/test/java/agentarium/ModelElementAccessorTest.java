@@ -2,6 +2,8 @@ package agentarium;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
+import agentarium.attributes.AttributeSetCollection;
+import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.environments.Environment;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
@@ -30,19 +32,22 @@ public class ModelElementAccessorTest {
     public void setup() {
         mockAgent = mock(Agent.class);
         mockEnvironment = mock(Environment.class);
-
         when(mockAgent.getName()).thenReturn("Agent_X");
 
         localAgentSet = new AgentSet();
-
         settings = new ModelSettings();
-        settings.setIsCacheUsed(true); // ← this must be set before constructing the accessor
-
+        settings.setIsCacheUsed(true);
         cache = new WorkerCache(true);
         requestInterface = mock(RequestResponseInterface.class);
 
         ModelElement modelElement = mock(ModelElement.class);
+        AttributeSetCollection mockAttrSetCollection = mock(AttributeSetCollection.class);
+        AttributeSetCollectionResults mockResults = mock(AttributeSetCollectionResults.class);
+
         when(modelElement.getName()).thenReturn("Agent_X");
+        when(modelElement.getAttributeSetCollection()).thenReturn(mockAttrSetCollection);
+        when(mockAttrSetCollection.getResults()).thenReturn(mockResults);
+        when(mockResults.getModelElementName()).thenReturn("Agent_X");
 
         accessor = new ModelElementAccessor(
                 modelElement,
@@ -53,6 +58,7 @@ public class ModelElementAccessorTest {
                 mockEnvironment
         );
     }
+
 
     @Test
     public void testDoesAgentExistInThisCore_returnsTrue() {
@@ -71,11 +77,12 @@ public class ModelElementAccessorTest {
     @Test
     public void testGetAgentByName_returnsFromCache() {
         settings.setIsCacheUsed(true);
-        when(mockAgent.getName()).thenReturn("Agent_X");
-        cache.addAgent(mockAgent);  // uses getName() as the key
-        Agent agent = accessor.getAgentByName("Agent_X");
-        assertNotNull(agent, "Should return the agent from cache.");
-        assertEquals("Agent_X", agent.getName());
+        settings.setAreProcessesSynced(false); // optional; cache access doesn't need this
+        Agent agent = new Agent("Agent_X", new AttributeSetCollection());
+        cache.addAgent(agent);
+        Agent result = accessor.getAgentByName("Agent_X");
+        assertNotNull(result, "Should return the agent from cache.");
+        assertEquals("Agent_X", result.getName());
     }
 
     @Test

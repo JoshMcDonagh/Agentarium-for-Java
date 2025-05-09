@@ -29,9 +29,8 @@ public abstract class AgentGenerator {
         AgentSet agents = new AgentSet();
         int numOfAgents = modelSettings.getNumOfAgents();
 
-        for (int i = 0; i < numOfAgents; i++) {
+        for (int i = 0; i < numOfAgents; i++)
             agents.add(generateAgent(modelSettings));
-        }
 
         return agents;
     }

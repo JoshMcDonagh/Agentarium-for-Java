@@ -26,19 +26,20 @@ public class ModelSchedulerTest {
 
     @Test
     void testRunTickCallsStepOnAllAgents() {
-        // Arrange: create mock agents
         Agent mockAgent1 = mock(Agent.class);
         Agent mockAgent2 = mock(Agent.class);
+
+        // Stub getName() to avoid indexing issues
+        when(mockAgent1.getName()).thenReturn("mock1");
+        when(mockAgent2.getName()).thenReturn("mock2");
 
         AgentSet agentSet = new AgentSet();
         agentSet.add(mockAgent1);
         agentSet.add(mockAgent2);
 
-        // Act: run the scheduler
         ModelScheduler scheduler = new BasicModelScheduler();
         scheduler.runTick(agentSet);
 
-        // Assert: verify each agent's step method was called once
         verify(mockAgent1, times(1)).run();
         verify(mockAgent2, times(1)).run();
     }

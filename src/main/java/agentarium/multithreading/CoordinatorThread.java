@@ -28,6 +28,13 @@ public class CoordinatorThread implements Runnable {
     /** Controller that manages the request and response queues for inter-thread communication */
     private final RequestResponseController requestResponseController;
 
+    /** Global agent set of the model */
+    private final AgentSet predefinedGlobalAgentSet;
+
+    /** Flag to control the running state of the thread */
+    private volatile boolean isRunning = true;
+
+
     /**
      * Constructs the coordinator thread with required references.
      *
@@ -40,10 +47,35 @@ public class CoordinatorThread implements Runnable {
                              ModelSettings settings,
                              Environment environment,
                              RequestResponseController requestResponseController) {
+        this(name, settings, environment, requestResponseController, null);
+    }
+
+    /**
+     * Constructs the coordinator thread with required references.
+     *
+     * @param name the thread name or ID
+     * @param settings global model settings
+     * @param environment the shared simulation environment
+     * @param requestResponseController the controller managing request/response queues
+     * @param globalAgentSet the global agent set for the whole model
+     */
+    public CoordinatorThread(String name,
+                             ModelSettings settings,
+                             Environment environment,
+                             RequestResponseController requestResponseController,
+                             AgentSet globalAgentSet) {
         this.threadName = name;
         this.settings = settings;
         this.environment = environment;
         this.requestResponseController = requestResponseController;
+        this.predefinedGlobalAgentSet = globalAgentSet;
+    }
+
+    /**
+     * Signals the coordinator thread to stop processing and terminate.
+     */
+    public void shutdown() {
+        isRunning = false;
     }
 
     /**
@@ -53,7 +85,12 @@ public class CoordinatorThread implements Runnable {
      */
     @Override
     public void run() {
-        AgentSet globalAgentSet = new AgentSet();
+        AgentSet globalAgentSet;
+
+        if (predefinedGlobalAgentSet == null)
+            globalAgentSet = new AgentSet();
+        else
+            globalAgentSet = predefinedGlobalAgentSet;
 
         // Initialise the request handler with access to the global agent state and environment
         CoordinatorRequestHandler.initialise(
@@ -61,16 +98,18 @@ public class CoordinatorThread implements Runnable {
                 settings,
                 requestResponseController.getResponseQueue(),
                 globalAgentSet,
-                environment);
+                environment
+        );
 
         // Continuously poll for and handle incoming requests from workers
-        while (true) {
-            if (!requestResponseController.getRequestQueue().isEmpty()) {
-                Request request = requestResponseController.getRequestQueue().poll();
+        while (isRunning) {
+            Request request = requestResponseController.getRequestQueue().poll();
+            if (request != null) {
                 try {
                     CoordinatorRequestHandler.handleCoordinatorRequest(request);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    Thread.currentThread().interrupt();
+                    break;  // Exit cleanly if interrupted
                 }
             }
         }

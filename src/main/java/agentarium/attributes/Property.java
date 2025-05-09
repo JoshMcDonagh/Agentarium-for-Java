@@ -24,7 +24,7 @@ public abstract class Property<T> extends Attribute {
      * @param type the class of the property's value type
      */
     public Property(String name, boolean isRecorded, Class<T> type) {
-        super(name, isRecorded);
+        super(name != null ? name : "Property " + propertyCount, isRecorded);
         this.type = type;
         propertyCount++;
     }

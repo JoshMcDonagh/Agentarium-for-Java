@@ -1,21 +1,19 @@
 package agentarium.multithreading;
 
 import agentarium.ModelSettings;
+import agentarium.agents.Agent;
+import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
-import agentarium.multithreading.requestresponse.CoordinatorRequestHandler;
-import agentarium.multithreading.requestresponse.Request;
-import agentarium.multithreading.requestresponse.RequestResponseController;
-import agentarium.multithreading.requestresponse.Response;
+import agentarium.multithreading.requestresponse.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -56,32 +54,55 @@ public class CoordinatorThreadTest {
     }
 
     @Test
-    void testCoordinatorThreadHandlesRequestWhenAvailable() throws InterruptedException {
-        // Mock request to simulate worker input
+    void testCoordinatorThreadHandlesAgentAccessRequest() throws InterruptedException {
+        when(settings.getNumOfCores()).thenReturn(1);  // For barrier-based handlers if needed
+
+        // Mock request
         Request mockRequest = mock(Request.class);
-        requestQueue.add(mockRequest);
+        when(mockRequest.getRequestType()).thenReturn(RequestType.AGENT_ACCESS);
+        when(mockRequest.getRequester()).thenReturn("Worker-1");
+        when(mockRequest.getPayload()).thenReturn("agent-123");
 
-        // Spy on static method
-        var handler = mockStatic(CoordinatorRequestHandler.class);
-        handler.when(() -> CoordinatorRequestHandler.initialise(any(), any(), any(), any(), any())).thenCallRealMethod();
-        handler.when(() -> CoordinatorRequestHandler.handleCoordinatorRequest(mockRequest)).thenAnswer(invocation -> null);
+        // Create dummy agent and ensure its name matches the payload
+        Agent dummyAgent = mock(Agent.class);
+        when(dummyAgent.getName()).thenReturn("agent-123");
 
-        CoordinatorThread coordinatorThread = new CoordinatorThread("TestThread", settings, environment, controller);
+        // Add dummy agent to a real agent set
+        AgentSet realAgentSet = new AgentSet();
+        realAgentSet.add(dummyAgent);
 
-        // Run in a separate thread and interrupt after some delay to prevent infinite loop
-        Thread thread = new Thread(() -> {
-            try {
-                coordinatorThread.run(); // This normally loops forever
-            } catch (RuntimeException ignored) {
-                // Ignore runtime exceptions for test interruption
-            }
-        });
+        // Let the static initialise method run normally
+        try (MockedStatic<CoordinatorRequestHandler> handler = mockStatic(CoordinatorRequestHandler.class)) {
+            handler.when(() -> CoordinatorRequestHandler.initialise(any(), any(), any(), any(), any()))
+                    .thenCallRealMethod();
 
-        thread.start();
-        Thread.sleep(100); // Let it process at least once
-        thread.stop(); // Deprecated but acceptable in tightly controlled test conditions
+            // Inject the agent set
+            CoordinatorThread coordinatorThread = new CoordinatorThread(
+                    "TestThread",
+                    settings,
+                    environment,
+                    controller,
+                    realAgentSet  // Injected global agent set
+            );
 
-        handler.verify(() -> CoordinatorRequestHandler.handleCoordinatorRequest(mockRequest), times(1));
-        handler.close();
+            Thread thread = new Thread(coordinatorThread::run);
+            thread.start();
+
+            // Send the request
+            requestQueue.offer(mockRequest);
+
+            // Give time to process
+            Thread.sleep(300);
+
+            // Shutdown
+            coordinatorThread.shutdown();
+            thread.join();
+
+            // Check response
+            Response response = responseQueue.poll();
+            assertNotNull(response, "Expected a response to be placed in the queue");
+            assertEquals(ResponseType.AGENT_ACCESS, response.getResponseType());
+            assertEquals("Worker-1", response.getDestination());
+        }
     }
 }

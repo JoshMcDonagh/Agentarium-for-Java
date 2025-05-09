@@ -19,7 +19,12 @@ public class DefaultAgentGeneratorTest {
     private DefaultAgentGenerator generator;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
+        // Reset static counter via reflection
+        java.lang.reflect.Field agentCountField = DefaultAgentGenerator.class.getDeclaredField("agentCount");
+        agentCountField.setAccessible(true);
+        agentCountField.setInt(null, 0); // static field, so pass null as instance
+
         settings = new ModelSettings();
         settings.setBaseAgentAttributeSetCollection(new AttributeSetCollection());
         settings.setNumOfAgents(5);

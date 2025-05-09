@@ -18,7 +18,7 @@ public abstract class Event extends Attribute {
      * @param isRecorded whether the event is recorded in output
      */
     public Event(String name, boolean isRecorded) {
-        super(name, isRecorded);
+        super(name != null ? name : "Event " + eventCount, isRecorded);
         eventCount++;
     }
 

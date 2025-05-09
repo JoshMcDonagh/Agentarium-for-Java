@@ -1,6 +1,7 @@
 package agentarium.results;
 
 import agentarium.ModelElement;
+import agentarium.attributes.AttributeSetCollection;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.attributes.results.AttributeSetResults;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +16,8 @@ import static org.mockito.Mockito.*;
  * Unit tests for {@link ModelElementResults}.
  */
 public class ModelElementResultsTest {
-
     private ModelElement mockElement;
+    private AttributeSetCollection mockCollection;
     private AttributeSetCollectionResults mockCollectionResults;
     private AttributeSetResults mockSetResults;
 
@@ -24,11 +25,15 @@ public class ModelElementResultsTest {
     void setUp() {
         // Mocks for attribute set structure
         mockElement = mock(ModelElement.class);
+        mockCollection = mock(AttributeSetCollection.class); // NEW: mock the collection
         mockCollectionResults = mock(AttributeSetCollectionResults.class);
         mockSetResults = mock(AttributeSetResults.class);
 
         // Setup hierarchy
-        when(mockElement.getAttributeSetCollection().getResults()).thenReturn(mockCollectionResults);
+        when(mockElement.getAttributeSetCollection()).thenReturn(mockCollection); // ← FIXED
+        when(mockCollection.getResults()).thenReturn(mockCollectionResults);      // ← FIXED
+
+        // Attribute set result behavior
         when(mockCollectionResults.getModelElementName()).thenReturn("Agent1");
         when(mockCollectionResults.getAttributeSetResults("set1")).thenReturn(mockSetResults);
         when(mockSetResults.getPropertyValues("prop1")).thenReturn(List.of("value1"));
@@ -39,7 +44,6 @@ public class ModelElementResultsTest {
     @Test
     void testSingleModelElementConstruction() {
         ModelElementResults results = new ModelElementResults(mockElement);
-
         assertEquals(1, results.getAttributeSetCollectionSetCount());
         assertEquals(mockCollectionResults, results.getAttributeSetCollectionResults("Agent1"));
         assertEquals(mockCollectionResults, results.getAttributeSetCollectionResults(0));
@@ -48,13 +52,14 @@ public class ModelElementResultsTest {
     @Test
     void testMultipleModelElementConstruction() {
         ModelElement anotherElement = mock(ModelElement.class);
+        AttributeSetCollection mockAnotherCollection = mock(AttributeSetCollection.class);
         AttributeSetCollectionResults anotherResults = mock(AttributeSetCollectionResults.class);
 
-        when(anotherElement.getAttributeSetCollection().getResults()).thenReturn(anotherResults);
+        when(anotherElement.getAttributeSetCollection()).thenReturn(mockAnotherCollection);
+        when(mockAnotherCollection.getResults()).thenReturn(anotherResults);
         when(anotherResults.getModelElementName()).thenReturn("Agent2");
 
         ModelElementResults results = new ModelElementResults(List.of(mockElement, anotherElement));
-
         assertEquals(2, results.getAttributeSetCollectionSetCount());
         assertEquals(anotherResults, results.getAttributeSetCollectionResults("Agent2"));
     }
@@ -64,12 +69,14 @@ public class ModelElementResultsTest {
         ModelElementResults results1 = new ModelElementResults(mockElement);
 
         ModelElement mockOther = mock(ModelElement.class);
+        AttributeSetCollection mockOtherCollection = mock(AttributeSetCollection.class);
         AttributeSetCollectionResults mockOtherResults = mock(AttributeSetCollectionResults.class);
-        when(mockOther.getAttributeSetCollection().getResults()).thenReturn(mockOtherResults);
+
+        when(mockOther.getAttributeSetCollection()).thenReturn(mockOtherCollection);
+        when(mockOtherCollection.getResults()).thenReturn(mockOtherResults);
         when(mockOtherResults.getModelElementName()).thenReturn("Other");
 
         ModelElementResults results2 = new ModelElementResults(mockOther);
-
         results1.mergeWith(results2);
 
         assertEquals(2, results1.getAttributeSetCollectionSetCount());
@@ -101,7 +108,6 @@ public class ModelElementResultsTest {
     void testDisconnectDatabasesClearsAll() {
         ModelElementResults results = new ModelElementResults(mockElement);
         results.disconnectDatabases();
-
         verify(mockCollectionResults).disconnectDatabases();
         assertEquals(0, results.getAttributeSetCollectionSetCount());
     }

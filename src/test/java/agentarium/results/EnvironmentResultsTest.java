@@ -1,5 +1,6 @@
 package agentarium.results;
 
+import agentarium.attributes.AttributeSetCollection;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.attributes.results.AttributeSetResults;
 import agentarium.environments.Environment;
@@ -19,19 +20,23 @@ public class EnvironmentResultsTest {
     private Environment mockEnvironment;
     private AttributeSetCollectionResults mockCollectionResults;
     private AttributeSetResults mockSetResults;
+    private AttributeSetCollection mockCollection;
 
     @BeforeEach
     void setUp() {
         mockEnvironment = mock(Environment.class);
+        mockCollection = mock(AttributeSetCollection.class); // ← mock it here
         mockCollectionResults = mock(AttributeSetCollectionResults.class);
         mockSetResults = mock(AttributeSetResults.class);
 
-        when(mockEnvironment.getAttributeSetCollection().getResults()).thenReturn(mockCollectionResults);
-        when(mockEnvironment.getName()).thenReturn("Env1");
+        // Chain setup correctly
+        when(mockEnvironment.getAttributeSetCollection()).thenReturn(mockCollection);
+        when(mockCollection.getResults()).thenReturn(mockCollectionResults);
 
+        // Stub rest as before
+        when(mockEnvironment.getName()).thenReturn("Env1");
         when(mockCollectionResults.getModelElementName()).thenReturn("Env1");
         when(mockCollectionResults.getAttributeSetResults("Weather")).thenReturn(mockSetResults);
-
         when(mockSetResults.getPropertyValues("temperature")).thenReturn(List.of(23.5));
         when(mockSetResults.getPreEventValues("stormWarning")).thenReturn(List.of(true));
         when(mockSetResults.getPostEventValues("rainEnd")).thenReturn(List.of(false));

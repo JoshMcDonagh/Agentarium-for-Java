@@ -1,6 +1,7 @@
 package agentarium.multithreading;
 
 import agentarium.ModelSettings;
+import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
@@ -43,6 +44,10 @@ public class WorkerThreadTest {
         when(settings.getResultsClass()).thenReturn((Class) DummyResults.class);
         when(agents.duplicate()).thenReturn(duplicatedAgents);
         when(controller.getInterface(any())).thenReturn(requestInterface);
+
+        Agent mockAgent = mock(Agent.class);
+        when(mockAgent.getName()).thenReturn("Agent1");
+        when(agents.iterator()).thenReturn(List.of(mockAgent).iterator());
     }
 
     @Test

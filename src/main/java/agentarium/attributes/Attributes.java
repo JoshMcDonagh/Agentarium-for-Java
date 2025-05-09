@@ -1,5 +1,7 @@
 package agentarium.attributes;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +19,10 @@ import java.util.Map;
 public abstract class Attributes {
 
     /** Maps attribute names to their index positions in the list */
-    private Map<String, Integer> attributeIndexes;
+    private final Map<String, Integer> attributeIndexes = new HashMap<>();
 
     /** Ordered list of attribute instances */
-    private List<Attribute> attributes;
+    private final List<Attribute> attributes = new ArrayList<>();
 
     /**
      * Adds or replaces an attribute in the collection.

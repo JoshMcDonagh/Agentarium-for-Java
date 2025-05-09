@@ -14,12 +14,6 @@ import java.util.Map;
  */
 public class Events extends Attributes {
 
-    /** Optional separate index map for direct access to events by name (not currently used) */
-    private Map<String, Integer> eventIndexes;
-
-    /** Optional separate list of events (not currently used directly; storage is inherited) */
-    private List<Event> events;
-
     /**
      * Adds a single event to the collection.
      *

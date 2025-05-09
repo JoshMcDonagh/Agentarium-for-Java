@@ -23,7 +23,11 @@ public class AttributeSetCollectionTest {
     public void setup() {
         collection = new AttributeSetCollection();
         mockAttributeSet = mock(AttributeSet.class);
+
         when(mockAttributeSet.getName()).thenReturn("TestSet");
+        when(mockAttributeSet.getProperties()).thenReturn(new Properties());
+        when(mockAttributeSet.getPreEvents()).thenReturn(new Events());
+        when(mockAttributeSet.getPostEvents()).thenReturn(new Events());
     }
 
     @Test

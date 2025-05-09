@@ -1,6 +1,7 @@
 package agentarium.attributes.results.databases;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class AttributeSetResultsDatabaseFactoryTest {
 
-    @AfterEach
-    public void tearDown() {
-        // Reset factory state after each test to avoid cross-test contamination
+    @BeforeEach
+    public void setUp() {
+        // Reset factory state before each test to avoid cross-test contamination
         AttributeSetResultsDatabaseFactory.clearCustomFactory();
         AttributeSetResultsDatabaseFactory.setDatabaseToDiskBased();
     }

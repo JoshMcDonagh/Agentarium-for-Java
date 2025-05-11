@@ -4,6 +4,7 @@ import agentarium.ModelSettings;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,17 +17,26 @@ import static org.mockito.Mockito.*;
  */
 public class FunctionalAgentGeneratorTest {
 
+    private final AtomicInteger idGenerator = new AtomicInteger();
+
+    /**
+     * Creates a generator function that returns uniquely named mock agents.
+     */
+    private Function<ModelSettings, Agent> createUniqueMockAgentGenerator() {
+        return s -> {
+            Agent mockAgent = mock(Agent.class);
+            when(mockAgent.getName()).thenReturn("agent" + idGenerator.getAndIncrement());
+            return mockAgent;
+        };
+    }
+
     @Test
     void testGenerateAgentsCreatesCorrectNumber() {
         // Arrange
         ModelSettings settings = mock(ModelSettings.class);
         when(settings.getNumOfAgents()).thenReturn(5);
 
-        Agent mockAgent = mock(Agent.class);
-
-        Function<ModelSettings, Agent> generatorFunction = s -> mockAgent;
-
-        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(generatorFunction);
+        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(createUniqueMockAgentGenerator());
 
         // Act
         AgentSet result = generator.generateAgents(settings);
@@ -42,10 +52,7 @@ public class FunctionalAgentGeneratorTest {
         when(settings.getNumOfAgents()).thenReturn(4);
         when(settings.getNumOfCores()).thenReturn(2);
 
-        Agent mockAgent = mock(Agent.class);
-        Function<ModelSettings, Agent> generatorFunction = s -> mockAgent;
-
-        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(generatorFunction);
+        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(createUniqueMockAgentGenerator());
 
         // Act
         List<AgentSet> coreAssignments = generator.getAgentsForEachCore(settings);
@@ -63,10 +70,7 @@ public class FunctionalAgentGeneratorTest {
         when(settings.getNumOfAgents()).thenReturn(3);
         when(settings.getNumOfCores()).thenReturn(0);
 
-        Agent mockAgent = mock(Agent.class);
-        Function<ModelSettings, Agent> generatorFunction = s -> mockAgent;
-
-        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(generatorFunction);
+        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(createUniqueMockAgentGenerator());
 
         // Act
         List<AgentSet> result = generator.getAgentsForEachCore(settings);
@@ -82,10 +86,7 @@ public class FunctionalAgentGeneratorTest {
         when(settings.getNumOfAgents()).thenReturn(3);
         when(settings.getNumOfCores()).thenReturn(1);
 
-        Agent mockAgent = mock(Agent.class);
-        Function<ModelSettings, Agent> generatorFunction = s -> mockAgent;
-
-        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(generatorFunction);
+        FunctionalAgentGenerator generator = new FunctionalAgentGenerator(createUniqueMockAgentGenerator());
 
         // Act
         List<AgentSet> result = generator.getAgentsForEachCore(settings);

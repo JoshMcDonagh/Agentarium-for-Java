@@ -16,22 +16,6 @@ public class DefaultAgentGenerator extends AgentGenerator {
     private static int agentCount = 0;
 
     /**
-     * Generates a complete {@link AgentSet} based on the number of agents specified in the model settings.
-     *
-     * @param modelSettings the simulation configuration containing the agent count
-     * @return an {@link AgentSet} containing all generated agents
-     */
-    @Override
-    public AgentSet generateAgents(ModelSettings modelSettings) {
-        AgentSet agentSet = new AgentSet();
-        for (int i = 0; i < modelSettings.getNumOfAgents(); i++) {
-            Agent agent = generateAgent(modelSettings);
-            agentSet.add(agent);
-        }
-        return agentSet;
-    }
-
-    /**
      * Generates a single agent with a unique name and a deep copy of the base attribute set.
      *
      * @param modelSettings the model settings containing the base attribute set for agents

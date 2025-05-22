@@ -104,12 +104,16 @@ public class AgentSet implements Iterable<Agent> {
     }
 
     /**
-     * Adds all agents from another {@link AgentSet}.
+     * Adds all agents from another {@link AgentSet} that do not already exist in this set.
+     * Existing agents (by name) are not modified or replaced.
      *
      * @param agentSet the agent set to add from
      */
     public void add(AgentSet agentSet) {
-        add(agentSet.getAsList());
+        for (Agent agent : agentSet) {
+            if (!doesAgentExist(agent.getName()))
+                add(agent);
+        }
     }
 
     /**

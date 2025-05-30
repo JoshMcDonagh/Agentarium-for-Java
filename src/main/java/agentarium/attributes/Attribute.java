@@ -12,7 +12,7 @@ public abstract class Attribute {
     private final String name;
 
     /** Whether this attribute should be recorded in results output */
-    private final Boolean isRecorded;
+    private final boolean isRecorded;
 
     /**
      * Constructs an attribute with the given name and recording flag.
@@ -20,7 +20,7 @@ public abstract class Attribute {
      * @param name the name of the attribute
      * @param isRecorded whether the attribute should be included in output
      */
-    public Attribute(String name, Boolean isRecorded) {
+    public Attribute(String name, boolean isRecorded) {
         this.name = name;
         this.isRecorded = isRecorded;
     }

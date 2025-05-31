@@ -31,9 +31,8 @@ public abstract class Attributes {
      * @param associatedModelElement the model element (e.g. agent or environment) to associate
      */
     public void setAssociatedModelElement(ModelElement associatedModelElement) {
-        for (Attribute attribute : attributes) {
+        for (Attribute attribute : attributes)
             attribute.setAssociatedModelElement(associatedModelElement);
-        }
     }
 
     /**

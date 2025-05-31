@@ -1,5 +1,6 @@
 package agentarium.attributes;
 
+import agentarium.ModelElement;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import com.google.gson.reflect.TypeToken;
 import utils.DeepCopier;
@@ -33,6 +34,11 @@ public class AttributeSetCollection {
 
     /** Results structure for recording attribute data across ticks */
     private AttributeSetCollectionResults attributeSetCollectionResults;
+
+    public void setAssociatedModelElement(ModelElement associatedModelElement) {
+        for (AttributeSet attributeSet : attributeSets)
+            attributeSet.setAssociatedModelElement(associatedModelElement);
+    }
 
     /**
      * Adds a single attribute set to the collection.

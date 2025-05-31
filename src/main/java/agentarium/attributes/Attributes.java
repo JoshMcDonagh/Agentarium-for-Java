@@ -1,5 +1,7 @@
 package agentarium.attributes;
 
+import agentarium.ModelElement;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,25 +10,36 @@ import java.util.Map;
 /**
  * Abstract base class for managing a collection of {@link Attribute} instances.
  *
- * <p>This class provides the internal structure and core logic for attribute lookup and
- * storage. It supports both name-based and index-based access and assumes that attributes
- * are uniquely named.
+ * <p>This class provides the core internal structure for storing and looking up attributes
+ * by name or index. It assumes attribute names are unique within the collection.
  *
- * <p>Subclasses are expected to initialise and manage the {@code attributeIndexes} and
- * {@code attributes} structures, and to implement the {@link #run()} method to define
- * how the collection behaves on each simulation tick.
+ * <p>Subclasses are responsible for populating the collection and must define the behaviour
+ * of the group during each simulation tick via the {@link #run()} method.
  */
 public abstract class Attributes {
 
-    /** Maps attribute names to their index positions in the list */
+    /** Maps attribute names to their index positions within the list */
     private final Map<String, Integer> attributeIndexes = new HashMap<>();
 
-    /** Ordered list of attribute instances */
+    /** Ordered list of attributes held by this collection */
     private final List<Attribute> attributes = new ArrayList<>();
 
     /**
+     * Associates all contained attributes with the given model element.
+     * Typically called once during initialisation.
+     *
+     * @param associatedModelElement the model element (e.g. agent or environment) to associate
+     */
+    public void setAssociatedModelElement(ModelElement associatedModelElement) {
+        for (Attribute attribute : attributes) {
+            attribute.setAssociatedModelElement(associatedModelElement);
+        }
+    }
+
+    /**
      * Adds or replaces an attribute in the collection.
-     * If an attribute with the same name already exists, it is replaced at its existing index.
+     * If an attribute with the same name already exists, it will be replaced
+     * at its current index; otherwise, the new attribute is appended.
      *
      * @param attribute the attribute to add or update
      */
@@ -34,13 +47,13 @@ public abstract class Attributes {
         int index;
 
         if (attributeIndexes.containsKey(attribute.getName())) {
-            // Replace existing attribute by name
+            // Replace an existing attribute using its known index
             index = attributeIndexes.get(attribute.getName());
         } else {
-            // Add new attribute at the end
+            // Append a new attribute and register its index
             index = attributes.size();
             attributeIndexes.put(attribute.getName(), index);
-            attributes.add(null); // Ensure capacity before setting
+            attributes.add(null); // Reserve space before inserting
         }
 
         attributes.set(index, attribute);
@@ -50,7 +63,7 @@ public abstract class Attributes {
      * Retrieves an attribute by its name.
      *
      * @param attributeName the name of the attribute to retrieve
-     * @return the matching {@link Attribute} instance
+     * @return the corresponding {@link Attribute} instance
      */
     protected Attribute getAttribute(String attributeName) {
         int index = attributeIndexes.get(attributeName);
@@ -58,25 +71,25 @@ public abstract class Attributes {
     }
 
     /**
-     * Retrieves an attribute by its index position in the list.
+     * Retrieves an attribute by its index in the list.
      *
-     * @param index the index of the attribute
-     * @return the attribute at the specified position
+     * @param index the index position of the attribute
+     * @return the {@link Attribute} at the given index
      */
     protected Attribute getAttribute(int index) {
         return attributes.get(index);
     }
 
     /**
-     * @return the number of attributes in this collection
+     * @return the number of attributes held by this collection
      */
     public int size() {
         return attributes.size();
     }
 
     /**
-     * Defines how the entire attribute collection is processed each simulation tick.
-     * Subclasses must implement this method.
+     * Defines how the entire collection of attributes should be processed
+     * during a simulation tick. Must be implemented by subclasses.
      */
     public abstract void run();
 }

@@ -28,7 +28,8 @@ public abstract class ModelElement {
      */
     public ModelElement(String name, AttributeSetCollection attributeSetCollection) {
         this.name = name;
-        this.attributeSetCollection = attributeSetCollection;
+        this.attributeSetCollection = attributeSetCollection.deepCopyDuplicate();
+        this.attributeSetCollection.setAssociatedModelElement(this);
     }
 
     /**

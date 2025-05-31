@@ -1,13 +1,14 @@
 package agentarium.attributes;
 
+import agentarium.ModelElement;
 import agentarium.attributes.results.AttributeSetResults;
 
 /**
- * Represents a named set of attributes grouped into pre-events, properties, and post-events.
+ * Represents a named collection of attributes, organised into pre-events, properties, and post-events.
  *
- * <p>This class defines the execution and data-recording logic for all attributes associated
- * with an agent or environment component. It is intended to be run once per simulation tick,
- * coordinating execution order and conditional recording of attribute values.
+ * <p>This class defines the execution order and data recording logic for all attributes linked
+ * to a model element such as an agent or environment. It is intended to be executed once per
+ * simulation tick, coordinating the flow of behaviour and conditionally recording attribute states.
  */
 public class AttributeSet {
 
@@ -17,22 +18,22 @@ public class AttributeSet {
     /** The name of this attribute set */
     private final String name;
 
-    /** Events to run before the properties — typically trigger inputs or conditions */
+    /** Events executed before properties — typically input checks or triggers */
     private final Events preEvents;
 
-    /** Stateful attributes that hold and expose typed values */
+    /** Properties representing the stateful values of the model element */
     private final Properties properties;
 
-    /** Events to run after properties — typically responses or outcomes */
+    /** Events executed after properties — typically responses or side effects */
     private final Events postEvents;
 
     /**
-     * Constructs a fully specified attribute set.
+     * Constructs an attribute set with a given name and specified components.
      *
-     * @param name the name of the attribute set
-     * @param preEvents the events to run before properties
-     * @param properties the properties in this attribute set
-     * @param postEvents the events to run after properties
+     * @param name        the name of the attribute set
+     * @param preEvents   the events to execute before properties
+     * @param properties  the properties in this attribute set
+     * @param postEvents  the events to execute after properties
      */
     public AttributeSet(String name, Events preEvents, Properties properties, Events postEvents) {
         this.name = name;
@@ -43,7 +44,7 @@ public class AttributeSet {
     }
 
     /**
-     * Constructs an attribute set with the given name and empty components.
+     * Constructs an attribute set with a given name and empty event/property collections.
      *
      * @param name the name of the attribute set
      */
@@ -52,10 +53,22 @@ public class AttributeSet {
     }
 
     /**
-     * Constructs an attribute set with a generated name and empty components.
+     * Constructs an attribute set with a generated default name and empty components.
      */
     public AttributeSet() {
         this("Attribute set " + attributeSetCount);
+    }
+
+    /**
+     * Associates all contained attributes with the specified model element.
+     * Typically called during initialisation.
+     *
+     * @param associatedModelElement the model element to associate with
+     */
+    public void setAssociatedModelElement(ModelElement associatedModelElement) {
+        preEvents.setAssociatedModelElement(associatedModelElement);
+        properties.setAssociatedModelElement(associatedModelElement);
+        postEvents.setAssociatedModelElement(associatedModelElement);
     }
 
     /** @return the name of this attribute set */
@@ -63,33 +76,33 @@ public class AttributeSet {
         return name;
     }
 
-    /** @return the collection of pre-event attributes */
+    /** @return the pre-event attributes of this set */
     public Events getPreEvents() {
         return preEvents;
     }
 
-    /** @return the collection of property attributes */
+    /** @return the property attributes of this set */
     public Properties getProperties() {
         return properties;
     }
 
-    /** @return the collection of post-event attributes */
+    /** @return the post-event attributes of this set */
     public Events getPostEvents() {
         return postEvents;
     }
 
     /**
-     * Executes all events and properties in the defined order:
+     * Executes all attributes in the prescribed order:
      * <ol>
      *     <li>Pre-events (conditionally triggered)</li>
-     *     <li>Properties (always run)</li>
+     *     <li>Properties (always executed)</li>
      *     <li>Post-events (conditionally triggered)</li>
      * </ol>
      *
-     * <p>If attributes are marked as recorded, their values or trigger states are stored in the
-     * provided {@link AttributeSetResults} container.
+     * <p>If any attribute is marked for recording, its value or triggered state is stored in the
+     * provided {@link AttributeSetResults} container for this tick.
      *
-     * @param attributeSetResults the results object used to record values for this tick
+     * @param attributeSetResults the results object used to collect recorded values
      */
     public void run(AttributeSetResults attributeSetResults) {
         preEvents.run();
@@ -102,7 +115,7 @@ public class AttributeSet {
         recordPostEvents(attributeSetResults);
     }
 
-    /** Records all pre-event trigger states if they are marked for recording */
+    /** Records the triggered state of pre-events if marked as recorded */
     private void recordPreEvents(AttributeSetResults attributeSetResults) {
         for (int i = 0; i < preEvents.size(); i++) {
             Event event = preEvents.get(i);
@@ -111,7 +124,7 @@ public class AttributeSet {
         }
     }
 
-    /** Records all property values if they are marked for recording */
+    /** Records the values of properties if marked as recorded */
     private void recordProperties(AttributeSetResults attributeSetResults) {
         for (int i = 0; i < properties.size(); i++) {
             Property<?> property = properties.get(i);
@@ -120,7 +133,7 @@ public class AttributeSet {
         }
     }
 
-    /** Records all post-event trigger states if they are marked for recording */
+    /** Records the triggered state of post-events if marked as recorded */
     private void recordPostEvents(AttributeSetResults attributeSetResults) {
         for (int i = 0; i < postEvents.size(); i++) {
             Event event = postEvents.get(i);

@@ -5,6 +5,8 @@ import agentarium.attributes.AttributeSetCollection;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the abstract {@link EnvironmentGenerator} class
@@ -25,7 +27,8 @@ public class EnvironmentGeneratorTest {
     @Test
     public void testGenerateEnvironmentReturnsExpectedEnvironment() {
         ModelSettings settings = new ModelSettings();
-        AttributeSetCollection mockAttributes = new AttributeSetCollection();
+        AttributeSetCollection mockAttributes = mock(AttributeSetCollection.class);
+        when(mockAttributes.deepCopyDuplicate()).thenReturn(mockAttributes);
         settings.setBaseEnvironmentAttributeSetCollection(mockAttributes);
 
         EnvironmentGenerator generator = new TestEnvironmentGenerator();

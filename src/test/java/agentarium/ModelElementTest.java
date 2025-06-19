@@ -4,8 +4,6 @@ import agentarium.attributes.AttributeSetCollection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -36,7 +34,8 @@ public class ModelElementTest {
 
     @BeforeEach
     public void setup() {
-        attributeSetCollection = new AttributeSetCollection();
+        attributeSetCollection = mock(AttributeSetCollection.class);
+        when(attributeSetCollection.deepCopyDuplicate()).thenReturn(attributeSetCollection);
         dummyElement = new DummyModelElement("TestElement", attributeSetCollection);
     }
 
@@ -47,23 +46,19 @@ public class ModelElementTest {
 
     @Test
     public void testAttributeSetCollectionIsReturned() {
-        assertEquals(attributeSetCollection.getModelElementName(), dummyElement.getAttributeSetCollection().getModelElementName(),
+        assertSame(attributeSetCollection, dummyElement.getAttributeSetCollection(),
                 "Attribute set collection should be the same as passed in.");
     }
 
     @Test
-    public void testSetupInitialisesAttributeCollection() throws Exception {
-        AttributeSetCollection temp = new AttributeSetCollection();
-        DummyModelElement dummy = new DummyModelElement("TestElement", temp);
+    public void testSetupInitialisesAttributeCollection() {
+        AttributeSetCollection mockAttributeSetCollection = mock(AttributeSetCollection.class);
+        when(mockAttributeSetCollection.deepCopyDuplicate()).thenReturn(mockAttributeSetCollection);
 
-        Field field = ModelElement.class.getDeclaredField("attributeSetCollection");
-        field.setAccessible(true);
-        AttributeSetCollection copied = (AttributeSetCollection) field.get(dummy);
-        AttributeSetCollection spyCopy = spy(copied);
-        field.set(dummy, spyCopy);
-        
+        DummyModelElement dummy = new DummyModelElement("TestElement", mockAttributeSetCollection);
         dummy.setup();
-        verify(spyCopy).setup("TestElement");
+
+        verify(mockAttributeSetCollection).setup("TestElement");
     }
 
     @Test

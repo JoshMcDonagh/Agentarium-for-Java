@@ -20,6 +20,7 @@ public class EnvironmentTest {
     public void setUp() {
         // Create a mock AttributeSetCollection to verify interaction
         mockAttributeSets = mock(AttributeSetCollection.class);
+        when(mockAttributeSets.deepCopyDuplicate()).thenReturn(mockAttributeSets);
         environment = new Environment("TestEnvironment", mockAttributeSets);
     }
 

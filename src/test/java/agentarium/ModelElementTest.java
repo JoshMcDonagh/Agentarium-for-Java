@@ -4,9 +4,10 @@ import agentarium.attributes.AttributeSetCollection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the {@link ModelElement} abstract class via a dummy subclass.
@@ -35,7 +36,7 @@ public class ModelElementTest {
 
     @BeforeEach
     public void setup() {
-        attributeSetCollection = mock(AttributeSetCollection.class);
+        attributeSetCollection = new AttributeSetCollection();
         dummyElement = new DummyModelElement("TestElement", attributeSetCollection);
     }
 
@@ -46,18 +47,23 @@ public class ModelElementTest {
 
     @Test
     public void testAttributeSetCollectionIsReturned() {
-        assertSame(attributeSetCollection, dummyElement.getAttributeSetCollection(),
+        assertEquals(attributeSetCollection.getModelElementName(), dummyElement.getAttributeSetCollection().getModelElementName(),
                 "Attribute set collection should be the same as passed in.");
     }
 
     @Test
-    public void testSetupInitialisesAttributeCollection() {
-        AttributeSetCollection mockAttributeSetCollection = mock(AttributeSetCollection.class);
-        DummyModelElement dummy = new DummyModelElement("TestElement", mockAttributeSetCollection);
+    public void testSetupInitialisesAttributeCollection() throws Exception {
+        AttributeSetCollection temp = new AttributeSetCollection();
+        DummyModelElement dummy = new DummyModelElement("TestElement", temp);
 
+        Field field = ModelElement.class.getDeclaredField("attributeSetCollection");
+        field.setAccessible(true);
+        AttributeSetCollection copied = (AttributeSetCollection) field.get(dummy);
+        AttributeSetCollection spyCopy = spy(copied);
+        field.set(dummy, spyCopy);
+        
         dummy.setup();
-
-        verify(mockAttributeSetCollection).setup("TestElement");
+        verify(spyCopy).setup("TestElement");
     }
 
     @Test

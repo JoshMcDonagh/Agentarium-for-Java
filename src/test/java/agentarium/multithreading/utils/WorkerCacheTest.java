@@ -2,6 +2,7 @@ package agentarium.multithreading.utils;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
+import agentarium.attributes.AttributeSetCollection;
 import agentarium.environments.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class WorkerCacheTest {
 
     @Test
     public void testAddAndGetAgent() {
-        Agent agent = new Agent("Agent1", null);
+        Agent agent = new Agent("Agent1", new AttributeSetCollection());
         cache.addAgent(agent);
         assertTrue(cache.doesAgentExist("Agent1"));
         assertSame(agent, cache.getAgent("Agent1"));
@@ -41,8 +42,8 @@ public class WorkerCacheTest {
 
     @Test
     public void testGetFilteredAgentsFromCachedSet() {
-        Agent agent1 = new Agent("A", null);
-        Agent agent2 = new Agent("B", null);
+        Agent agent1 = new Agent("A", new AttributeSetCollection());
+        Agent agent2 = new Agent("B", new AttributeSetCollection());
 
         AgentSet set = new AgentSet();
         set.add(agent1);
@@ -59,7 +60,7 @@ public class WorkerCacheTest {
 
     @Test
     public void testAddAndGetEnvironment() {
-        Environment env = new Environment("Env1", null);
+        Environment env = new Environment("Env1", new AttributeSetCollection());
         cache.addEnvironment(env);
 
         assertTrue(cache.doesEnvironmentExist());
@@ -68,8 +69,8 @@ public class WorkerCacheTest {
 
     @Test
     public void testClearResetsCache() {
-        Agent agent = new Agent("Agent1", null);
-        Environment env = new Environment("Env", null);
+        Agent agent = new Agent("Agent1", new AttributeSetCollection());
+        Environment env = new Environment("Env", new AttributeSetCollection());
         Predicate<Agent> filter = a -> true;
 
         cache.addAgent(agent);

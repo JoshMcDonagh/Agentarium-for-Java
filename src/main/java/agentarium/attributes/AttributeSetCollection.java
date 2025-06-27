@@ -35,6 +35,11 @@ public class AttributeSetCollection {
     /** Results structure for recording attribute data across ticks */
     private AttributeSetCollectionResults attributeSetCollectionResults;
 
+    /**
+     * Sets the {@link ModelElement} associated with the collection's attributes.
+     *
+     * @param associatedModelElement the associated model element to add
+     */
     public void setAssociatedModelElement(ModelElement associatedModelElement) {
         for (AttributeSet attributeSet : attributeSets)
             attributeSet.setAssociatedModelElement(associatedModelElement);

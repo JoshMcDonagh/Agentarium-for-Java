@@ -95,7 +95,7 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
         // Final setup and result collection
         agents.setup();
         AgentResults agentResults = new AgentResults(agents);
-        Results results = settings.getResultsClass().getDeclaredConstructor().newInstance();
+        Results results = settings.getResults();
         results.setAgentNames(agents);
         results.setAgentResults(agentResults);
 

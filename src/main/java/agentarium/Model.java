@@ -56,7 +56,7 @@ public class Model {
         Environment environment = settings.getEnvironmentGenerator().generateEnvironment(settings);
 
         // Instantiate results container
-        Results results = settings.getResultsClass().getDeclaredConstructor().newInstance();
+        Results results = settings.getResults();
         results.setAgentNames(agentsForEachCore);
 
         // Prepare the environment

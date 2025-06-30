@@ -5,6 +5,10 @@ import agentarium.attributes.AttributeSetCollection;
 import agentarium.environments.EnvironmentGenerator;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
+import com.google.gson.reflect.TypeToken;
+import utils.DeepCopier;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Encapsulates all configurable settings for a simulation model run.
@@ -31,7 +35,8 @@ public class ModelSettings {
     private boolean isCacheUsed = false;
 
     // Core components required for simulation
-    private Class<? extends Results> resultsClass;
+    private Class<? extends Results> resultsClass = null;
+    private Results results = null;
     private AgentGenerator agentGenerator;
     private EnvironmentGenerator environmentGenerator;
     private ModelScheduler modelScheduler;
@@ -86,6 +91,11 @@ public class ModelSettings {
     /** Sets the results class that will be used to store and process simulation data. */
     public <T extends Results> void setResultsClass(Class<T> resultsClass) {
         this.resultsClass = resultsClass;
+    }
+
+    /** Sets the results instance that will be used to store and process simulation data. */
+    public void setResults(Results results) {
+        this.results = results;
     }
 
     /** Sets the generator responsible for creating initial agent populations. */
@@ -155,9 +165,11 @@ public class ModelSettings {
         return isCacheUsed;
     }
 
-    /** @return the results class used to process and store simulation output */
-    public Class<? extends Results> getResultsClass() {
-        return resultsClass;
+    /** @return a new results instance used to process and store simulation output */
+    public Results getResults() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        if (results != null)
+            return DeepCopier.deepCopy(results, new TypeToken<Results>() {}.getType());
+        return resultsClass.getDeclaredConstructor().newInstance();
     }
 
     /** @return the agent generator assigned to this model run */

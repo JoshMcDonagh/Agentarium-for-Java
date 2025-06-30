@@ -8,6 +8,7 @@ import agentarium.scheduler.ModelScheduler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,9 +89,9 @@ public class ModelSettingsTest {
     }
 
     @Test
-    public void testResultsClassSetterAndGetter() {
+    public void testResultsClassSetterAndGetter() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         settings.setResultsClass(MockResults.class);
-        assertEquals(MockResults.class, settings.getResultsClass(), "Should return the same results class that was set.");
+        assertEquals(MockResults.class, settings.getResults().getClass(), "Should return the same results class that was set.");
     }
 
     @Test

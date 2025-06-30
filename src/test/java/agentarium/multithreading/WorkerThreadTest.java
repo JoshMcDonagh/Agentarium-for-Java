@@ -5,12 +5,10 @@ import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
-import agentarium.results.AgentResults;
 import agentarium.results.Results;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,7 +39,7 @@ public class WorkerThreadTest {
         when(settings.getAreProcessesSynced()).thenReturn(false);
         when(settings.getTotalNumOfTicks()).thenReturn(2);  // keep it small for test speed
         when(settings.getModelScheduler()).thenReturn(tick -> {}); // no-op scheduler
-        when(settings.getResultsClass()).thenReturn((Class) DummyResults.class);
+        when(settings.getResults()).thenReturn(new DummyResults());
         when(agents.duplicate()).thenReturn(duplicatedAgents);
         when(controller.getInterface(any())).thenReturn(requestInterface);
 

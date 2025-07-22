@@ -237,8 +237,50 @@ public abstract class Results {
         if (isImmutable)
             throw new IllegalStateException("Cannot modify Results: object is immutable.");
 
-        // Implementation omitted here as it’s already covered in your code above.
-        // Will accumulate across agents and aggregate by property/event.
+        for (int i = 0; i < agentResults.getAttributeSetCollectionSetCount(); i++) {
+            AttributeSetCollectionResults agentAttributeSetCollectionResults = agentResults.getAttributeSetCollectionResults(i);
+
+            if (accumulatedAgentAttributeSetResultsDatabaseList.isEmpty()) {
+                for (int j = 0; j < agentAttributeSetCollectionResults.getAttributeSetCount(); j++) {
+                    String attributeName = agentAttributeSetCollectionResults.getAttributeSetResults(j).getAttributeSetName();
+                    AttributeSetResultsDatabase newDatabase = AttributeSetResultsDatabaseFactory.createDatabase();
+                    assert newDatabase != null;
+                    newDatabase.connect();
+                    accumulatedAgentAttributeSetResultsDatabaseMap.put(attributeName, newDatabase);
+                    accumulatedAgentAttributeSetResultsDatabaseList.add(newDatabase);
+                }
+                isAccumulatedAgentAttributeSetDataConnected = true;
+            }
+
+            for (int j = 0; j < agentAttributeSetCollectionResults.getAttributeSetCount(); j++) {
+                AttributeSetResults agentAttributeSetResults = agentAttributeSetCollectionResults.getAttributeSetResults(j);
+                String attributeName = agentAttributeSetResults.getAttributeSetName();
+
+                List<String> propertyNamesList = agentAttributeSetResults.getPropertyNamesList();
+                for (String propertyName : propertyNamesList) {
+                    List<?> accumulatedValues = accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).getPropertyColumnAsList(propertyName);
+                    List<?> valuesToBeProcessed = agentAttributeSetResults.getPropertyValues(propertyName);
+                    List<?> newAccumulatedValues = accumulateAgentPropertyResults(attributeName, propertyName, accumulatedValues, valuesToBeProcessed);
+                    accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).setPropertyColumn(propertyName, (List<Object>) newAccumulatedValues);
+                }
+
+                List<String> preEventNamesList = agentAttributeSetResults.getPreEventNamesList();
+                for (String preEventName : preEventNamesList) {
+                    List<?> accumulatedValues = accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).getPreEventColumnAsList(preEventName);
+                    List<Boolean> valuesToBeProcessed = agentAttributeSetResults.getPreEventValues(preEventName);
+                    List<?> newAccumulatedValues = accumulateAgentPreEventResults(attributeName, preEventName, accumulatedValues, valuesToBeProcessed);
+                    accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).setPreEventColumn(preEventName, (List<Object>) newAccumulatedValues);
+                }
+
+                List<String> postEventNamesList = agentAttributeSetResults.getPostEventNamesList();
+                for (String postEventName : postEventNamesList) {
+                    List<?> accumulatedValues= accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).getPostEventColumnAsList(postEventName);
+                    List<Boolean> valuesToBeProcessed = agentAttributeSetResults.getPostEventValues(postEventName);
+                    List<?> newAccumulatedValues= accumulateAgentPostEventResults(attributeName, postEventName, accumulatedValues, valuesToBeProcessed);
+                    accumulatedAgentAttributeSetResultsDatabaseMap.get(attributeName).setPostEventColumn(postEventName, (List<Object>) newAccumulatedValues);
+                }
+            }
+        }
     }
 
     /**
@@ -248,7 +290,45 @@ public abstract class Results {
         if (isImmutable)
             throw new IllegalStateException("Cannot modify Results: object is immutable.");
 
-        // Implementation already provided.
+        AttributeSetCollectionResults environmentAttributeSetCollectionResults = environmentResults.getAttributeSetCollectionResults();
+
+        if (processedEnvironmentAttributeSetResultsDatabaseList.isEmpty()) {
+            for (int i = 0; i < environmentAttributeSetCollectionResults.getAttributeSetCount(); i++) {
+                String attributeName = environmentAttributeSetCollectionResults.getAttributeSetResults(i).getAttributeSetName();
+                AttributeSetResultsDatabase newDatabase = AttributeSetResultsDatabaseFactory.createDatabase();
+                assert newDatabase != null;
+                newDatabase.connect();
+                processedEnvironmentAttributeSetResultsDatabaseMap.put(attributeName, newDatabase);
+                accumulatedAgentAttributeSetResultsDatabaseList.add(newDatabase);
+            }
+            isProcessedEnvironmentAttributeSetDataConnected = true;
+        }
+
+        for (int i = 0; i < environmentAttributeSetCollectionResults.getAttributeSetCount(); i++) {
+            AttributeSetResults environmentAttributeSetResults = environmentAttributeSetCollectionResults.getAttributeSetResults(i);
+            String attributeName = environmentAttributeSetResults.getAttributeSetName();
+
+            List<String> propertyNamesList = environmentAttributeSetResults.getPropertyNamesList();
+            for (String propertyName : propertyNamesList) {
+                List<?> valuesToBeProcessed = environmentAttributeSetResults.getPropertyValues(propertyName);
+                List<?> newProcessedValues = processEnvironmentPropertyResults(attributeName, propertyName, valuesToBeProcessed);
+                processedEnvironmentAttributeSetResultsDatabaseMap.get(attributeName).setPropertyColumn(propertyName, (List<Object>) newProcessedValues);
+            }
+
+            List<String> preEventNamesList = environmentAttributeSetResults.getPreEventNamesList();
+            for (String preEventName : preEventNamesList) {
+                List<?> valuesToBeProcessed = environmentAttributeSetResults.getPreEventValues(preEventName);
+                List<?> newProcessedValues = processEnvironmentPreEventResults(attributeName, preEventName, valuesToBeProcessed);
+                processedEnvironmentAttributeSetResultsDatabaseMap.get(attributeName).setPreEventColumn(preEventName, (List<Object>) newProcessedValues);
+            }
+
+            List<String> postEventNamesList = environmentAttributeSetResults.getPostEventNamesList();
+            for (String postEventName : postEventNamesList) {
+                List<?> valuesToBeProcessed = environmentAttributeSetResults.getPostEventValues(postEventName);
+                List<?> newProcessedValues = processEnvironmentPostEventResults(attributeName, postEventName, valuesToBeProcessed);
+                processedEnvironmentAttributeSetResultsDatabaseMap.get(attributeName).setPostEventColumn(postEventName, (List<Object>) newProcessedValues);
+            }
+        }
     }
 
     /**

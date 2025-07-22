@@ -2,10 +2,10 @@ package agentarium.results;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import utils.Function4;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,10 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class FunctionalResultsTest {
 
+    private String lastPropertyAttrSet;
+    private String lastPropertyName;
     private List<?> lastPropertyLeft;
     private List<?> lastPropertyRight;
+
+    private String lastPreEventAttrSet;
+    private String lastPreEventName;
     private List<Boolean> lastPreEventLeft;
     private List<Boolean> lastPreEventRight;
+
+    private String lastPostEventAttrSet;
+    private String lastPostEventName;
     private List<Boolean> lastPostEventLeft;
     private List<Boolean> lastPostEventRight;
 
@@ -28,35 +36,40 @@ public class FunctionalResultsTest {
 
     @BeforeEach
     void setUp() {
-        // Functional delegate for accumulating property values (generic)
-        BiFunction<List<?>, List<?>, List<?>> propertyAccumulator = (a, b) -> {
-            lastPropertyLeft = a;
-            lastPropertyRight = b;
-            List<Object> combined = new ArrayList<>();
-            combined.addAll(a);
-            combined.addAll(b);
-            return combined;
-        };
+        Function4<String, String, List<?>, List<?>, List<?>> propertyAccumulator =
+                (attrSet, name, a, b) -> {
+                    lastPropertyAttrSet = attrSet;
+                    lastPropertyName = name;
+                    lastPropertyLeft = a;
+                    lastPropertyRight = b;
+                    List<Object> combined = new ArrayList<>();
+                    combined.addAll(a);
+                    combined.addAll(b);
+                    return combined;
+                };
 
-        // Functional delegate for accumulating pre-event values (Boolean)
-        BiFunction<List<Boolean>, List<Boolean>, List<?>> preEventAccumulator = (a, b) -> {
-            lastPreEventLeft = a;
-            lastPreEventRight = b;
-            List<Boolean> combined = new ArrayList<>(a);
-            combined.addAll(b);
-            return combined;
-        };
+        Function4<String, String, List<Boolean>, List<Boolean>, List<?>> preEventAccumulator =
+                (attrSet, name, a, b) -> {
+                    lastPreEventAttrSet = attrSet;
+                    lastPreEventName = name;
+                    lastPreEventLeft = a;
+                    lastPreEventRight = b;
+                    List<Boolean> combined = new ArrayList<>(a);
+                    combined.addAll(b);
+                    return combined;
+                };
 
-        // Functional delegate for accumulating post-event values (Boolean)
-        BiFunction<List<Boolean>, List<Boolean>, List<?>> postEventAccumulator = (a, b) -> {
-            lastPostEventLeft = a;
-            lastPostEventRight = b;
-            List<Boolean> combined = new ArrayList<>(a);
-            combined.addAll(b);
-            return combined;
-        };
+        Function4<String, String, List<Boolean>, List<Boolean>, List<?>> postEventAccumulator =
+                (attrSet, name, a, b) -> {
+                    lastPostEventAttrSet = attrSet;
+                    lastPostEventName = name;
+                    lastPostEventLeft = a;
+                    lastPostEventRight = b;
+                    List<Boolean> combined = new ArrayList<>(a);
+                    combined.addAll(b);
+                    return combined;
+                };
 
-        // Construct the FunctionalResults using the above lambdas
         results = new FunctionalResults(propertyAccumulator, preEventAccumulator, postEventAccumulator);
     }
 
@@ -70,6 +83,8 @@ public class FunctionalResultsTest {
         assertEquals(List.of("x", "y", "z"), result);
         assertSame(acc, lastPropertyLeft);
         assertSame(incoming, lastPropertyRight);
+        assertEquals("attr", lastPropertyAttrSet);
+        assertEquals("prop", lastPropertyName);
     }
 
     @Test
@@ -82,6 +97,8 @@ public class FunctionalResultsTest {
         assertEquals(List.of(true, false), result);
         assertSame(acc, lastPreEventLeft);
         assertSame(incoming, lastPreEventRight);
+        assertEquals("attr", lastPreEventAttrSet);
+        assertEquals("event", lastPreEventName);
     }
 
     @Test
@@ -94,5 +111,7 @@ public class FunctionalResultsTest {
         assertEquals(List.of(false, true, true), result);
         assertSame(acc, lastPostEventLeft);
         assertSame(incoming, lastPostEventRight);
+        assertEquals("attr", lastPostEventAttrSet);
+        assertEquals("event", lastPostEventName);
     }
 }

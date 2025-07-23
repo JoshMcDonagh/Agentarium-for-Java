@@ -77,6 +77,8 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
         if (settings.getAreProcessesSynced())
             requestResponseInterface.updateCoordinatorAgents(agents);
 
+        agents.setup();
+
         // Simulation main loop
         for (int tick = 0; tick < settings.getTotalNumOfTicks(); tick++) {
             settings.getModelScheduler().runTick(agents);
@@ -93,7 +95,6 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
         }
 
         // Final setup and result collection
-        agents.setup();
         AgentResults agentResults = new AgentResults(agents);
         Results results = settings.getResults();
         results.setAgentNames(agents);

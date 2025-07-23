@@ -8,6 +8,7 @@ import agentarium.multithreading.WorkerThread;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
 import agentarium.multithreading.utils.WorkerCache;
+import agentarium.results.AgentResults;
 import agentarium.results.EnvironmentResults;
 import agentarium.results.Results;
 import utils.DeepCopier;
@@ -58,6 +59,7 @@ public class Model {
         // Instantiate results container
         Results results = settings.getResults();
         results.setAgentNames(agentsForEachCore);
+        results.setAgentResults(new AgentResults(new AgentSet()));
 
         // Prepare the environment
         environment.setup();

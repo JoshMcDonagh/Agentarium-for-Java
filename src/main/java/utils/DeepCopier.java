@@ -1,8 +1,10 @@
 package utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 /**
@@ -14,8 +16,21 @@ import java.lang.reflect.Type;
  */
 public abstract class DeepCopier {
 
-    // Singleton instance of Gson used for serialisation and deserialisation
-    private static final Gson gson = new GsonBuilder().create();
+    // Gson instance configured to exclude Class<?> fields and transient/static fields
+    private static final Gson gson = new GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT)
+            .addSerializationExclusionStrategy(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f.getDeclaredType() == Class.class;
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            })
+            .create();
 
     /**
      * Creates a deep copy of the given object using its class type.
@@ -26,7 +41,6 @@ public abstract class DeepCopier {
      * @return a deep copy of the original object
      */
     public static <T> T deepCopy(T original, Class<T> clazz) {
-        // Serialise and then deserialise the object to produce a deep copy
         return gson.fromJson(gson.toJson(original), clazz);
     }
 
@@ -40,8 +54,6 @@ public abstract class DeepCopier {
      * @return a deep copy of the original object
      */
     public static <T> T deepCopy(T original, Type typeOfT) {
-        // Convert the object to JSON and then parse it back using the provided type
-        String json = gson.toJson(original);
-        return gson.fromJson(json, typeOfT);
+        return gson.fromJson(gson.toJson(original), typeOfT);
     }
 }

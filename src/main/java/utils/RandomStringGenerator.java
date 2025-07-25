@@ -12,7 +12,10 @@ import java.util.List;
  * <p>Note: Uniqueness is determined by maintaining an in-memory list
  * of previously generated strings for the duration of the application's runtime.
  */
-public abstract class RandomStringGenerator {
+public final class RandomStringGenerator {
+
+    // Prevent instantiation
+    private RandomStringGenerator() {}
 
     // Pool of characters to be used for random string generation
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

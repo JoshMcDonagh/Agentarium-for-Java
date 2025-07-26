@@ -2,6 +2,8 @@ package agentarium.attributes;
 
 import agentarium.ModelElement;
 
+import java.io.Serializable;
+
 /**
  * Represents a named attribute associated with a model element such as an agent or environment.
  *
@@ -12,7 +14,7 @@ import agentarium.ModelElement;
  * <p>Each attribute may be associated with a specific {@link ModelElement} (e.g. an agent or
  * environment) to provide context during execution.
  */
-public abstract class Attribute {
+public abstract class Attribute implements Serializable {
 
     /** Unique name identifying this attribute */
     private final String name;

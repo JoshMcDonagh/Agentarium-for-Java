@@ -11,7 +11,6 @@ import agentarium.multithreading.utils.WorkerCache;
 import agentarium.results.AgentResults;
 import agentarium.results.EnvironmentResults;
 import agentarium.results.Results;
-import utils.DeepCopier;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -111,7 +110,7 @@ public class Model {
 
             // Prepare agents for this core and assign them accessors
             for (Agent agent : coreAgentSet) {
-                Environment localEnvironment = DeepCopier.deepCopy(environment, Environment.class);
+                Environment localEnvironment = environment.deepCopy();
                 ModelElementAccessor agentModelElementAccessor = new ModelElementAccessor(
                         agent,
                         coreAgentSet,

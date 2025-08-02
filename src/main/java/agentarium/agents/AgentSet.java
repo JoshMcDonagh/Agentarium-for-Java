@@ -88,7 +88,7 @@ public class AgentSet implements Iterable<Agent> {
         }
 
         if (isStoringAgentCopies)
-            agents.set(index, agent.deepCopyDuplicate());
+            agents.set(index, agent.deepCopy());
         else
             agents.set(index, agent);
     }

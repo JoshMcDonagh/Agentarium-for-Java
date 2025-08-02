@@ -6,6 +6,8 @@ import agentarium.attributes.results.AttributeSetCollectionResults;
 import agentarium.attributes.results.AttributeSetResults;
 import agentarium.attributes.results.databases.AttributeSetResultsDatabase;
 import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
+import utils.DeepCopier;
+import utils.DeepCopyable;
 
 import java.util.*;
 
@@ -20,7 +22,7 @@ import java.util.*;
  * Subclasses must define how agent property and event data are accumulated.
  * </p>
  */
-public abstract class Results {
+public abstract class Results implements DeepCopyable<Results> {
 
     private AgentResults agentResults;
     private EnvironmentResults environmentResults;
@@ -104,6 +106,11 @@ public abstract class Results {
         this.environmentResults = environmentResults;
         if (environmentResults != null)
             isRawEnvironmentAttributeSetDataConnected = true;
+    }
+
+    @Override
+    public Results deepCopy() {
+        return DeepCopier.deepCopy(this, this.getClass());
     }
 
     // === Raw Data Getters ===

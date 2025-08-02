@@ -25,7 +25,7 @@ public class DefaultAgentGenerator extends AgentGenerator {
     protected Agent generateAgent(ModelSettings modelSettings) {
         // Copy the base attributes to ensure each agent has its own instance
         AttributeSetCollection agentAttributeSetCollection =
-                modelSettings.getBaseAgentAttributeSetCollection().deepCopyDuplicate();
+                modelSettings.getBaseAgentAttributeSetCollection().deepCopy();
 
         // Create and name the agent uniquely
         Agent newAgent = new Agent("Agent_" + agentCount, agentAttributeSetCollection);

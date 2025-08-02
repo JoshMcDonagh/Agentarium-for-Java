@@ -1,6 +1,7 @@
 package agentarium.attributes;
 
 import agentarium.ModelElement;
+import utils.DeepCopyable;
 
 import java.io.Serializable;
 
@@ -14,7 +15,7 @@ import java.io.Serializable;
  * <p>Each attribute may be associated with a specific {@link ModelElement} (e.g. an agent or
  * environment) to provide context during execution.
  */
-public abstract class Attribute implements Serializable {
+public abstract class Attribute implements Serializable, DeepCopyable<Attribute> {
 
     /** Unique name identifying this attribute */
     private final String name;

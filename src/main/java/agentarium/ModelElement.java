@@ -1,6 +1,7 @@
 package agentarium;
 
 import agentarium.attributes.AttributeSetCollection;
+import utils.DeepCopyable;
 
 /**
  * Abstract base class for all model elements in the simulation.
@@ -9,7 +10,7 @@ import agentarium.attributes.AttributeSetCollection;
  * or the {@link agentarium.environments.Environment} and holds a unique name,
  * a set of attributes, and a reference to its {@link ModelElementAccessor}.
  */
-public abstract class ModelElement {
+public abstract class ModelElement implements DeepCopyable<ModelElement> {
 
     /** Unique name of the model element (e.g., agent ID or environment name) */
     private final String name;
@@ -28,7 +29,7 @@ public abstract class ModelElement {
      */
     public ModelElement(String name, AttributeSetCollection attributeSetCollection) {
         this.name = name;
-        this.attributeSetCollection = attributeSetCollection.deepCopyDuplicate();
+        this.attributeSetCollection = attributeSetCollection.deepCopy();
         this.attributeSetCollection.setAssociatedModelElement(this);
     }
 

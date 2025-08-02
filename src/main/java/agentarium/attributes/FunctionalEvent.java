@@ -36,4 +36,9 @@ public class FunctionalEvent extends Event {
     public void run() {
         runLogic.run();
     }
+
+    @Override
+    public FunctionalEvent deepCopy() {
+        return new FunctionalEvent(getName(), isRecorded(), runLogic, triggerLogic);
+    }
 }

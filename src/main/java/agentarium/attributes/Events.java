@@ -1,5 +1,7 @@
 package agentarium.attributes;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,5 +68,13 @@ public class Events extends Attributes {
             if (event.isTriggered())
                 event.run();
         }
+    }
+
+    @Override
+    public Events deepCopy() {
+        Events eventsCopy = new Events();
+        for (int i = 0; i < size(); i++)
+            eventsCopy.add(get(i).deepCopy());
+        return eventsCopy;
     }
 }

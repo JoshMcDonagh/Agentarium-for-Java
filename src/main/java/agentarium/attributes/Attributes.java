@@ -1,6 +1,7 @@
 package agentarium.attributes;
 
 import agentarium.ModelElement;
+import utils.DeepCopyable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.Map;
  * <p>Subclasses are responsible for populating the collection and must define the behaviour
  * of the group during each simulation tick via the {@link #run()} method.
  */
-public abstract class Attributes {
+public abstract class Attributes implements DeepCopyable<Attributes> {
 
     /** Maps attribute names to their index positions within the list */
     private final Map<String, Integer> attributeIndexes = new HashMap<>();

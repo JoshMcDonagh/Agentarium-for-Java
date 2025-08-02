@@ -56,4 +56,16 @@ public class FunctionalProperty<T> extends Property<T> {
     public void run() {
         runLogic.run();
     }
+
+    @Override
+    public FunctionalProperty<T> deepCopy() {
+        return new FunctionalProperty<>(
+                getName(),
+                isRecorded(),
+                getType(),
+                getter,
+                setter,
+                runLogic
+        );
+    }
 }

@@ -2,7 +2,7 @@ package agentarium.results;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utils.Function4;
+import utils.QuadFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class FunctionalResultsTest {
 
     @BeforeEach
     void setUp() {
-        Function4<String, String, List<?>, List<?>, List<?>> propertyAccumulator =
+        QuadFunction<String, String, List<?>, List<?>, List<?>> propertyAccumulator =
                 (attrSet, name, a, b) -> {
                     lastPropertyAttrSet = attrSet;
                     lastPropertyName = name;
@@ -48,7 +48,7 @@ public class FunctionalResultsTest {
                     return combined;
                 };
 
-        Function4<String, String, List<Boolean>, List<Boolean>, List<?>> preEventAccumulator =
+        QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> preEventAccumulator =
                 (attrSet, name, a, b) -> {
                     lastPreEventAttrSet = attrSet;
                     lastPreEventName = name;
@@ -59,7 +59,7 @@ public class FunctionalResultsTest {
                     return combined;
                 };
 
-        Function4<String, String, List<Boolean>, List<Boolean>, List<?>> postEventAccumulator =
+        QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> postEventAccumulator =
                 (attrSet, name, a, b) -> {
                     lastPostEventAttrSet = attrSet;
                     lastPostEventName = name;

@@ -3,7 +3,7 @@ package agentarium.agents;
 import agentarium.ModelElement;
 import agentarium.attributes.AttributeSetCollection;
 import com.google.gson.reflect.TypeToken;
-import utils.DeepCopier;
+import utils.DeepCopyable;
 
 /**
  * Represents an agent in the agent-based model.
@@ -35,21 +35,8 @@ public class Agent extends ModelElement {
         getAttributeSetCollection().run();
     }
 
-    /**
-     * Creates a deep copy of this agent, duplicating its name and attributes.
-     *
-     * <p>The copied agent will behave identically to the original unless the
-     * simulation modifies it independently after duplication.
-     *
-     * @return a new {@code Agent} instance with deep-copied attributes
-     */
-    public Agent deepCopyDuplicate() {
-        return new Agent(
-                getName(),
-                DeepCopier.deepCopy(
-                        getAttributeSetCollection(),
-                        new TypeToken<AttributeSetCollection>() {}.getType()
-                )
-        );
+    @Override
+    public Agent deepCopy() {
+        return new Agent(getName(), getAttributeSetCollection().deepCopy());
     }
 }

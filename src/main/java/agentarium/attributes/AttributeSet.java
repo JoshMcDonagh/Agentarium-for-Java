@@ -2,6 +2,7 @@ package agentarium.attributes;
 
 import agentarium.ModelElement;
 import agentarium.attributes.results.AttributeSetResults;
+import utils.DeepCopyable;
 
 /**
  * Represents a named collection of attributes, organised into pre-events, properties, and post-events.
@@ -10,7 +11,7 @@ import agentarium.attributes.results.AttributeSetResults;
  * to a model element such as an agent or environment. It is intended to be executed once per
  * simulation tick, coordinating the flow of behaviour and conditionally recording attribute states.
  */
-public class AttributeSet {
+public class AttributeSet implements DeepCopyable<AttributeSet> {
 
     /** Global counter used to generate default names for unnamed attribute sets */
     private static int attributeSetCount = 0;
@@ -140,5 +141,10 @@ public class AttributeSet {
             if (event.isRecorded())
                 attributeSetResults.recordPostEvent(event.getName(), event.isTriggered());
         }
+    }
+
+    @Override
+    public AttributeSet deepCopy() {
+        return new AttributeSet(name, preEvents.deepCopy(), properties.deepCopy(), postEvents.deepCopy());
     }
 }

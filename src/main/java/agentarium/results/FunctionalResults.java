@@ -2,7 +2,7 @@ package agentarium.results;
 
 import java.util.List;
 
-import utils.Function4;
+import utils.QuadFunction;
 
 /**
  * A functional implementation of {@link Results} that allows users to define
@@ -13,9 +13,9 @@ import utils.Function4;
  */
 public class FunctionalResults extends Results {
 
-    private final Function4<String, String, List<?>, List<?>, List<?>> accumulateProperty;
-    private final Function4<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePreEvent;
-    private final Function4<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePostEvent;
+    private final QuadFunction<String, String, List<?>, List<?>, List<?>> accumulateProperty;
+    private final QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePreEvent;
+    private final QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePostEvent;
 
     /**
      * Constructs a new FunctionalResults instance.
@@ -25,9 +25,9 @@ public class FunctionalResults extends Results {
      * @param accumulatePostEvent logic for accumulating agent post-event values
      */
     public FunctionalResults(
-            Function4<String, String, List<?>, List<?>, List<?>> accumulateProperty,
-            Function4<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePreEvent,
-            Function4<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePostEvent
+            QuadFunction<String, String, List<?>, List<?>, List<?>> accumulateProperty,
+            QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePreEvent,
+            QuadFunction<String, String, List<Boolean>, List<Boolean>, List<?>> accumulatePostEvent
     ) {
         this.accumulateProperty = accumulateProperty;
         this.accumulatePreEvent = accumulatePreEvent;

@@ -30,4 +30,9 @@ public class Environment extends ModelElement {
     public void run() {
         getAttributeSetCollection().run();
     }
+
+    @Override
+    public Environment deepCopy() {
+        return new Environment(getName(), getAttributeSetCollection().deepCopy());
+    }
 }

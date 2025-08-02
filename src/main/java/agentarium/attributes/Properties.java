@@ -61,4 +61,12 @@ public class Properties extends Attributes {
         for (int i = 0; i < size(); i++)
             get(i).run();
     }
+
+    @Override
+    public Properties deepCopy() {
+        Properties propertiesCopy = new Properties();
+        for (int i = 0; i < size(); i++)
+            propertiesCopy.add(get(i).deepCopy());
+        return propertiesCopy;
+    }
 }

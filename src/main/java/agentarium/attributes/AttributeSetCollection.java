@@ -3,7 +3,7 @@ package agentarium.attributes;
 import agentarium.ModelElement;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import com.google.gson.reflect.TypeToken;
-import utils.DeepCopier;
+import utils.DeepCopyable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
  *   <li>Executing all attribute sets each simulation tick</li>
  * </ul>
  */
-public class AttributeSetCollection {
+public class AttributeSetCollection implements DeepCopyable<AttributeSetCollection> {
 
     /** The name of the owning model element (e.g., agent or environment) */
     private String modelElementName;
@@ -129,12 +129,13 @@ public class AttributeSetCollection {
             attributeSet.run(getResults().getAttributeSetResults(attributeSet.getName()));
     }
 
-    /**
-     * Creates a deep copy of this entire attribute set collection, including all contained attribute sets.
-     *
-     * @return a new, deep-copied {@code AttributeSetCollection}
-     */
-    public AttributeSetCollection deepCopyDuplicate() {
-        return DeepCopier.deepCopy(this, new TypeToken<AttributeSetCollection>() {}.getType());
+    @Override
+    public AttributeSetCollection deepCopy() {
+        AttributeSetCollection attributeSetCollectionCopy = new AttributeSetCollection();
+        attributeSetCollectionCopy.modelElementName = modelElementName;
+        for (AttributeSet attributeSet : attributeSets)
+            attributeSetCollectionCopy.add(attributeSet.deepCopy());
+        attributeSetCollectionCopy.attributeSetCollectionResults = attributeSetCollectionResults;
+        return attributeSetCollectionCopy;
     }
 }

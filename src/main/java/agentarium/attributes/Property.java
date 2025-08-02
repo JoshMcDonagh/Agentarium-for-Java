@@ -1,5 +1,8 @@
 package agentarium.attributes;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+
 /**
  * Represents a stateful, typed property attribute.
  *
@@ -86,4 +89,34 @@ public abstract class Property<T> extends Attribute {
      */
     @Override
     public abstract void run();
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Property<T> deepCopy() {
+        try {
+            Class<? extends Property> clazz = this.getClass();
+
+            // Try to find a copy constructor
+            try {
+                Constructor<? extends Property> copyCtor = clazz.getDeclaredConstructor(clazz);
+                copyCtor.setAccessible(true);
+                return copyCtor.newInstance(this);
+            } catch (NoSuchMethodException ignored) {}
+
+            // Try no-arg constructor and copy fields manually
+            Constructor<? extends Property> ctor = clazz.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            Property<T> copy = (Property<T>) ctor.newInstance();
+
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                field.set(copy, field.get(this));
+            }
+
+            return copy;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deep copy Property of type " + this.getClass().getName(), e);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package agentarium.attributes;
 
+import agentarium.attributes.functional.FunctionalProperty;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;

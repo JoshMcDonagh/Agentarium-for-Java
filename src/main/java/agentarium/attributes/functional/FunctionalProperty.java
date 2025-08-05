@@ -1,4 +1,6 @@
-package agentarium.attributes;
+package agentarium.attributes.functional;
+
+import agentarium.attributes.Property;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -14,9 +16,11 @@ import java.util.function.Supplier;
  */
 public class FunctionalProperty<T> extends Property<T> {
 
-    private final Supplier<T> getter;
-    private final Consumer<T> setter;
-    private final Runnable runLogic;
+    private final PropertyGetterFunction<T> getter;
+    private final PropertySetterFunction<T> setter;
+    private final PropertyRunFunction<T> runLogic;
+
+    private T propertyValue = null;
 
     /**
      * Constructs a functional property with the given name, type, recording flag, and logic.
@@ -32,9 +36,9 @@ public class FunctionalProperty<T> extends Property<T> {
             String name,
             boolean isRecorded,
             Class<T> type,
-            Supplier<T> getter,
-            Consumer<T> setter,
-            Runnable runLogic
+            PropertyGetterFunction<T> getter,
+            PropertySetterFunction<T> setter,
+            PropertyRunFunction<T> runLogic
     ) {
         super(name, isRecorded, type);
         this.getter = getter;
@@ -44,17 +48,17 @@ public class FunctionalProperty<T> extends Property<T> {
 
     @Override
     public T get() {
-        return getter.get();
+        return getter.get(getAssociatedModelElement(), propertyValue);
     }
 
     @Override
     public void set(T value) {
-        setter.accept(value);
+        propertyValue = setter.set(getAssociatedModelElement(), propertyValue, value);
     }
 
     @Override
     public void run() {
-        runLogic.run();
+        propertyValue = runLogic.run(getAssociatedModelElement(), propertyValue);
     }
 
     @Override

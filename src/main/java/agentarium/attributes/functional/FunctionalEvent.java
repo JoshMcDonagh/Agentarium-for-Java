@@ -1,4 +1,6 @@
-package agentarium.attributes;
+package agentarium.attributes.functional;
+
+import agentarium.attributes.Event;
 
 import java.util.function.BooleanSupplier;
 
@@ -10,8 +12,8 @@ import java.util.function.BooleanSupplier;
  */
 public class FunctionalEvent extends Event {
 
-    private final Runnable runLogic;
-    private final BooleanSupplier triggerLogic;
+    private final EventRunFunction runLogic;
+    private final EventIsTriggeredFunction triggerLogic;
 
     /**
      * Constructs a functional event with the given name, recording flag, and behaviour.
@@ -21,7 +23,7 @@ public class FunctionalEvent extends Event {
      * @param runLogic logic to execute when {@link #run()} is called
      * @param triggerLogic logic to evaluate when {@link #isTriggered()} is called
      */
-    public FunctionalEvent(String name, boolean isRecorded, Runnable runLogic, BooleanSupplier triggerLogic) {
+    public FunctionalEvent(String name, boolean isRecorded, EventRunFunction runLogic, EventIsTriggeredFunction triggerLogic) {
         super(name, isRecorded);
         this.runLogic = runLogic;
         this.triggerLogic = triggerLogic;
@@ -29,12 +31,12 @@ public class FunctionalEvent extends Event {
 
     @Override
     public boolean isTriggered() {
-        return triggerLogic.getAsBoolean();
+        return triggerLogic.isTriggered(getAssociatedModelElement());
     }
 
     @Override
     public void run() {
-        runLogic.run();
+        runLogic.run(getAssociatedModelElement());
     }
 
     @Override

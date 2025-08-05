@@ -1,5 +1,6 @@
 package agentarium.attributes;
 
+import agentarium.attributes.functional.FunctionalEvent;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;

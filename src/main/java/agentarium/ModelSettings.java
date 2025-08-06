@@ -6,6 +6,7 @@ import agentarium.environments.EnvironmentGenerator;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
 import com.google.gson.reflect.TypeToken;
+import utils.DeepCopier;
 
 import java.lang.reflect.InvocationTargetException;
 

@@ -28,7 +28,7 @@ public class DefaultEnvironmentGenerator extends EnvironmentGenerator {
     public Environment generateEnvironment(ModelSettings modelSettings) {
         // Create a deep copy of the base environment attributes to ensure isolation
         AttributeSetCollection environmentAttributeSetCollection =
-                modelSettings.getBaseEnvironmentAttributeSetCollection().deepCopyDuplicate();
+                modelSettings.getBaseEnvironmentAttributeSetCollection().deepCopy();
 
         // Return a standard environment instance named "Environment"
         return new Environment("Environment", environmentAttributeSetCollection);

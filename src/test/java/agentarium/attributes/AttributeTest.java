@@ -27,6 +27,11 @@ public class AttributeTest {
         public boolean wasRun() {
             return wasRun;
         }
+
+        @Override
+        public Attribute deepCopy() {
+            return null;
+        }
     }
 
     @Test

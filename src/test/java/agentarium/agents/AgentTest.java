@@ -1,5 +1,6 @@
 package agentarium.agents;
 
+import agentarium.ModelElement;
 import agentarium.attributes.AttributeSetCollection;
 import agentarium.attributes.results.AttributeSetCollectionResults;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ public class AgentTest {
     @BeforeEach
     public void setUp() {
         mockAttributeSetCollection = mock(AttributeSetCollection.class);
-        when(mockAttributeSetCollection.deepCopyDuplicate()).thenReturn(mockAttributeSetCollection);
+        when(mockAttributeSetCollection.deepCopy()).thenReturn(mockAttributeSetCollection);
 
         agent = new Agent("Agent_1", mockAttributeSetCollection);
     }
@@ -42,7 +43,12 @@ public class AgentTest {
 
     @Test
     public void testDeepCopyDuplicate_createsEquivalentAgent() {
-        Agent copy = agent.deepCopyDuplicate();
+        AttributeSetCollection copiedAttributeSetCollection = mock(AttributeSetCollection.class);
+        when(mockAttributeSetCollection.deepCopy()).thenReturn(copiedAttributeSetCollection);
+        doNothing().when(copiedAttributeSetCollection).setAssociatedModelElement(any(ModelElement.class));
+        when(copiedAttributeSetCollection.deepCopy()).thenReturn((copiedAttributeSetCollection));
+
+        Agent copy = agent.deepCopy();
 
         assertNotNull(copy, "Deep copy should not be null.");
         assertEquals(agent.getName(), copy.getName(), "Copied agent should retain the same name.");

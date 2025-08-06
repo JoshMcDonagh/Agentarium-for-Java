@@ -29,6 +29,11 @@ public class AttributesTest {
         public boolean hasRun() {
             return hasRun;
         }
+
+        @Override
+        public Attribute deepCopy() {
+            return null;
+        }
     }
 
     // Minimal concrete subclass for testing base behaviour
@@ -65,6 +70,11 @@ public class AttributesTest {
 
         public Attribute getByIndex(int index) {
             return getAttribute(index);
+        }
+
+        @Override
+        public Attributes deepCopy() {
+            return null;
         }
     }
 

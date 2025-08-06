@@ -27,6 +27,11 @@ public class ModelElementTest {
         public boolean wasRunCalled() {
             return wasRunCalled;
         }
+
+        @Override
+        public ModelElement deepCopy() {
+            return null;
+        }
     }
 
     private AttributeSetCollection attributeSetCollection;
@@ -35,7 +40,7 @@ public class ModelElementTest {
     @BeforeEach
     public void setup() {
         attributeSetCollection = mock(AttributeSetCollection.class);
-        when(attributeSetCollection.deepCopyDuplicate()).thenReturn(attributeSetCollection);
+        when(attributeSetCollection.deepCopy()).thenReturn(attributeSetCollection);
         dummyElement = new DummyModelElement("TestElement", attributeSetCollection);
     }
 
@@ -53,7 +58,7 @@ public class ModelElementTest {
     @Test
     public void testSetupInitialisesAttributeCollection() {
         AttributeSetCollection mockAttributeSetCollection = mock(AttributeSetCollection.class);
-        when(mockAttributeSetCollection.deepCopyDuplicate()).thenReturn(mockAttributeSetCollection);
+        when(mockAttributeSetCollection.deepCopy()).thenReturn(mockAttributeSetCollection);
 
         DummyModelElement dummy = new DummyModelElement("TestElement", mockAttributeSetCollection);
         dummy.setup();

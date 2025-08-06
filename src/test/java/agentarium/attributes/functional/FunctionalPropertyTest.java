@@ -1,4 +1,4 @@
-package agentarium.attributes;
+package agentarium.attributes.functional;
 
 import agentarium.attributes.functional.FunctionalProperty;
 import org.junit.jupiter.api.Test;
@@ -19,18 +19,18 @@ public class FunctionalPropertyTest {
 
     @Test
     void testGetReturnsCurrentValue() {
-        // Arrange: use an atomic reference to hold the backing value
-        AtomicReference<String> valueHolder = new AtomicReference<>("initial");
+        String value = "initial";
 
-        Supplier<String> getter = valueHolder::get;
-        Consumer<String> setter = valueHolder::set;
-        Runnable runLogic = mock(Runnable.class); // Not tested here
+        PropertyGetterFunction<String> getter = (associatedModelElement, propertyValue) -> propertyValue;
+        PropertySetterFunction<String> setter = (associatedModelElement, currentPropertyValue, newValue) -> newValue;
+        PropertyRunFunction<String> runLogic = mock(PropertyRunFunction.class);
 
         FunctionalProperty<String> property = new FunctionalProperty<>(
                 "TestProperty", true, String.class, getter, setter, runLogic
         );
 
         // Act
+        property.set(value);
         String result = property.get();
 
         // Assert
@@ -39,18 +39,18 @@ public class FunctionalPropertyTest {
 
     @Test
     void testSetUpdatesValueCorrectly() {
-        // Arrange: same pattern as above
-        AtomicReference<Integer> valueHolder = new AtomicReference<>(0);
+        int value = 0;
 
-        Supplier<Integer> getter = valueHolder::get;
-        Consumer<Integer> setter = valueHolder::set;
-        Runnable runLogic = mock(Runnable.class);
+        PropertyGetterFunction<Integer> getter = (associatedModelElement, propertyValue) -> propertyValue;
+        PropertySetterFunction<Integer> setter = (associatedModelElement, currentPropertyValue, newValue) -> newValue;
+        PropertyRunFunction<Integer> runLogic = mock(PropertyRunFunction.class);
 
         FunctionalProperty<Integer> property = new FunctionalProperty<>(
                 "Counter", true, Integer.class, getter, setter, runLogic
         );
 
         // Act
+        property.set(value);
         property.set(99);
 
         // Assert
@@ -59,26 +59,27 @@ public class FunctionalPropertyTest {
 
     @Test
     void testRunExecutesRunLogic() {
-        // Arrange
-        Runnable runLogic = mock(Runnable.class);
+        PropertyGetterFunction<Double> getter = (associatedModelElement, propertyValue) -> 0.0;
+        PropertySetterFunction<Double> setter = (associatedModelElement, currentPropertyValue, newValue) -> null;
+        PropertyRunFunction<Double> runLogic = mock(PropertyRunFunction.class);
 
         FunctionalProperty<Double> property = new FunctionalProperty<>(
-                "RunTest", false, Double.class, () -> 0.0, v -> {}, runLogic
+                "RunTest", false, Double.class, getter, setter, runLogic
         );
 
         // Act
         property.run();
 
         // Assert
-        verify(runLogic, times(1)).run();
+        verify(runLogic, times(1)).run(null, null);
     }
 
     @Test
     void testMetadataIsCorrect() {
         // Arrange
-        Supplier<Boolean> getter = () -> true;
-        Consumer<Boolean> setter = v -> {};
-        Runnable runLogic = mock(Runnable.class);
+        PropertyGetterFunction<Boolean> getter = (associatedModelElement, propertyValue) -> true;
+        PropertySetterFunction<Boolean> setter = (associatedModelElement, currentPropertyValue, newValue) -> null;
+        PropertyRunFunction<Boolean> runLogic = mock(PropertyRunFunction.class);
 
         FunctionalProperty<Boolean> property = new FunctionalProperty<>(
                 "Flag", true, Boolean.class, getter, setter, runLogic

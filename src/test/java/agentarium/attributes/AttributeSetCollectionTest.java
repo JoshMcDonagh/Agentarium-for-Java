@@ -28,6 +28,8 @@ public class AttributeSetCollectionTest {
         when(mockAttributeSet.getProperties()).thenReturn(new Properties());
         when(mockAttributeSet.getPreEvents()).thenReturn(new Events());
         when(mockAttributeSet.getPostEvents()).thenReturn(new Events());
+
+        when(mockAttributeSet.deepCopy()).thenReturn(mockAttributeSet);
     }
 
     @Test
@@ -74,7 +76,7 @@ public class AttributeSetCollectionTest {
     @Test
     public void testDeepCopyProducesEqualButDistinctCollection() {
         collection.add(mockAttributeSet);
-        AttributeSetCollection copy = collection.deepCopyDuplicate();
+        AttributeSetCollection copy = collection.deepCopy();
 
         assertNotSame(collection, copy);
         assertEquals(collection.size(), copy.size());

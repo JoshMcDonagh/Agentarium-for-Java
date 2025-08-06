@@ -1,5 +1,7 @@
-package agentarium.attributes;
+package agentarium.attributes.functional;
 
+import agentarium.attributes.functional.EventIsTriggeredFunction;
+import agentarium.attributes.functional.EventRunFunction;
 import agentarium.attributes.functional.FunctionalEvent;
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +21,11 @@ public class FunctionalEventTest {
     @Test
     void testRunLogicIsExecuted() {
         // Arrange: use a flag to verify the run logic is called
-        AtomicBoolean hasRun = new AtomicBoolean(false);
-        Runnable runLogic = () -> hasRun.set(true);
 
-        BooleanSupplier triggerLogic = () -> false;  // doesn't matter for this test
+        AtomicBoolean hasRun = new AtomicBoolean(false);
+        EventRunFunction runLogic = (associatedModelElement) -> hasRun.set(true);
+
+        EventIsTriggeredFunction triggerLogic = (associatedModelElement) -> false;  // doesn't matter for this test
 
         FunctionalEvent event = new FunctionalEvent("RunEvent", true, runLogic, triggerLogic);
 
@@ -36,8 +39,8 @@ public class FunctionalEventTest {
     @Test
     void testIsTriggeredReturnsTrue() {
         // Arrange: use a BooleanSupplier that returns true
-        Runnable runLogic = mock(Runnable.class);
-        BooleanSupplier triggerLogic = () -> true;
+        EventRunFunction runLogic = mock(EventRunFunction.class);
+        EventIsTriggeredFunction triggerLogic = (associatedModelElement) -> true;
 
         FunctionalEvent event = new FunctionalEvent("TriggerTrueEvent", false, runLogic, triggerLogic);
 
@@ -48,8 +51,8 @@ public class FunctionalEventTest {
     @Test
     void testIsTriggeredReturnsFalse() {
         // Arrange: use a BooleanSupplier that returns false
-        Runnable runLogic = mock(Runnable.class);
-        BooleanSupplier triggerLogic = () -> false;
+        EventRunFunction runLogic = mock(EventRunFunction.class);
+        EventIsTriggeredFunction triggerLogic = (associatedModelElement) -> false;
 
         FunctionalEvent event = new FunctionalEvent("TriggerFalseEvent", false, runLogic, triggerLogic);
 
@@ -62,8 +65,8 @@ public class FunctionalEventTest {
         // Arrange
         String name = "TestEvent";
         boolean isRecorded = true;
-        Runnable runLogic = mock(Runnable.class);
-        BooleanSupplier triggerLogic = () -> false;
+        EventRunFunction runLogic = mock(EventRunFunction.class);
+        EventIsTriggeredFunction triggerLogic = (associatedModelElement) -> false;
 
         FunctionalEvent event = new FunctionalEvent(name, isRecorded, runLogic, triggerLogic);
 

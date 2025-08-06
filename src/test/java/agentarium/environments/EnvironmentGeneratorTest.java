@@ -28,7 +28,7 @@ public class EnvironmentGeneratorTest {
     public void testGenerateEnvironmentReturnsExpectedEnvironment() {
         ModelSettings settings = new ModelSettings();
         AttributeSetCollection mockAttributes = mock(AttributeSetCollection.class);
-        when(mockAttributes.deepCopyDuplicate()).thenReturn(mockAttributes);
+        when(mockAttributes.deepCopy()).thenReturn(mockAttributes);
         settings.setBaseEnvironmentAttributeSetCollection(mockAttributes);
 
         EnvironmentGenerator generator = new TestEnvironmentGenerator();

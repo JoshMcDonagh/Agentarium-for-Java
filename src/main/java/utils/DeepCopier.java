@@ -5,6 +5,7 @@ import com.google.gson.*;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
@@ -24,8 +25,8 @@ public final class DeepCopier {
     // Gson instance configured to ignore Class<?> fields and static/transient modifiers
     private static final Gson gson = new GsonBuilder()
             .excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT)
-            .registerTypeAdapter(Class.class, (JsonSerializer<Class<?>>) (src, typeOfSrc, context) -> JsonNull.INSTANCE)
-            .registerTypeAdapter(Class.class, (JsonDeserializer<Class<?>>) (json, typeOfT, context) -> null)
+            .registerTypeAdapter(Class.class, (JsonSerializer<Class<?>>) (src, t, c) -> JsonNull.INSTANCE)
+            .registerTypeAdapter(Class.class, (JsonDeserializer<Class<?>>) (json, t, c) -> null)
             .create();
 
     /**
@@ -41,17 +42,28 @@ public final class DeepCopier {
      */
     @SuppressWarnings("unchecked")
     public static <T> T deepCopy(T original, Class<T> clazz) {
+        if (original == null)
+            return null;
+
         if (original instanceof Attribute || original instanceof Serializable) {
             try {
                 return (T) deepCopyViaSerialization((Serializable) original);
             } catch (Exception e) {
                 if (original instanceof Attribute) {
-                    throw new IllegalStateException("Attribute must be serializable: " + original.getClass().getName(), e);
+                    throw new IllegalStateException(
+                            "Attribute must be serializable: " + original.getClass().getName(), e);
                 }
                 // fall through to Gson if not Attribute
             }
         }
-        return deepCopyViaGson(original, clazz);
+
+        // Use a concrete target class for Gson to avoid "abstract class" instantiation
+        @SuppressWarnings("unchecked")
+        Class<T> target = (clazz == null || clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()))
+                ? (Class<T>) original.getClass()
+                : clazz;
+
+        return deepCopyViaGson(original, target);
     }
 
     /**
@@ -64,6 +76,14 @@ public final class DeepCopier {
      * @return a deep copy of the original object
      */
     public static <T> T deepCopy(T original, Type typeOfT) {
+        if (original == null) return null;
+
+        Class<?> raw = rawClass(typeOfT);
+        if (raw == null || raw.isInterface() || Modifier.isAbstract(raw.getModifiers())) {
+            @SuppressWarnings("unchecked")
+            Class<T> runtime = (Class<T>) original.getClass();
+            return deepCopyViaGson(original, runtime);
+        }
         return gson.fromJson(gson.toJson(original), typeOfT);
     }
 
@@ -77,17 +97,10 @@ public final class DeepCopier {
      * @throws ClassNotFoundException if deserialization fails
      */
     @SuppressWarnings("unchecked")
-    private static <T extends Serializable> T deepCopyViaSerialization(T object)
-            throws IOException, ClassNotFoundException {
-        try (
-                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                ObjectOutputStream out = new ObjectOutputStream(byteOut)
-        ) {
+    private static <T extends Serializable> T deepCopyViaSerialization(T object) throws IOException, ClassNotFoundException {
+        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream(); ObjectOutputStream out = new ObjectOutputStream(byteOut)) {
             out.writeObject(object);
-            try (
-                    ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
-                    ObjectInputStream in = new ObjectInputStream(byteIn)
-            ) {
+            try (ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray()); ObjectInputStream in = new ObjectInputStream(byteIn)) {
                 return (T) in.readObject();
             }
         }
@@ -97,11 +110,21 @@ public final class DeepCopier {
      * Performs deep copy using Gson serialization/deserialization.
      *
      * @param original the object
-     * @param clazz    the class of the object
+     * @param targetClass   the class of the object
      * @param <T>      the type
      * @return a deep copy
      */
-    private static <T> T deepCopyViaGson(T original, Class<T> clazz) {
-        return gson.fromJson(gson.toJson(original), clazz);
+    private static <T> T deepCopyViaGson(T original, Class<T> targetClass) {
+        return gson.fromJson(gson.toJson(original), targetClass);
+    }
+
+    // Helper to get the raw Class from a Type (if possible)
+    private static Class<?> rawClass(Type t) {
+        if (t instanceof Class) return (Class<?>) t;
+        if (t instanceof ParameterizedType) {
+            Type rt = ((ParameterizedType) t).getRawType();
+            if (rt instanceof Class) return (Class<?>) rt;
+        }
+        return null;
     }
 }

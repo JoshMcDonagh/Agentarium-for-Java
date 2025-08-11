@@ -22,7 +22,7 @@ public class DefaultAgentGenerator extends AgentGenerator {
      * @return a new {@link Agent} with copied attributes and a unique name
      */
     @Override
-    protected Agent generateAgent(ModelSettings modelSettings) {
+    public Agent generateAgent(ModelSettings modelSettings) {
         // Copy the base attributes to ensure each agent has its own instance
         AttributeSetCollection agentAttributeSetCollection =
                 modelSettings.getBaseAgentAttributeSetCollection().deepCopy();

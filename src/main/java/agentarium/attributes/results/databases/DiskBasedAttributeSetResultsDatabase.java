@@ -22,6 +22,14 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
     private static final List<DiskBasedAttributeSetResultsDatabase> activeDatabases = Collections.synchronizedList(new ArrayList<>());
     private static boolean shutdownHookRegistered = false;
 
+    private static Class<?> firstNonNullClass(List<?> values) {
+        if (values == null) return null;
+        for (Object v : values) {
+            if (v != null) return v.getClass();
+        }
+        return null;
+    }
+
     private final String PROPERTIES_TABLE_NAME = "properties_table";
     private final String PRE_EVENTS_TABLE_NAME = "pre_events_table";
     private final String POST_EVENTS_TABLE_NAME = "post_events_table";
@@ -121,20 +129,39 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
 
     @Override
     public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
-        propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
-        setColumn(PROPERTIES_TABLE_NAME, propertyName, propertyValues);
+        // Always ensure the column exists
+        ensureColumnExists(PROPERTIES_TABLE_NAME, propertyName);
+
+        // Infer and remember the element type if we can (skip if empty/all null)
+        Class<?> inferred = firstNonNullClass(propertyValues);
+        if (inferred != null) {
+            propertyClassesMap.put(propertyName, inferred);
+        }
+        // Replace data (handles empty list by clearing the table)
+        setColumn(PROPERTIES_TABLE_NAME, propertyName,
+                (propertyValues == null) ? Collections.emptyList() : propertyValues);
     }
 
     @Override
     public void setPreEventColumn(String preEventName, List<Object> preEventValues) {
-        preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
-        setColumn(PRE_EVENTS_TABLE_NAME, preEventName, preEventValues);
+        ensureColumnExists(PRE_EVENTS_TABLE_NAME, preEventName);
+        Class<?> inferred = firstNonNullClass(preEventValues);
+        if (inferred != null) {
+            preEventClassesMap.put(preEventName, inferred);
+        }
+        setColumn(PRE_EVENTS_TABLE_NAME, preEventName,
+                (preEventValues == null) ? Collections.emptyList() : preEventValues);
     }
 
     @Override
     public void setPostEventColumn(String postEventName, List<Object> postEventValues) {
-        postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
-        setColumn(POST_EVENTS_TABLE_NAME, postEventName, postEventValues);
+        ensureColumnExists(POST_EVENTS_TABLE_NAME, postEventName);
+        Class<?> inferred = firstNonNullClass(postEventValues);
+        if (inferred != null) {
+            postEventClassesMap.put(postEventName, inferred);
+        }
+        setColumn(POST_EVENTS_TABLE_NAME, postEventName,
+                (postEventValues == null) ? Collections.emptyList() : postEventValues);
     }
 
     // === Column Retrieval ===

@@ -1,6 +1,8 @@
 package agentarium.multithreading;
 
+import agentarium.ModelClock;
 import agentarium.ModelSettings;
+import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
 import agentarium.multithreading.requestresponse.RequestResponseController;
 import agentarium.multithreading.requestresponse.RequestResponseInterface;
@@ -67,6 +69,10 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
      */
     @Override
     public Results call() throws InterruptedException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        ModelClock modelClock = new ModelClock(settings.getNumOfTicksToRun(), settings.getNumOfWarmUpTicks());
+        for (Agent agent : agents)
+            agent.getModelElementAccessor().setModelClock(modelClock);
+
         WorkerCache cache = settings.getIsCacheUsed()
                 ? new WorkerCache(settings.getDoAgentStoresHoldAgentCopies())
                 : null;
@@ -80,7 +86,7 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
         agents.setup();
 
         // Simulation main loop
-        for (int tick = 0; tick < settings.getTotalNumOfTicks(); tick++) {
+        while (modelClock.isRunning()) {
             settings.getModelScheduler().runTick(agents);
 
             if (settings.getAreProcessesSynced()) {
@@ -92,6 +98,8 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
 
             if (cache != null)
                 cache.clear();
+
+            modelClock.triggerTick();
         }
 
         // Final setup and result collection

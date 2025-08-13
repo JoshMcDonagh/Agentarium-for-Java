@@ -118,6 +118,9 @@ public class AttributeSet implements DeepCopyable<AttributeSet> {
 
     /** Records the triggered state of pre-events if marked as recorded */
     private void recordPreEvents(AttributeSetResults attributeSetResults) {
+        if (preEvents.getAssociatedModelElement().getModelElementAccessor().getModelClock().isWarmingUp())
+            return;
+
         for (int i = 0; i < preEvents.size(); i++) {
             Event event = preEvents.get(i);
             if (event.isRecorded())
@@ -127,6 +130,9 @@ public class AttributeSet implements DeepCopyable<AttributeSet> {
 
     /** Records the values of properties if marked as recorded */
     private void recordProperties(AttributeSetResults attributeSetResults) {
+        if (properties.getAssociatedModelElement().getModelElementAccessor().getModelClock().isWarmingUp())
+            return;
+
         for (int i = 0; i < properties.size(); i++) {
             Property<?> property = properties.get(i);
             if (property.isRecorded())
@@ -136,6 +142,9 @@ public class AttributeSet implements DeepCopyable<AttributeSet> {
 
     /** Records the triggered state of post-events if marked as recorded */
     private void recordPostEvents(AttributeSetResults attributeSetResults) {
+        if (postEvents.getAssociatedModelElement().getModelElementAccessor().getModelClock().isWarmingUp())
+            return;
+
         for (int i = 0; i < postEvents.size(); i++) {
             Event event = postEvents.get(i);
             if (event.isRecorded())

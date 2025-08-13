@@ -98,15 +98,16 @@ public class Model {
 
         // Launch worker threads
         for (int coreIndex = 0; coreIndex < settings.getNumOfCores(); coreIndex++) {
+            // Optional local cache for worker thread
+            WorkerCache cache = null;
+            if (settings.getIsCacheUsed())
+                cache = new WorkerCache(settings.getDoAgentStoresHoldAgentCopies());
 
             // Create an agent set for the current core
             AgentSet coreAgentSet = new AgentSet(settings.getDoAgentStoresHoldAgentCopies());
 
-            // Optional local cache for worker thread
-            WorkerCache cache = null;
-            if (settings.getIsCacheUsed()) {
-                cache = new WorkerCache(settings.getDoAgentStoresHoldAgentCopies());
-            }
+            // Add the pre-assigned agent set for this core
+            coreAgentSet.add(agentsForEachCore.get(coreIndex));
 
             // Prepare agents for this core and assign them accessors
             for (Agent agent : coreAgentSet) {
@@ -119,11 +120,8 @@ public class Model {
                         new RequestResponseInterface(agent.getName(), settings, requestResponseController),
                         localEnvironment
                 );
-                // Note: model element accessor is prepared but not stored in this scope
+                agent.setModelElementAccessor(agentModelElementAccessor);
             }
-
-            // Add the pre-assigned agent set for this core
-            coreAgentSet.add(agentsForEachCore.get(coreIndex));
 
             // Create and submit the worker task
             Callable<Results> worker = new WorkerThread<>(

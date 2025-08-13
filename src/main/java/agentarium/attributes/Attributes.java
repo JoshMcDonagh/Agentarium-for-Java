@@ -1,5 +1,6 @@
 package agentarium.attributes;
 
+import agentarium.ModelClock;
 import agentarium.ModelElement;
 import utils.DeepCopyable;
 
@@ -25,6 +26,8 @@ public abstract class Attributes implements DeepCopyable<Attributes> {
     /** Ordered list of attributes held by this collection */
     private final List<Attribute> attributes = new ArrayList<>();
 
+    private ModelElement associatedModelElement;
+
     /**
      * Associates all contained attributes with the given model element.
      * Typically called once during initialisation.
@@ -32,8 +35,17 @@ public abstract class Attributes implements DeepCopyable<Attributes> {
      * @param associatedModelElement the model element (e.g. agent or environment) to associate
      */
     public void setAssociatedModelElement(ModelElement associatedModelElement) {
+        this.associatedModelElement = associatedModelElement;
         for (Attribute attribute : attributes)
             attribute.setAssociatedModelElement(associatedModelElement);
+    }
+
+    /**
+     * Retrieves the model element associated with attributes.
+     * @return the {@link ModelElement} instance
+     */
+    public ModelElement getAssociatedModelElement() {
+        return associatedModelElement;
     }
 
     /**

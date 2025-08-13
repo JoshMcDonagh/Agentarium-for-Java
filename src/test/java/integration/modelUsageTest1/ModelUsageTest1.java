@@ -4,86 +4,72 @@ import agentarium.Model;
 import agentarium.ModelSettings;
 import agentarium.agents.DefaultAgentGenerator;
 import agentarium.attributes.results.databases.AttributeSetResultsDatabase;
+import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
 import agentarium.environments.DefaultEnvironmentGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import integration.modelUsageTest1.attributes.ModelAttributes;
-import integration.modelUsageTest1.results.ModelResults;
 import agentarium.results.Results;
 import agentarium.scheduler.InOrderScheduler;
+import integration.modelUsageTest1.attributes.ModelAttributes;
+import integration.modelUsageTest1.results.ModelResults;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelUsageTest1 {
-    private static <T> T getPrivateFieldByType(Object target, Class<T> type) {
-        Class<?> c = target.getClass();
-        while (c != null) {
-            for (Field f : c.getDeclaredFields()) {
-                if (type.isAssignableFrom(f.getType())) {
-                    try {
-                        f.setAccessible(true);
-                        Object v = f.get(target);
-                        return type.cast(v);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException("Cannot access field: " + f.getName(), e);
-                    }
-                }
-            }
-            c = c.getSuperclass();
+
+    // ---- tiny in-memory capture DB for assertions ----
+    static class TestCaptureDB extends AttributeSetResultsDatabase {
+        private final Map<String, List<Object>> props = new HashMap<>();
+        private final Map<String, List<Object>> pre   = new HashMap<>();
+        private final Map<String, List<Object>> post  = new HashMap<>();
+        // Track which columns were set via bulk API (accumulated/processed writes)
+        private final Set<String> bulkProps = new HashSet<>();
+        private final Set<String> bulkPre   = new HashSet<>();
+        private final Set<String> bulkPost  = new HashSet<>();
+
+        @Override public <T> void addPropertyValue(String name, T v) {
+            props.computeIfAbsent(name, k -> new ArrayList<>()).add(v);
         }
-        throw new IllegalArgumentException("No field of type " + type.getName() + " found");
-    }
-
-    private static boolean isOurPackage(Class<?> cls) {
-        if (cls.isPrimitive()) return false;
-        Package p = cls.getPackage();
-        String name = (p == null) ? "" : p.getName();
-        return name.startsWith("agentarium.");
-    }
-
-    private static <T> T findByTypeDeep(Object root, Class<T> type) {
-        return findByTypeDeep(root, type, new IdentityHashMap<>());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T findByTypeDeep(Object obj, Class<T> type, Map<Object, Boolean> seen) {
-        if (obj == null) return null;
-        if (seen.put(obj, Boolean.TRUE) != null) return null; // cycle guard
-        if (type.isInstance(obj)) return (T) obj;
-
-        Class<?> c = obj.getClass();
-        while (c != null) {
-            for (Field f : c.getDeclaredFields()) {
-                f.setAccessible(true);
-                try {
-                    Object v = f.get(obj);
-                    if (v != null && isOurPackage(v.getClass())) {
-                        T found = findByTypeDeep(v, type, seen);
-                        if (found != null) return found;
-                    }
-                } catch (IllegalAccessException ignore) {}
-            }
-            c = c.getSuperclass();
+        @Override public <T> void addPreEventValue(String name, T v) {
+            pre.computeIfAbsent(name, k -> new ArrayList<>()).add(v);
         }
-        return null;
+        @Override public <T> void addPostEventValue(String name, T v) {
+            post.computeIfAbsent(name, k -> new ArrayList<>()).add(v);
+        }
+
+        @Override public void setPropertyColumn(String name, List<Object> vs) {
+            props.put(name, new ArrayList<>(vs == null ? List.of() : vs));
+            bulkProps.add(name);
+        }
+        @Override public void setPreEventColumn(String name, List<Object> vs) {
+            pre.put(name, new ArrayList<>(vs == null ? List.of() : vs));
+            bulkPre.add(name);
+        }
+        @Override public void setPostEventColumn(String name, List<Object> vs) {
+            post.put(name, new ArrayList<>(vs == null ? List.of() : vs));
+            bulkPost.add(name);
+        }
+
+        @Override public List<Object> getPropertyColumnAsList(String name) {
+            return props.getOrDefault(name, List.of());
+        }
+        @Override public List<Object> getPreEventColumnAsList(String name) {
+            return pre.getOrDefault(name, List.of());
+        }
+        @Override public List<Object> getPostEventColumnAsList(String name) {
+            return post.getOrDefault(name, List.of());
+        }
+
+        // helpers for the test
+        boolean hasBulkProperty(String name) { return bulkProps.contains(name); }
     }
 
     private static double asDouble(Object v) {
         if (v == null) return 0.0;
         if (v instanceof Number) return ((Number) v).doubleValue();
-        if (v instanceof String s) {
-            try { return new ObjectMapper().readValue(s, Double.class); }
-            catch (Exception ignore) {
-                return Double.parseDouble(s); // fallback if plain text number
-            }
-        }
-        throw new AssertionError("Unexpected value type: " + v.getClass());
+        try { return Double.parseDouble(v.toString()); } catch (Exception e) { return 0.0; }
     }
 
     private static ModelSettings getModelSettings() {
@@ -110,33 +96,45 @@ public class ModelUsageTest1 {
     }
 
     @Test
-    public void testModelUsage() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testModelUsage() throws Exception {
         ModelSettings settings = getModelSettings();
 
-        Model model = new Model(settings);
-        Results results = model.run();
+        // Create a NEW capture DB for every factory call and keep them all
+        List<TestCaptureDB> created = new ArrayList<>();
+        AttributeSetResultsDatabaseFactory.setCustomFactory(() -> {
+            TestCaptureDB db = new TestCaptureDB();
+            created.add(db);
+            return db;
+        });
 
-        AttributeSetResultsDatabase db;
         try {
-            db = getPrivateFieldByType(results, AttributeSetResultsDatabase.class);
-        } catch (IllegalArgumentException notFound) {
-            db = findByTypeDeep(results, AttributeSetResultsDatabase.class);
-        }
-        assertNotNull(db, "Could not locate AttributeSetResultsDatabase via reflection");
+            Results results = new Model(settings).run();
 
-        List<Object> hunger = db.getPropertyColumnAsList("Hunger");
+            // Find the DB that received the bulk (accumulated) "Hunger" column
+            TestCaptureDB target = created.stream()
+                    .filter(db -> db.hasBulkProperty("Hunger"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError(
+                            "No accumulated DB found for 'Hunger'. Sizes seen: " +
+                                    created.stream()
+                                            .map(db -> db.getPropertyColumnAsList("Hunger").size())
+                                            .collect(Collectors.toList())));
 
-        int expectedRows = settings.getNumOfTicksToRun() - settings.getNumOfWarmUpTicks();
-        assertEquals(expectedRows, hunger.size(), "rows after warm-up");
+            List<Object> hunger = target.getPropertyColumnAsList("Hunger");
 
-        for (int i = 0; i < hunger.size(); i++) {
-            assertNotNull(hunger.get(i), "hunger[" + i + "] should not be null");
-        }
+            int expectedRows = settings.getNumOfTicksToRun();
+            assertEquals(expectedRows, hunger.size(), "rows after warm-up");
 
-        for (int i = 1; i < hunger.size(); i++) {
-            double prev = asDouble(hunger.get(i - 1));
-            double curr = asDouble(hunger.get(i));
-            assertTrue(curr >= prev, "Hunger should be non-decreasing");
+            for (int i = 0; i < hunger.size(); i++) {
+                assertNotNull(hunger.get(i), "hunger[" + i + "] should not be null");
+            }
+            for (int i = 1; i < hunger.size(); i++) {
+                double prev = asDouble(hunger.get(i - 1));
+                double curr = asDouble(hunger.get(i));
+                assertTrue(curr >= prev, "Hunger should be non-decreasing");
+            }
+        } finally {
+            AttributeSetResultsDatabaseFactory.clearCustomFactory();
         }
     }
 }

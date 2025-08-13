@@ -86,11 +86,11 @@ public class ResultsTest {
     }
 
     @Test
-    void testDisconnectedRawDatabasesDisconnectsAgentsAndEnvironment() {
+    void testDisconnectRawDatabasesDisconnectsAgentsAndEnvironment() {
         results.setAgentResults(mockAgentResults);
         results.setEnvironmentResults(mockEnvironmentResults);
 
-        results.disconnectedRawDatabases();
+        results.disconnectRawDatabases();
 
         verify(mockAgentResults).disconnectDatabases();
         verify(mockEnvironmentResults).disconnectDatabases();

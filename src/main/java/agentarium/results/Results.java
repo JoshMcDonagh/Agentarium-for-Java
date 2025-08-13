@@ -196,7 +196,7 @@ public abstract class Results implements DeepCopyable<Results> {
     /**
      * Disconnects all raw (per-agent and environment) databases if connected.
      */
-    public void disconnectedRawDatabases() {
+    public void disconnectRawDatabases() {
         if (isRawAgentAttributeSetDataConnected) {
             agentResults.disconnectDatabases();
             isRawAgentAttributeSetDataConnected = false;
@@ -231,7 +231,7 @@ public abstract class Results implements DeepCopyable<Results> {
      * Disconnects all raw and processed databases.
      */
     public void disconnectAllDatabases() {
-        disconnectedRawDatabases();
+        disconnectRawDatabases();
         disconnectAccumulatedDatabases();
     }
 
@@ -250,8 +250,7 @@ public abstract class Results implements DeepCopyable<Results> {
             if (accumulatedAgentAttributeSetResultsDatabaseList.isEmpty()) {
                 for (int j = 0; j < agentAttributeSetCollectionResults.getAttributeSetCount(); j++) {
                     String attributeName = agentAttributeSetCollectionResults.getAttributeSetResults(j).getAttributeSetName();
-                    AttributeSetResultsDatabase newDatabase = AttributeSetResultsDatabaseFactory.createDatabase();
-                    assert newDatabase != null;
+                    AttributeSetResultsDatabase newDatabase = Objects.requireNonNull(AttributeSetResultsDatabaseFactory.createDatabase(), "AttributeSetResultsDatabaseFactory.createDatabase() returned null");
                     newDatabase.connect();
                     accumulatedAgentAttributeSetResultsDatabaseMap.put(attributeName, newDatabase);
                     accumulatedAgentAttributeSetResultsDatabaseList.add(newDatabase);
@@ -302,11 +301,10 @@ public abstract class Results implements DeepCopyable<Results> {
         if (processedEnvironmentAttributeSetResultsDatabaseList.isEmpty()) {
             for (int i = 0; i < environmentAttributeSetCollectionResults.getAttributeSetCount(); i++) {
                 String attributeName = environmentAttributeSetCollectionResults.getAttributeSetResults(i).getAttributeSetName();
-                AttributeSetResultsDatabase newDatabase = AttributeSetResultsDatabaseFactory.createDatabase();
-                assert newDatabase != null;
+                AttributeSetResultsDatabase newDatabase = Objects.requireNonNull(AttributeSetResultsDatabaseFactory.createDatabase(), "AttributeSetResultsDatabaseFactory.createDatabase() returned null");
                 newDatabase.connect();
                 processedEnvironmentAttributeSetResultsDatabaseMap.put(attributeName, newDatabase);
-                accumulatedAgentAttributeSetResultsDatabaseList.add(newDatabase);
+                processedEnvironmentAttributeSetResultsDatabaseList.add(newDatabase);
             }
             isProcessedEnvironmentAttributeSetDataConnected = true;
         }

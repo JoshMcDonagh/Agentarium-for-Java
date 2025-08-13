@@ -18,6 +18,7 @@ import java.util.function.Predicate;
  *     <li>Local access versus coordinated inter-thread access</li>
  *     <li>Optional caching of agents and environments</li>
  *     <li>Safe agent filtering with predicate functions</li>
+ *     <li>The associated model clock</li>
  * </ul>
  */
 public class ModelElementAccessor {
@@ -28,6 +29,8 @@ public class ModelElementAccessor {
     private final WorkerCache cache;
     private final RequestResponseInterface requestResponseInterface;
     private final Environment localEnvironment;
+
+    private ModelClock clock = null;
 
     /**
      * Constructs a new accessor for a model element.
@@ -53,6 +56,25 @@ public class ModelElementAccessor {
         this.cache = cache;
         this.requestResponseInterface = requestResponseInterface;
         this.localEnvironment = localEnvironment;
+    }
+
+    /**
+     * Sets the associated clock instance.
+     * Once a clock has been set, it cannot be reset.
+     *
+     * @param clock the {@link ModelClock} instance to set with
+     */
+    public void setModelClock(ModelClock clock) {
+        if (this.clock == null)
+            this.clock = clock;
+    }
+
+    /**
+     * Retrieves the associated clock instance.
+     * @return the {@link ModelClock} instance
+     */
+    public ModelClock getModelClock() {
+        return clock;
     }
 
     /**

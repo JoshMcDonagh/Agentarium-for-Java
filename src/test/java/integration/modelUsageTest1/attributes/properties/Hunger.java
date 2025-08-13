@@ -23,7 +23,7 @@ public class Hunger extends Property<Double> {
 
     @Override
     public void run() {
-        hungerLevel = hungerLevel - 0.1;
+        hungerLevel = hungerLevel + 0.1;
         normaliseLevel();
     }
 

@@ -34,6 +34,10 @@ public class ModelSettings {
     private boolean doAgentStoresHoldAgentCopies = false;
     private boolean isCacheUsed = false;
 
+    // Attribute configurations for attribute set results storage
+
+    private boolean areAttributeSetResultsStoredOnDisk = true;
+
     // Core components required for simulation
     private Class<? extends Results> resultsClass = null;
     private Results results = null;
@@ -86,6 +90,11 @@ public class ModelSettings {
     /** Enables or disables use of caching mechanisms within agent stores. */
     public void setIsCacheUsed(boolean isCacheUsed) {
         this.isCacheUsed = isCacheUsed;
+    }
+
+    /** Sets whether attribute set results are stored on disk or in memory. */
+    public void setAreAttributeSetResultsStoredOnDisk(boolean areAttributeSetResultsStoredOnDisk) {
+        this.areAttributeSetResultsStoredOnDisk = areAttributeSetResultsStoredOnDisk;
     }
 
     /** Sets the results class that will be used to store and process simulation data. */
@@ -163,6 +172,11 @@ public class ModelSettings {
     /** @return true if caching is enabled for agent lookups */
     public boolean getIsCacheUsed() {
         return isCacheUsed;
+    }
+
+    /** @return true if attribute set results are stored on disk, false if attribute set results are stored in memory */
+    public boolean getAreAttributeSetResultsStoredOnDisk() {
+        return areAttributeSetResultsStoredOnDisk;
     }
 
     /** @return a new results instance used to process and store simulation output */

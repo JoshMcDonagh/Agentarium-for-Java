@@ -85,19 +85,23 @@ public class DiskBasedAttributeSetResultsDatabase extends AttributeSetResultsDat
     @Override
     public void disconnect() {
         synchronized (activeDatabases) {
-            if (connection == null)
-                return;
-
             try {
-                connection.close();
-                String databasePath = getDatabasePath();
-                File databaseFile = new File(databasePath);
-                if (databaseFile.exists() && !databaseFile.delete())
-                    System.err.println("Failed to delete database file: " + databasePath);
-            } catch (SQLException e) {
-                System.err.println("Error closing SQLite connection: " + e.getMessage());
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        System.err.println("Error closing SQLite connection: " + e.getMessage());
+                    }
+                    String databasePath = getDatabasePath();
+                    File databaseFile = new File(databasePath);
+                    if (databaseFile.exists() && !databaseFile.delete()) {
+                        System.err.println("Failed to delete database file: " + databasePath);
+                    }
+                }
             } finally {
+                // ALWAYS deregister, even if we were never connected
                 activeDatabases.remove(this);
+                connection = null;
             }
         }
     }

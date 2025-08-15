@@ -3,6 +3,7 @@ package integration.modelUsageTest1;
 import agentarium.Model;
 import agentarium.ModelSettings;
 import agentarium.agents.DefaultAgentGenerator;
+import agentarium.attributes.results.databases.DiskBasedAttributeSetResultsDatabase;
 import agentarium.environments.DefaultEnvironmentGenerator;
 import agentarium.results.Results;
 import agentarium.scheduler.InOrderScheduler;

@@ -2,6 +2,7 @@ package agentarium;
 
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
+import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
 import agentarium.environments.Environment;
 import agentarium.multithreading.CoordinatorThread;
 import agentarium.multithreading.WorkerThread;
@@ -16,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Main class for executing an agent-based model using multithreaded execution.
@@ -48,6 +50,11 @@ public class Model {
      */
     public Results run() throws NoSuchMethodException, InvocationTargetException,
             InstantiationException, IllegalAccessException {
+
+        if (settings.getAreAttributeSetResultsStoredOnDisk())
+            AttributeSetResultsDatabaseFactory.setDatabaseToDiskBased();
+        else
+            AttributeSetResultsDatabaseFactory.setDatabaseToMemoryBased();
 
         // Distribute agents among cores
         List<AgentSet> agentsForEachCore = settings.getAgentGenerator().getAgentsForEachCore(settings);

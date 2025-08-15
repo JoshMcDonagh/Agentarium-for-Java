@@ -78,13 +78,51 @@ public final class DeepCopier {
     public static <T> T deepCopy(T original, Type typeOfT) {
         if (original == null) return null;
 
-        Class<?> raw = rawClass(typeOfT);
-        if (raw == null || raw.isInterface() || Modifier.isAbstract(raw.getModifiers())) {
-            @SuppressWarnings("unchecked")
-            Class<T> runtime = (Class<T>) original.getClass();
-            return deepCopyViaGson(original, runtime);
+        // 1) Prefer Java serialization for Attribute or Serializable (like the Class<T> overload)
+        if (original instanceof Attribute || original instanceof Serializable) {
+            try {
+                @SuppressWarnings("unchecked")
+                T copy = (T) deepCopyViaSerialization((Serializable) original);
+                return copy;
+            } catch (Exception e) {
+                if (original instanceof Attribute) {
+                    throw new IllegalStateException(
+                            "Attribute must be serializable: " + original.getClass().getName(), e);
+                }
+                // fall through to Gson if not Attribute
+            }
         }
-        return gson.fromJson(gson.toJson(original), typeOfT);
+
+        if (typeOfT instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) typeOfT;
+            Class<?> raw = rawClass(pt);
+            if (raw != null && (raw.isInterface() || Modifier.isAbstract(raw.getModifiers()))) {
+                Class<?> runtime = original.getClass();
+                if (raw.isAssignableFrom(runtime)) {
+                    Type concrete = parameterizedType(runtime, pt.getActualTypeArguments());
+                    return gson.fromJson(gson.toJsonTree(original), concrete);
+                }
+            }
+        }
+
+        else if (typeOfT instanceof Class<?>) {
+            Class<?> raw = (Class<?>) typeOfT;
+            if (raw.isInterface() || Modifier.isAbstract(raw.getModifiers())) {
+                @SuppressWarnings("unchecked")
+                Class<T> runtime = (Class<T>) original.getClass();
+                return gson.fromJson(gson.toJsonTree(original), runtime);
+            }
+        }
+
+        return gson.fromJson(gson.toJsonTree(original), typeOfT);
+    }
+
+    private static ParameterizedType parameterizedType(final Type raw, final Type... typeArgs) {
+        return new ParameterizedType() {
+            @Override public Type[] getActualTypeArguments() { return typeArgs.clone(); }
+            @Override public Type getRawType() { return raw; }
+            @Override public Type getOwnerType() { return null; }
+        };
     }
 
     /**

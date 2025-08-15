@@ -1,5 +1,8 @@
 package unit.agentarium.attributes;
 
+import agentarium.ModelClock;
+import agentarium.ModelElement;
+import agentarium.ModelElementAccessor;
 import agentarium.attributes.*;
 import agentarium.attributes.results.AttributeSetResults;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,9 +27,20 @@ public class AttributeSetTest {
 
     @BeforeEach
     public void setup() {
+        ModelElement mockModelElement = mock(ModelElement.class);
+        ModelElementAccessor mockModelElementAccessor= mock(ModelElementAccessor.class);
+        ModelClock mockClock = mock(ModelClock.class);
+
+        when(mockModelElement.getModelElementAccessor()).thenReturn(mockModelElementAccessor);
+        when(mockModelElementAccessor.getModelClock()).thenReturn(mockClock);
+
         preEvents = spy(new Events());
         properties = spy(new Properties());
         postEvents = spy(new Events());
+
+        when(preEvents.getAssociatedModelElement()).thenReturn(mockModelElement);
+        when(properties.getAssociatedModelElement()).thenReturn(mockModelElement);
+        when(postEvents.getAssociatedModelElement()).thenReturn(mockModelElement);
 
         attributeSet = new AttributeSet("TestSet", preEvents, properties, postEvents);
         results = mock(AttributeSetResults.class);

@@ -3,19 +3,24 @@ package integration.modelUsageTest1;
 import agentarium.Model;
 import agentarium.ModelSettings;
 import agentarium.agents.DefaultAgentGenerator;
+import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
 import agentarium.attributes.results.databases.DiskBasedAttributeSetResultsDatabase;
 import agentarium.environments.DefaultEnvironmentGenerator;
 import agentarium.results.Results;
 import agentarium.scheduler.InOrderScheduler;
 import integration.modelUsageTest1.attributes.ModelAttributes;
 import integration.modelUsageTest1.results.ModelResults;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelUsageTest1 {
+
+    private static ModelSettings settings;
 
     private static double asDouble(Object v) {
         if (v == null) return 0.0;
@@ -43,13 +48,11 @@ public class ModelUsageTest1 {
         settings.setAgentGenerator(new DefaultAgentGenerator());
         settings.setEnvironmentGenerator(new DefaultEnvironmentGenerator());
         settings.setModelScheduler(new InOrderScheduler());
+
         return settings;
     }
 
-    @Test
-    public void testModelUsage() throws Exception {
-        ModelSettings settings = getModelSettings();
-
+    public void runModelUsage() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Results results = new Model(settings).run();
 
         // Aggregated per-tick hunger AFTER warm-up
@@ -77,5 +80,24 @@ public class ModelUsageTest1 {
         // With your EatFood event, we expect both rises (natural accrual) and drops (eating)
         assertTrue(sawIncrease, "series should have increases (hunger accrual)");
         assertTrue(sawDecrease, "series should have decreases (EatFood triggers)");
+    }
+
+    @BeforeEach
+    public void setup() {
+        AttributeSetResultsDatabaseFactory.clearCustomFactory();
+        AttributeSetResultsDatabaseFactory.setDatabaseToDiskBased();
+        settings = getModelSettings();
+    }
+
+    @Test
+    public void testModelUsageWithMemory() throws Exception {
+        settings.setAreAttributeSetResultsStoredOnDisk(false);
+        runModelUsage();
+    }
+
+    @Test
+    public void testModelUsageOnDisk() throws Exception {
+        settings.setAreAttributeSetResultsStoredOnDisk(true);
+        runModelUsage();
     }
 }

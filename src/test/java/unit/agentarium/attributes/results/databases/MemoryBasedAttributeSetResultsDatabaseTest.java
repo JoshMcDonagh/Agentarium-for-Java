@@ -78,15 +78,6 @@ public class MemoryBasedAttributeSetResultsDatabaseTest {
     }
 
     @Test
-    public void testRejectInvalidPropertyReplacement() {
-        IllegalArgumentException thrown = assertThrows(
-                IllegalArgumentException.class,
-                () -> database.setPropertyColumn("unknown", List.of(1, 2, 3))
-        );
-        assertTrue(thrown.getMessage().contains("does not exist"));
-    }
-
-    @Test
     public void testRejectTypeMismatchForProperty() {
         database.addPropertyValue("counter", 5);
         assertThrows(IllegalArgumentException.class,

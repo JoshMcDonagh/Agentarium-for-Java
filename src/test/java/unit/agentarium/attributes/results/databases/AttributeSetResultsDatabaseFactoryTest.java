@@ -27,6 +27,12 @@ public class AttributeSetResultsDatabaseFactoryTest {
         AttributeSetResultsDatabaseFactory.setDatabaseToDiskBased();
     }
 
+    @AfterEach
+    void tearDown() {
+        AttributeSetResultsDatabaseFactory.clearCustomFactory();
+        AttributeSetResultsDatabaseFactory.setDatabaseToDiskBased();
+    }
+
     @Test
     public void testDefaultCreatesDiskDatabaseIfUnset() {
         // Clear any existing configuration

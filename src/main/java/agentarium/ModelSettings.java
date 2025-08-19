@@ -1,7 +1,9 @@
 package agentarium;
 
 import agentarium.agents.AgentGenerator;
+import agentarium.agents.DefaultAgentGenerator;
 import agentarium.attributes.AttributeSetCollection;
+import agentarium.environments.DefaultEnvironmentGenerator;
 import agentarium.environments.EnvironmentGenerator;
 import agentarium.results.Results;
 import agentarium.scheduler.ModelScheduler;
@@ -29,6 +31,10 @@ public class ModelSettings {
     private AttributeSetCollection baseAgentAttributeSetCollection = new AttributeSetCollection();
     private AttributeSetCollection baseEnvironmentAttributeSetCollection = new AttributeSetCollection();
 
+    // Generators for agents and the environment
+    private AgentGenerator agentGenerator = new DefaultAgentGenerator();
+    private EnvironmentGenerator environmentGenerator = new DefaultEnvironmentGenerator();
+
     // Flags for process coordination and optimisation
     private boolean areProcessesSynced = false;
     private boolean doAgentStoresHoldAgentCopies = false;
@@ -41,8 +47,6 @@ public class ModelSettings {
     // Core components required for simulation
     private Class<? extends Results> resultsClass = null;
     private Results results = null;
-    private AgentGenerator agentGenerator;
-    private EnvironmentGenerator environmentGenerator;
     private ModelScheduler modelScheduler;
 
     // === Setters ===

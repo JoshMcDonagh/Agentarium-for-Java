@@ -16,7 +16,6 @@ import java.util.Map;
 public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsDatabase {
 
     // === Internal maps to store values by name ===
-
     private final Map<String, List<Object>> propertiesMap = new HashMap<>();
     private final Map<String, Class<?>> propertyClassesMap = new HashMap<>();
 
@@ -26,6 +25,14 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
     private final Map<String, List<Object>> postEventsMap = new HashMap<>();
     private final Map<String, Class<?>> postEventClassesMap = new HashMap<>();
 
+    private static Class<?> firstNonNullClass(List<?> values) {
+        if (values == null) return null;
+        for (Object v : values) {
+            if (v != null) return v.getClass();
+        }
+        return null;
+    }
+
     /**
      * Overrides setDatabasePath but ignores the value, as memory-based storage does not require a file path.
      *
@@ -34,84 +41,90 @@ public class MemoryBasedAttributeSetResultsDatabase extends AttributeSetResultsD
     @Override
     protected void setDatabasePath(String databasePath) {
         // No-op for in-memory implementation
-        return;
     }
 
     // === Tick-by-tick value addition ===
-
     @Override
     public <T> void addPropertyValue(String propertyName, T propertyValue) {
-        if (!propertiesMap.containsKey(propertyName)) {
-            propertiesMap.put(propertyName, new ArrayList<>());
+        propertiesMap.computeIfAbsent(propertyName, k -> new ArrayList<>());
+        // If we don't yet know the element type for this column, infer it from the first non-null value
+        if (propertyValue != null && !propertyClassesMap.containsKey(propertyName)) {
             propertyClassesMap.put(propertyName, propertyValue.getClass());
         }
-
-        if (propertyClassesMap.get(propertyName).isInstance(propertyValue))
+        // Allow nulls; otherwise enforce the recorded element type
+        if (propertyValue == null || propertyClassesMap.get(propertyName).isInstance(propertyValue)) {
             propertiesMap.get(propertyName).add(propertyValue);
-        else
-            throw new IllegalArgumentException("Property '" + propertyName + "' is not an instance of " + propertyValue.getClass().getSimpleName());
+        } else {
+            throw new IllegalArgumentException(
+                    "Property '" + propertyName + "' is not an instance of " + propertyValue.getClass().getSimpleName());
+        }
     }
 
     @Override
     public <T> void addPreEventValue(String preEventName, T preEventValue) {
-        if (!preEventsMap.containsKey(preEventName)) {
-            preEventsMap.put(preEventName, new ArrayList<>());
+        preEventsMap.computeIfAbsent(preEventName, k -> new ArrayList<>());
+        if (preEventValue != null && !preEventClassesMap.containsKey(preEventName)) {
             preEventClassesMap.put(preEventName, preEventValue.getClass());
         }
-
-        if (preEventClassesMap.get(preEventName).isInstance(preEventValue))
+        if (preEventValue == null || preEventClassesMap.get(preEventName).isInstance(preEventValue)) {
             preEventsMap.get(preEventName).add(preEventValue);
-        else
-            throw new IllegalArgumentException("Pre-event '" + preEventName + "' is not an instance of " + preEventValue.getClass().getSimpleName());
+        } else {
+            throw new IllegalArgumentException(
+                    "Pre-event '" + preEventName + "' is not an instance of " + preEventValue.getClass().getSimpleName());
+        }
     }
 
     @Override
     public <T> void addPostEventValue(String postEventName, T postEventValue) {
-        if (!postEventsMap.containsKey(postEventName)) {
-            postEventsMap.put(postEventName, new ArrayList<>());
+        postEventsMap.computeIfAbsent(postEventName, k -> new ArrayList<>());
+        if (postEventValue != null && !postEventClassesMap.containsKey(postEventName)) {
             postEventClassesMap.put(postEventName, postEventValue.getClass());
         }
-
-        if (postEventClassesMap.get(postEventName).isInstance(postEventValue))
+        if (postEventValue == null || postEventClassesMap.get(postEventName).isInstance(postEventValue)) {
             postEventsMap.get(postEventName).add(postEventValue);
-        else
-            throw new IllegalArgumentException("Post-event '" + postEventName + "' is not an instance of " + postEventValue.getClass().getSimpleName());
+        } else {
+            throw new IllegalArgumentException(
+                    "Post-event '" + postEventName + "' is not an instance of " + postEventValue.getClass().getSimpleName());
+        }
     }
 
     // === Column replacement ===
-
     @Override
     public void setPropertyColumn(String propertyName, List<Object> propertyValues) {
-        if (propertiesMap.containsKey(propertyName)) {
-            propertyClassesMap.put(propertyName, propertyValues.get(0).getClass());
-            propertiesMap.put(propertyName, propertyValues);
-        } else {
-            throw new IllegalArgumentException("Property '" + propertyName + "' does not exist and cannot be replaced.");
+        // Create the column if it doesn't exist, then replace the data
+        propertiesMap.computeIfAbsent(propertyName, k -> new ArrayList<>());
+        propertiesMap.put(propertyName, propertyValues == null ? new ArrayList<>() : new ArrayList<>(propertyValues));
+
+        // Infer & record the element type from the first non-null value (if any)
+        Class<?> inferred = firstNonNullClass(propertyValues);
+        if (inferred != null) {
+            propertyClassesMap.put(propertyName, inferred);
         }
     }
 
     @Override
     public void setPreEventColumn(String preEventName, List<Object> preEventValues) {
-        if (preEventsMap.containsKey(preEventName)) {
-            preEventClassesMap.put(preEventName, preEventValues.get(0).getClass());
-            preEventsMap.put(preEventName, preEventValues);
-        } else {
-            throw new IllegalArgumentException("Pre-event '" + preEventName + "' does not exist and cannot be replaced.");
+        preEventsMap.computeIfAbsent(preEventName, k -> new ArrayList<>());
+        preEventsMap.put(preEventName, preEventValues == null ? new ArrayList<>() : new ArrayList<>(preEventValues));
+
+        Class<?> inferred = firstNonNullClass(preEventValues);
+        if (inferred != null) {
+            preEventClassesMap.put(preEventName, inferred);
         }
     }
 
     @Override
     public void setPostEventColumn(String postEventName, List<Object> postEventValues) {
-        if (postEventsMap.containsKey(postEventName)) {
-            postEventClassesMap.put(postEventName, postEventValues.get(0).getClass());
-            postEventsMap.put(postEventName, postEventValues);
-        } else {
-            throw new IllegalArgumentException("Post-event '" + postEventName + "' does not exist and cannot be replaced.");
+        postEventsMap.computeIfAbsent(postEventName, k -> new ArrayList<>());
+        postEventsMap.put(postEventName, postEventValues == null ? new ArrayList<>() : new ArrayList<>(postEventValues));
+
+        Class<?> inferred = firstNonNullClass(postEventValues);
+        if (inferred != null) {
+            postEventClassesMap.put(postEventName, inferred);
         }
     }
 
     // === Column retrieval ===
-
     @Override
     public List<Object> getPropertyColumnAsList(String propertyName) {
         return propertiesMap.get(propertyName);

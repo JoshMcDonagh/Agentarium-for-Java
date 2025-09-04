@@ -49,21 +49,15 @@ public class RequestResponseInterface {
      * Used for synchronisation barriers between threads.
      */
     private void wait(RequestType requestType, ResponseType responseType) throws InterruptedException {
-        if (!areProcessesSynced)
-            return;
+        if (!areProcessesSynced) return;
 
         requestQueue.put(new Request(name, null, requestType, null));
 
         while (true) {
-            while (responseQueue.isEmpty()); // Busy-wait until a response is available
-            Response response = responseQueue.poll();
-            if (Objects.equals(response.getResponseType(), responseType)
-                    && Objects.equals(response.getDestination(), name)) {
+            Response response = responseQueue.take();
+            if (Objects.equals(response.getResponseType(), responseType) && Objects.equals(response.getDestination(), name))
                 return;
-            } else {
-                // Put unrelated responses back on the queue
-                responseQueue.put(response);
-            }
+            responseQueue.put(response);
         }
     }
 
@@ -78,7 +72,7 @@ public class RequestResponseInterface {
      * Waits until all workers have updated the coordinator with their agent data.
      */
     public void waitUntilAllWorkersUpdateCoordinator() throws InterruptedException {
-        wait(RequestType.UPDATE_COORDINATOR_AGENTS, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR);
+        wait(RequestType.ALL_WORKERS_UPDATE_COORDINATOR, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR);
     }
 
     /**
@@ -92,10 +86,8 @@ public class RequestResponseInterface {
         requestQueue.put(new Request(requesterAgentName, targetAgentName, RequestType.AGENT_ACCESS, null));
 
         while (true) {
-            while (responseQueue.isEmpty());
-            Response response = responseQueue.poll();
-            if (Objects.equals(response.getResponseType(), ResponseType.AGENT_ACCESS)
-                    && Objects.equals(response.getDestination(), requesterAgentName))
+            Response response = responseQueue.take();
+            if (Objects.equals(response.getResponseType(), ResponseType.AGENT_ACCESS) && Objects.equals(response.getDestination(), requesterAgentName))
                 return (Agent) response.getPayload();
             responseQueue.put(response);
         }
@@ -112,10 +104,8 @@ public class RequestResponseInterface {
         requestQueue.put(new Request(requesterAgentName, null, RequestType.FILTERED_AGENTS_ACCESS, agentFilter));
 
         while (true) {
-            while (responseQueue.isEmpty());
-            Response response = responseQueue.poll();
-            if (Objects.equals(response.getResponseType(), ResponseType.FILTERED_AGENTS_ACCESS)
-                    && Objects.equals(response.getDestination(), requesterAgentName))
+            Response response = responseQueue.take();
+            if (Objects.equals(response.getResponseType(), ResponseType.FILTERED_AGENTS_ACCESS) && Objects.equals(response.getDestination(), requesterAgentName))
                 return (AgentSet) response.getPayload();
             responseQueue.put(response);
         }
@@ -131,10 +121,8 @@ public class RequestResponseInterface {
         requestQueue.put(new Request(requesterAgentName, null, RequestType.ENVIRONMENT_ATTRIBUTES_ACCESS, null));
 
         while (true) {
-            while (responseQueue.isEmpty());
-            Response response = responseQueue.poll();
-            if (Objects.equals(response.getResponseType(), ResponseType.ENVIRONMENT_ATTRIBUTES_ACCESS)
-                    && Objects.equals(response.getDestination(), name))
+            Response response = responseQueue.take();
+            if (Objects.equals(response.getResponseType(), ResponseType.ENVIRONMENT_ATTRIBUTES_ACCESS) && Objects.equals(response.getDestination(), requesterAgentName))
                 return (Environment) response.getPayload();
             responseQueue.put(response);
         }
@@ -146,6 +134,7 @@ public class RequestResponseInterface {
      * @param agentSet the updated set of agents
      */
     public void updateCoordinatorAgents(AgentSet agentSet) throws InterruptedException {
-        requestQueue.put(new Request(null, null, RequestType.UPDATE_COORDINATOR_AGENTS, agentSet));
+        Objects.requireNonNull(agentSet, "agentSet");
+        requestQueue.put(new Request(name, null, RequestType.UPDATE_COORDINATOR_AGENTS, agentSet));
     }
 }

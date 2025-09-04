@@ -11,6 +11,7 @@ import agentarium.results.AgentResults;
 import agentarium.results.Results;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -52,10 +53,10 @@ public class WorkerThread<T extends Results> implements Callable<Results> {
                         ModelSettings settings,
                         RequestResponseController requestResponseController,
                         AgentSet agents) {
-        this.threadName = threadName;
-        this.settings = settings;
-        this.requestResponseController = requestResponseController;
-        this.agents = agents;
+        this.threadName = Objects.requireNonNull(threadName, "threadName");
+        this.settings = Objects.requireNonNull(settings, "settings");
+        this.requestResponseController = Objects.requireNonNull(requestResponseController, "requestResponseController");
+        this.agents = Objects.requireNonNull(agents, "agents");
         this.updatedAgents = this.agents.duplicate();
     }
 

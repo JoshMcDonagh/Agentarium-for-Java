@@ -6,6 +6,7 @@ import agentarium.environments.Environment;
 import agentarium.multithreading.requestresponse.CoordinatorRequestHandler;
 import agentarium.multithreading.requestresponse.Request;
 import agentarium.multithreading.requestresponse.RequestResponseController;
+import agentarium.multithreading.requestresponse.RequestType;
 
 /**
  * Coordinator thread responsible for managing synchronised access to shared simulation state
@@ -76,6 +77,7 @@ public class CoordinatorThread implements Runnable {
      */
     public void shutdown() {
         isRunning = false;
+        requestResponseController.getRequestQueue().offer(new Request("SYSTEM", threadName, RequestType.SHUTDOWN, null));
     }
 
     /**
@@ -102,15 +104,18 @@ public class CoordinatorThread implements Runnable {
         );
 
         // Continuously poll for and handle incoming requests from workers
-        while (isRunning) {
-            Request request = requestResponseController.getRequestQueue().poll();
-            if (request != null) {
-                try {
-                    CoordinatorRequestHandler.handleCoordinatorRequest(request);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;  // Exit cleanly if interrupted
+        while (isRunning || !requestResponseController.getRequestQueue().isEmpty()) {
+            try {
+                Request request = requestResponseController.getRequestQueue().take(); // blocks
+                if (request.getRequestType() == RequestType.SHUTDOWN) {
+                    isRunning = false;
+                    continue;
                 }
+                CoordinatorRequestHandler.handleCoordinatorRequest(request);
+            } catch (InterruptedException e) {
+                if (!isRunning)
+                    break;
+                Thread.currentThread().interrupt();
             }
         }
     }

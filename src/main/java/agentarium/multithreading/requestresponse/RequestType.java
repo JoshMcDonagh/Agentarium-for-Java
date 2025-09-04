@@ -36,5 +36,10 @@ public enum RequestType {
     /**
      * Request to update the coordinator with the latest agent data from a worker thread.
      */
-    UPDATE_COORDINATOR_AGENTS
+    UPDATE_COORDINATOR_AGENTS,
+
+    /**
+     * Request to shut the model down.
+     */
+    SHUTDOWN
 }

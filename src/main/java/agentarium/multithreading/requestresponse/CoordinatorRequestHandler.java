@@ -59,8 +59,9 @@ public abstract class CoordinatorRequestHandler {
      */
     public static void handleCoordinatorRequest(Request request) throws InterruptedException {
         CoordinatorRequestHandler handler = requestHandlerMap.get(request.getRequestType());
-        if (handler != null)
-            handler.handleRequest(request);
+        if (handler == null)
+            throw new IllegalStateException("No coordinator handler registered for request type: " + request.getRequestType());
+        handler.handleRequest(request);
     }
 
     // Instance fields common to all handlers
@@ -139,9 +140,8 @@ public abstract class CoordinatorRequestHandler {
         public void handleRequest(Request request) throws InterruptedException {
             getWorkersWaiting().add(request.getRequester());
             if (getWorkersWaiting().size() == getSettings().getNumOfCores()) {
-                for (String worker : getWorkersWaiting()) {
+                for (String worker : getWorkersWaiting())
                     getResponseQueue().put(new Response(getThreadName(), worker, ResponseType.ALL_WORKERS_FINISH_TICK, null));
-                }
                 setWorkersWaiting(new ArrayList<>());
             }
         }
@@ -159,9 +159,8 @@ public abstract class CoordinatorRequestHandler {
         public void handleRequest(Request request) throws InterruptedException {
             getWorkersWaiting().add(request.getRequester());
             if (getWorkersWaiting().size() == getSettings().getNumOfCores()) {
-                for (String worker : getWorkersWaiting()) {
+                for (String worker : getWorkersWaiting())
                     getResponseQueue().put(new Response(getThreadName(), worker, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR, null));
-                }
                 setWorkersWaiting(new ArrayList<>());
 
                 // Run the environment after all workers are synchronised
@@ -195,7 +194,15 @@ public abstract class CoordinatorRequestHandler {
 
         @Override
         public void handleRequest(Request request) {
-            getGlobalAgentSet().update((AgentSet) request.getPayload());
+            Object payload = request.getPayload();
+            if (!(payload instanceof AgentSet)) {
+                throw new IllegalArgumentException(
+                        "UPDATE_COORDINATOR_AGENTS payload must be an AgentSet (got: " +
+                                (payload == null ? "null" : payload.getClass().getName()) +
+                                ") from requester: " + request.getRequester()
+                );
+            }
+            getGlobalAgentSet().update((AgentSet) payload);
         }
     }
 
@@ -207,9 +214,17 @@ public abstract class CoordinatorRequestHandler {
             super(threadName, settings, responseQueue, globalAgentSet, environment);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void handleRequest(Request request) throws InterruptedException {
-            Predicate<Agent> filter = (Predicate<Agent>) request.getPayload();
+            Object payload = request.getPayload();
+            if (!(payload instanceof Predicate<?>)) {
+                throw new IllegalArgumentException(
+                        "FILTERED_AGENTS_ACCESS payload must be a Predicate<Agent> (got: " +
+                                (payload == null ? "null" : payload.getClass().getName()) + ")"
+                );
+            }
+            Predicate<Agent> filter = (Predicate<Agent>) payload;
             AgentSet filtered = getGlobalAgentSet().getFilteredAgents(filter);
             getResponseQueue().put(new Response(getThreadName(), request.getRequester(), ResponseType.FILTERED_AGENTS_ACCESS, filtered));
         }

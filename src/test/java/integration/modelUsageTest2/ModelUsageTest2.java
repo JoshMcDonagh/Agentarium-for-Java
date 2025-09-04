@@ -1,24 +1,24 @@
-package integration.modelUsageTest1;
+package integration.modelUsageTest2;
 
 import agentarium.Model;
 import agentarium.ModelSettings;
 import agentarium.agents.DefaultAgentGenerator;
 import agentarium.attributes.results.databases.AttributeSetResultsDatabaseFactory;
-import agentarium.attributes.results.databases.DiskBasedAttributeSetResultsDatabase;
 import agentarium.environments.DefaultEnvironmentGenerator;
 import agentarium.results.Results;
-import agentarium.scheduler.InOrderScheduler;
-import integration.modelUsageTest1.attributes.ModelAttributes;
-import integration.modelUsageTest1.results.ModelResults;
+import agentarium.scheduler.RandomOrderScheduler;
+import integration.modelUsageTest2.attributes.ModelAttributes;
+import integration.modelUsageTest2.results.ModelResults;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ModelUsageTest1 {
+public class ModelUsageTest2 {
 
     private static ModelSettings settings;
 
@@ -44,16 +44,16 @@ public class ModelUsageTest1 {
         settings.setBaseAgentAttributeSetCollection(ModelAttributes.getAgentAttributeSetCollection());
         settings.setBaseEnvironmentAttributeSetCollection(ModelAttributes.getEnvironmentAttributeSetCollection());
 
-        settings.setAreProcessesSynced(false);
-        settings.setDoAgentStoresHoldAgentCopies(false);
-        settings.setIsCacheUsed(false);
+        settings.setAreProcessesSynced(true);
+        settings.setDoAgentStoresHoldAgentCopies(true);
+        settings.setIsCacheUsed(true);
 
         settings.setResultsClass(ModelResults.class);
         settings.setResults(new ModelResults());
 
         settings.setAgentGenerator(new DefaultAgentGenerator());
         settings.setEnvironmentGenerator(new DefaultEnvironmentGenerator());
-        settings.setModelScheduler(new InOrderScheduler());
+        settings.setModelScheduler(new RandomOrderScheduler());
 
         return settings;
     }

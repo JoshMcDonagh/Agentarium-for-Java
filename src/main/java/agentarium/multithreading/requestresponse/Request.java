@@ -1,5 +1,7 @@
 package agentarium.multithreading.requestresponse;
 
+import agentarium.agents.AgentSet;
+
 /**
  * Represents a request sent from a worker thread to the coordinator thread
  * in a synchronised, multithreaded simulation.
@@ -33,6 +35,16 @@ public class Request {
         this.requester = requester;
         this.destination = destination;
         this.requestType = requestType;
+        // Type-level validation
+        if (requestType == RequestType.UPDATE_COORDINATOR_AGENTS) {
+            if (!(payload instanceof AgentSet)) {
+                throw new IllegalArgumentException(
+                        "Request UPDATE_COORDINATOR_AGENTS requires non-null AgentSet payload; got: " +
+                                (payload == null ? "null" : payload.getClass().getName()) +
+                                " from requester: " + requester
+                );
+            }
+        }
         this.payload = payload;
     }
 

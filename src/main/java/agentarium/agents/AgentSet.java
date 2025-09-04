@@ -110,6 +110,9 @@ public class AgentSet implements Iterable<Agent> {
      * @param agentSet the agent set to add from
      */
     public void add(AgentSet agentSet) {
+        if (agentSet == null)
+            throw new IllegalArgumentException("agentSet cannot be null");
+
         for (Agent agent : agentSet) {
             if (!doesAgentExist(agent.getName()))
                 add(agent);
@@ -180,6 +183,9 @@ public class AgentSet implements Iterable<Agent> {
      * @param otherAgentSet the other agent set to pull from
      */
     public void update(AgentSet otherAgentSet) {
+        if (otherAgentSet == null)
+            throw new IllegalArgumentException("otherAgentSet cannot be null");
+
         for (int i = 0; i < otherAgentSet.size(); i++) {
             Agent agent = otherAgentSet.get(i);
             add(agent);

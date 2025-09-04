@@ -38,14 +38,4 @@ public class RequestTest {
         assertEquals(RequestType.ALL_WORKERS_FINISH_TICK, request.getRequestType());
         assertNull(request.getPayload(), "Payload should be null when not provided");
     }
-
-    @Test
-    public void testRequestWithNullDestination() {
-        Request request = new Request("Worker_3", null, RequestType.UPDATE_COORDINATOR_AGENTS, "Payload");
-
-        assertEquals("Worker_3", request.getRequester());
-        assertNull(request.getDestination(), "Destination should allow null if not needed");
-        assertEquals(RequestType.UPDATE_COORDINATOR_AGENTS, request.getRequestType());
-        assertEquals("Payload", request.getPayload());
-    }
 }

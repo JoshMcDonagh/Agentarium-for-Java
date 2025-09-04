@@ -78,6 +78,7 @@ public class Model {
         RequestResponseController requestResponseController = new RequestResponseController(settings);
 
         Thread coordinatorThread = null;
+        CoordinatorThread coordinator = null;
 
         // Set up accessor for the environment model element
         ModelElementAccessor environmentModelElementAccessor = new ModelElementAccessor(
@@ -93,7 +94,7 @@ public class Model {
 
         // Launch central coordinator if synchronisation is required
         if (settings.getAreProcessesSynced()) {
-            CoordinatorThread coordinator = new CoordinatorThread(
+            coordinator = new CoordinatorThread(
                     String.valueOf(settings.getNumOfCores()),
                     settings,
                     environment,
@@ -112,9 +113,14 @@ public class Model {
 
             // Create an agent set for the current core
             AgentSet coreAgentSet = new AgentSet(settings.getDoAgentStoresHoldAgentCopies());
+            AgentSet perCore = agentsForEachCore.get(coreIndex);
+
+            // Make sure agent set is not null
+            if (perCore == null)
+                perCore = new AgentSet(settings.getDoAgentStoresHoldAgentCopies());
 
             // Add the pre-assigned agent set for this core
-            coreAgentSet.add(agentsForEachCore.get(coreIndex));
+            coreAgentSet.add(perCore);
 
             // Prepare agents for this core and assign them accessors
             for (Agent agent : coreAgentSet) {
@@ -154,7 +160,7 @@ public class Model {
 
         // Gracefully stop the coordinator thread if it was used
         if (settings.getAreProcessesSynced() && coordinatorThread != null) {
-            coordinatorThread.interrupt();
+            coordinator.shutdown();
             try {
                 coordinatorThread.join();
             } catch (InterruptedException e) {

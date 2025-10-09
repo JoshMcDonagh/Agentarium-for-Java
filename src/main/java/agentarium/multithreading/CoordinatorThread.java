@@ -1,5 +1,6 @@
 package agentarium.multithreading;
 
+import agentarium.ModelClock;
 import agentarium.ModelSettings;
 import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
@@ -34,6 +35,8 @@ public class CoordinatorThread implements Runnable {
 
     /** Flag to control the running state of the thread */
     private volatile boolean isRunning = true;
+
+    private final ModelClock coordinatorClock;
 
 
     /**
@@ -70,6 +73,9 @@ public class CoordinatorThread implements Runnable {
         this.environment = environment;
         this.requestResponseController = requestResponseController;
         this.predefinedGlobalAgentSet = globalAgentSet;
+
+        this.coordinatorClock = new ModelClock(settings.getNumOfTicksToRun(), settings.getNumOfWarmUpTicks());
+        this.environment.getModelElementAccessor().setModelClock(this.coordinatorClock);
     }
 
     /**

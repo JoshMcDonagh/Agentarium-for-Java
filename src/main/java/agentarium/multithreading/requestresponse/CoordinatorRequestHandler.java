@@ -160,11 +160,15 @@ public abstract class CoordinatorRequestHandler {
             getWorkersWaiting().add(request.getRequester());
             if (getWorkersWaiting().size() == getSettings().getNumOfCores()) {
                 for (String worker : getWorkersWaiting())
-                    getResponseQueue().put(new Response(getThreadName(), worker, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR, null));
+                    getResponseQueue().put(new Response(getThreadName(), worker,
+                            ResponseType.ALL_WORKERS_UPDATE_COORDINATOR, null));
                 setWorkersWaiting(new ArrayList<>());
 
-                // Run the environment after all workers are synchronised
+                // Run the environment for this tick
                 getEnvironment().run();
+
+                // ADVANCE the coordinator clock after the environment has recorded for this tick
+                getEnvironment().getModelElementAccessor().getModelClock().triggerTick();
             }
         }
     }

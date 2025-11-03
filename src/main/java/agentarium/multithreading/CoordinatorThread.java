@@ -1,13 +1,12 @@
 package agentarium.multithreading;
 
 import agentarium.ModelClock;
+import agentarium.ModelElementAccessor;
 import agentarium.ModelSettings;
 import agentarium.agents.AgentSet;
 import agentarium.environments.Environment;
-import agentarium.multithreading.requestresponse.CoordinatorRequestHandler;
-import agentarium.multithreading.requestresponse.Request;
-import agentarium.multithreading.requestresponse.RequestResponseController;
-import agentarium.multithreading.requestresponse.RequestType;
+import agentarium.multithreading.requestresponse.*;
+import agentarium.multithreading.utils.WorkerCache;
 
 /**
  * Coordinator thread responsible for managing synchronised access to shared simulation state
@@ -74,8 +73,37 @@ public class CoordinatorThread implements Runnable {
         this.requestResponseController = requestResponseController;
         this.predefinedGlobalAgentSet = globalAgentSet;
 
+        if (this.environment.getModelElementAccessor() == null) {
+            this.environment.setModelElementAccessor(
+                    new ModelElementAccessor(
+                            this.environment,                        // modelElement
+                            new AgentSet(),                     // empty global set for env
+                            settings,                           // settings
+                            new WorkerCache(settings.getDoAgentStoresHoldAgentCopies()),
+                            new RequestResponseInterface(environment.getName(), settings, requestResponseController),
+                            environment                         // localEnvironment
+                    )
+            );
+        }
+
+        ModelElementAccessor modelElementAccessor = this.environment.getModelElementAccessor();
+        if (modelElementAccessor == null) {
+            modelElementAccessor = new ModelElementAccessor(
+                    this.environment,
+                    new AgentSet(),
+                    settings,
+                    new WorkerCache(settings.getDoAgentStoresHoldAgentCopies()),
+                    new RequestResponseInterface(environment.getName(), settings, requestResponseController),
+                    environment
+            );
+
+            try {
+                this.environment.setModelElementAccessor(modelElementAccessor);
+            } catch (Throwable ignore) {}
+        }
+
         this.coordinatorClock = new ModelClock(settings.getNumOfTicksToRun(), settings.getNumOfWarmUpTicks());
-        this.environment.getModelElementAccessor().setModelClock(this.coordinatorClock);
+        modelElementAccessor.setModelClock(this.coordinatorClock);
     }
 
     /**

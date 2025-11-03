@@ -1,5 +1,6 @@
 package agentarium.multithreading.requestresponse;
 
+import agentarium.ModelElementAccessor;
 import agentarium.ModelSettings;
 import agentarium.agents.Agent;
 import agentarium.agents.AgentSet;
@@ -159,17 +160,18 @@ public abstract class CoordinatorRequestHandler {
         public void handleRequest(Request request) throws InterruptedException {
             getWorkersWaiting().add(request.getRequester());
             if (getWorkersWaiting().size() == getSettings().getNumOfCores()) {
-                for (String worker : getWorkersWaiting())
-                    getResponseQueue().put(new Response(getThreadName(), worker,
-                            ResponseType.ALL_WORKERS_UPDATE_COORDINATOR, null));
-                setWorkersWaiting(new ArrayList<>());
-
-                // Run the environment for this tick
                 getEnvironment().run();
 
-                // ADVANCE the coordinator clock after the environment has recorded for this tick
-                getEnvironment().getModelElementAccessor().getModelClock().triggerTick();
+                var modelElementAccessor = getEnvironment().getModelElementAccessor();
+                if (modelElementAccessor != null && modelElementAccessor.getModelClock() != null)
+                    modelElementAccessor.getModelClock().triggerTick();
+
+                for (String worker : getWorkersWaiting())
+                    getResponseQueue().put(new Response(getThreadName(), worker, ResponseType.ALL_WORKERS_UPDATE_COORDINATOR, null));
+
+                setWorkersWaiting(new ArrayList<>());
             }
+
         }
     }
 

@@ -55,7 +55,7 @@ public abstract class ModelElement implements DeepCopyable<ModelElement> {
      *
      * @param modelElementAccessor the accessor to associate with this element
      */
-    protected void setModelElementAccessor(ModelElementAccessor modelElementAccessor) {
+    public void setModelElementAccessor(ModelElementAccessor modelElementAccessor) {
         this.modelElementAccessor = modelElementAccessor;
     }
 

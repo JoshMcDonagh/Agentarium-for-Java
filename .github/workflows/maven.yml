@@ -25,14 +25,16 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # Single Maven run: compile + test (and will fail the build if tests fail)
       - name: Build and test with Maven
         run: mvn -B -U test --file pom.xml
 
-      # Only do package AFTER tests pass
       - name: Package (skip tests)
         run: mvn -B -DskipTests package --file pom.xml
 
-      # Dependency submission
+      # Dependency submission (only on trusted event)
       - name: Submit dependency graph
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: advanced-security/maven-dependency-submission-action@v1
+        permissions:
+          contents: read
+          dependency-graph: write

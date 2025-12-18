@@ -14,10 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    # Job-level permissions (this is valid YAML for Actions)
     permissions:
-      contents: read
-      dependency-graph: write
+      contents: write
 
     steps:
       - name: Checkout

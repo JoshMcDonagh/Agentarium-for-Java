@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Job-level permissions (this is valid YAML for Actions)
+    permissions:
+      contents: read
+      dependency-graph: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,10 +36,6 @@ jobs:
       - name: Package (skip tests)
         run: mvn -B -DskipTests package --file pom.xml
 
-      # Dependency submission (only on trusted event)
       - name: Submit dependency graph
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: advanced-security/maven-dependency-submission-action@v1
-        permissions:
-          contents: read
-          dependency-graph: write
